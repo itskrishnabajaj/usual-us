@@ -33,6 +33,8 @@
                     <div id="who-pays-indicator" class="who-pays-indicator">🎲</div>
                 </div>
 
+                <button id="settle-btn" class="btn-settle">Settle Up</button>
+
                 <div class="recent-section">
                     <h2>Recent Expenses</h2>
                     <div id="recent-expenses"></div>
@@ -58,8 +60,8 @@
                                 <span>Me</span>
                             </label>
                             <label class="radio-option">
-                                <input type="radio" name="paidBy" value="her">
-                                <span>Her</span>
+                                <input type="radio" name="paidBy" value="partner">
+                                <span id="partner-label">Partner</span>
                             </label>
                         </div>
                     </div>
@@ -95,8 +97,8 @@
                                 <span>🎬 Dates</span>
                             </label>
                             <label class="category-option">
-                                <input type="radio" name="category" value="travel">
-                                <span>🚆 Travel</span>
+                                <input type="radio" name="category" value="gmasti">
+                                <span>☺️ G-Masti</span>
                             </label>
                             <label class="category-option">
                                 <input type="radio" name="category" value="gifts">
@@ -104,7 +106,7 @@
                             </label>
                             <label class="category-option">
                                 <input type="radio" name="category" value="home">
-                                <span>☺️ G.Masti</span>
+                                <span>🏠 Home</span>
                             </label>
                             <label class="category-option">
                                 <input type="radio" name="category" value="misc">
@@ -142,8 +144,8 @@
                         <div id="my-contribution" class="stat-value">₹0</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Her Contribution</div>
-                        <div id="her-contribution" class="stat-value">₹0</div>
+                        <div class="stat-label" id="partner-contribution-label">Partner Contribution</div>
+                        <div id="partner-contribution" class="stat-value">₹0</div>
                     </div>
                 </div>
 
@@ -151,14 +153,14 @@
                 <div id="category-breakdown"></div>
             </section>
 
-            <!-- Food Tab -->
-            <section id="food-tab" class="tab-content">
-                <div class="food-header">
-                    <h2>Our Food Memories</h2>
-                    <button id="add-food-btn" class="btn-add-food">+</button>
+            <!-- Us Tab -->
+            <section id="us-tab" class="tab-content">
+                <div class="us-header">
+                    <h2>Our Memories</h2>
+                    <button id="add-memory-btn" class="btn-add-memory">+</button>
                 </div>
                 
-                <div id="food-timeline"></div>
+                <div id="memories-timeline"></div>
             </section>
         </main>
 
@@ -180,9 +182,9 @@
                 <span class="nav-icon">📊</span>
                 <span class="nav-label">Stats</span>
             </button>
-            <button class="nav-item" data-tab="food">
-                <span class="nav-icon">🍽️</span>
-                <span class="nav-label">Food</span>
+            <button class="nav-item" data-tab="us">
+                <span class="nav-icon">💕</span>
+                <span class="nav-label">Us</span>
             </button>
         </nav>
     </div>
@@ -219,40 +221,87 @@
         </div>
     </div>
 
-    <!-- Food Upload Modal -->
-    <div id="food-modal" class="modal hidden">
+    <!-- Memory Upload Modal -->
+    <div id="memory-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Add Food Memory</h3>
-                <button id="close-modal" class="btn-close">×</button>
+                <h3>Add Memory</h3>
+                <button id="close-memory-modal" class="btn-close">×</button>
             </div>
-            <form id="food-form">
-                <div class="photo-upload-area" id="photo-upload-area">
-                    <input type="file" id="photo-input" accept="image/*" capture="environment" hidden>
-                    <div id="preview-container" class="hidden">
-                        <img id="photo-preview" alt="Preview">
-                    </div>
-                    <div id="upload-placeholder">
-                        <div class="upload-icon">📷</div>
-                        <p>Tap to add photo</p>
-                    </div>
-                </div>
+            
+            <!-- Photo Selection Options -->
+            <div id="photo-selection" class="photo-selection">
+                <button type="button" id="camera-btn" class="btn-photo-option">
+                    <span class="photo-option-icon">📷</span>
+                    <span>Camera</span>
+                </button>
+                <button type="button" id="gallery-btn" class="btn-photo-option">
+                    <span class="photo-option-icon">🖼️</span>
+                    <span>Gallery</span>
+                </button>
+            </div>
+            
+            <form id="memory-form" class="hidden">
+                <input type="file" id="camera-input" accept="image/*" capture="environment" hidden multiple>
+                <input type="file" id="gallery-input" accept="image/*" hidden multiple>
+                
+                <div id="photos-preview" class="photos-preview"></div>
+                
                 <div class="form-group">
                     <label>Caption (optional)</label>
-                    <input type="text" id="food-caption" placeholder="That small café ☕">
+                    <input type="text" id="memory-caption" placeholder="A beautiful moment together 💕">
                 </div>
-                <button type="submit" id="upload-btn" class="btn-primary" disabled>Upload Memory</button>
+                <button type="submit" id="upload-memory-btn" class="btn-primary">Upload Memory</button>
             </form>
         </div>
     </div>
 
-    <!-- Full Screen Photo Viewer -->
-    <div id="photo-viewer" class="modal hidden">
-        <div class="photo-viewer-content">
-            <button id="close-viewer" class="btn-close-viewer">×</button>
-            <img id="viewer-image" alt="Food memory">
-            <div id="viewer-caption" class="viewer-caption"></div>
-            <div id="viewer-date" class="viewer-date"></div>
+    <!-- Memory Viewer -->
+    <div id="memory-viewer" class="modal hidden">
+        <div class="memory-viewer-content">
+            <button id="close-memory-viewer" class="btn-close-viewer">×</button>
+            <div id="album-viewer" class="album-viewer"></div>
+            <div id="memory-viewer-caption" class="viewer-caption"></div>
+            <div id="memory-viewer-date" class="viewer-date"></div>
+            <button id="delete-memory-btn" class="btn-delete-viewer">Delete Memory</button>
+        </div>
+    </div>
+
+    <!-- Edit Expense Modal -->
+    <div id="edit-expense-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Expense</h3>
+                <button id="close-edit-modal" class="btn-close">×</button>
+            </div>
+            <form id="edit-expense-form">
+                <input type="hidden" id="edit-expense-id">
+                <div class="form-group">
+                    <label>Amount</label>
+                    <div class="amount-input-wrapper">
+                        <span class="currency">₹</span>
+                        <input type="number" id="edit-amount" placeholder="0" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Note</label>
+                    <input type="text" id="edit-note" placeholder="Note">
+                </div>
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settle Modal -->
+    <div id="settle-modal" class="modal hidden">
+        <div class="settle-content">
+            <div class="settle-emoji">💰</div>
+            <h2 id="settle-message"></h2>
+            <p id="settle-submessage"></p>
+            <div class="settle-actions">
+                <button id="confirm-settle-btn" class="btn-primary">Yes, Settle</button>
+                <button id="cancel-settle-btn" class="btn-secondary">Cancel</button>
+            </div>
         </div>
     </div>
 

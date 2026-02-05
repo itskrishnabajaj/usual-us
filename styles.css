@@ -31,7 +31,6 @@ body {
     display: none !important;
 }
 
-/* App Container */
 #app {
     display: flex;
     flex-direction: column;
@@ -40,7 +39,6 @@ body {
     margin: 0 auto;
 }
 
-/* Header */
 #app-header {
     padding: 20px 20px 10px;
     background: var(--bg-primary);
@@ -53,7 +51,6 @@ body {
     letter-spacing: -0.5px;
 }
 
-/* Main Content */
 #main-content {
     flex: 1;
     overflow-y: auto;
@@ -119,7 +116,7 @@ body {
     border-radius: 20px;
     padding: 24px;
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 16px;
 }
 
 .who-pays-label {
@@ -130,6 +127,24 @@ body {
 
 .who-pays-indicator {
     font-size: 36px;
+}
+
+.btn-settle {
+    width: 100%;
+    background: var(--accent);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: 16px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 24px;
+    transition: all 0.3s ease;
+}
+
+.btn-settle:active {
+    transform: scale(0.98);
 }
 
 .recent-section h2 {
@@ -179,7 +194,7 @@ body {
     color: var(--accent);
 }
 
-/* Add Expense Form */
+/* Form Styles */
 .form-group {
     margin-bottom: 24px;
 }
@@ -214,7 +229,8 @@ body {
 }
 
 input[type="number"],
-input[type="text"] {
+input[type="text"],
+input[type="password"] {
     background: transparent;
     border: none;
     outline: none;
@@ -224,7 +240,8 @@ input[type="text"] {
     font-weight: 600;
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="password"] {
     background: var(--bg-card);
     border-radius: 16px;
     padding: 16px 20px;
@@ -234,7 +251,8 @@ input[type="text"] {
     transition: border-color 0.3s ease;
 }
 
-input[type="text"]:focus {
+input[type="text"]:focus,
+input[type="password"]:focus {
     border-color: var(--accent);
 }
 
@@ -322,6 +340,23 @@ input[type="text"]:focus {
     cursor: not-allowed;
 }
 
+.btn-secondary {
+    width: 100%;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:active {
+    transform: scale(0.98);
+}
+
 /* History Tab */
 #expenses-list {
     display: flex;
@@ -394,6 +429,10 @@ input[type="text"]:focus {
     transform: scale(0.95);
 }
 
+.btn-small.edit {
+    color: var(--accent);
+}
+
 .btn-small.delete {
     color: #ff6b6b;
 }
@@ -462,20 +501,20 @@ input[type="text"]:focus {
     color: var(--accent);
 }
 
-/* Food Tab */
-.food-header {
+/* Us Tab - Memories */
+.us-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
 }
 
-.food-header h2 {
+.us-header h2 {
     font-size: 24px;
     font-weight: 600;
 }
 
-.btn-add-food {
+.btn-add-memory {
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -490,17 +529,17 @@ input[type="text"]:focus {
     transition: all 0.3s ease;
 }
 
-.btn-add-food:active {
+.btn-add-memory:active {
     transform: scale(0.9);
 }
 
-#food-timeline {
+#memories-timeline {
     display: flex;
     flex-direction: column;
     gap: 32px;
 }
 
-.food-memory {
+.memory-item {
     animation: slideUp 0.4s ease;
 }
 
@@ -515,17 +554,41 @@ input[type="text"]:focus {
     }
 }
 
+.memory-string {
+    width: 2px;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent 0%, var(--text-secondary) 50%, transparent 100%);
+    margin: 0 auto 16px;
+    position: relative;
+}
+
+.memory-string::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+}
+
+.memory-album {
+    cursor: pointer;
+    margin-bottom: 12px;
+}
+
 .photo-frame {
     background: #f8f8f8;
     border-radius: 4px;
     padding: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3);
-    margin-bottom: 12px;
-    cursor: pointer;
     transition: transform 0.3s ease;
+    position: relative;
 }
 
-.photo-frame:active {
+.memory-album:active .photo-frame {
     transform: scale(0.98);
 }
 
@@ -533,6 +596,22 @@ input[type="text"]:focus {
     width: 100%;
     border-radius: 2px;
     display: block;
+}
+
+.album-badge {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.memory-info {
+    margin-bottom: 8px;
 }
 
 .memory-caption {
@@ -546,48 +625,81 @@ input[type="text"]:focus {
     color: var(--text-secondary);
 }
 
-.photo-string {
-    width: 2px;
-    height: 40px;
-    background: linear-gradient(to bottom, transparent 0%, var(--text-secondary) 50%, transparent 100%);
-    margin: 0 auto 16px;
-    position: relative;
+/* Photo Selection */
+.photo-selection {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
-.photo-string::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 8px;
-    height: 8px;
-    background: var(--text-secondary);
-    border-radius: 50%;
-}
-
-.memory-info {
-    margin-bottom: 12px;
-}
-
-.btn-delete-photo {
-    width: 100%;
+.btn-photo-option {
+    flex: 1;
     background: var(--bg-card);
-    color: #ff6b6b;
-    border: none;
-    border-radius: 12px;
-    padding: 10px;
-    font-size: 14px;
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 16px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    color: var(--text-primary);
 }
 
-.btn-delete-photo:active {
-    transform: scale(0.95);
-    background: #1f1f1f;
+.btn-photo-option:active {
+    transform: scale(0.98);
+    border-color: var(--accent);
 }
 
-/* Food Modal */
+.photo-option-icon {
+    font-size: 32px;
+}
+
+.btn-photo-option span:last-child {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.photos-preview {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.photo-preview-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg-card);
+}
+
+.photo-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.btn-remove-photo {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Modals */
 .modal {
     position: fixed;
     top: 0;
@@ -655,46 +767,8 @@ input[type="text"]:focus {
     justify-content: center;
 }
 
-.photo-upload-area {
-    background: var(--bg-card);
-    border-radius: 20px;
-    min-height: 300px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-    cursor: pointer;
-    overflow: hidden;
-    position: relative;
-}
-
-#upload-placeholder {
-    text-align: center;
-    color: var(--text-secondary);
-}
-
-.upload-icon {
-    font-size: 48px;
-    margin-bottom: 12px;
-}
-
-#upload-placeholder p {
-    font-size: 16px;
-}
-
-#preview-container {
-    width: 100%;
-    height: 100%;
-}
-
-#photo-preview {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* Photo Viewer */
-.photo-viewer-content {
+/* Memory Viewer */
+.memory-viewer-content {
     position: relative;
     width: 100%;
     height: 100%;
@@ -723,11 +797,36 @@ input[type="text"]:focus {
     z-index: 10;
 }
 
-#viewer-image {
+#album-viewer {
     max-width: 100%;
-    max-height: 70vh;
+    max-height: 60vh;
+    margin-bottom: 20px;
+}
+
+.viewer-single-image {
+    max-width: 100%;
+    max-height: 60vh;
     border-radius: 8px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+}
+
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    max-width: 100%;
+}
+
+.album-grid-item {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.album-grid-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .viewer-caption {
@@ -742,6 +841,55 @@ input[type="text"]:focus {
     color: var(--text-secondary);
     margin-top: 8px;
     text-align: center;
+}
+
+.btn-delete-viewer {
+    background: rgba(255, 107, 107, 0.2);
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: all 0.3s ease;
+}
+
+.btn-delete-viewer:active {
+    transform: scale(0.95);
+    background: rgba(255, 107, 107, 0.3);
+}
+
+/* Settle Modal */
+.settle-content {
+    text-align: center;
+    padding: 60px 40px 40px;
+    animation: celebrationPop 0.6s ease;
+}
+
+.settle-emoji {
+    font-size: 80px;
+    margin-bottom: 24px;
+}
+
+.settle-content h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.settle-content p {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+}
+
+.settle-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 /* Balance Celebration */
@@ -864,8 +1012,8 @@ input[type="text"]:focus {
 }
 
 .btn-login {
-    background: white;
-    color: #333;
+    background: var(--accent);
+    color: var(--bg-primary);
     border: none;
     border-radius: 16px;
     padding: 16px 32px;
@@ -873,7 +1021,7 @@ input[type="text"]:focus {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    width: 100%;
 }
 
 .btn-login:active {
@@ -1012,3 +1160,4 @@ body {
 #main-content {
     overscroll-behavior-y: contain;
 }
+

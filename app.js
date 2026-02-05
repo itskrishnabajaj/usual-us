@@ -1,11 +1,11 @@
 // Cloudinary configuration
 const CLOUDINARY_CLOUD_NAME = 'ddyj2njes';
 const CLOUDINARY_UPLOAD_PRESET = 'usual_us';
-const CLOUDINARY_FOLDER = 'usual-us/food';
+const CLOUDINARY_FOLDER = 'usual-us/memories';
 
 // User credentials (EXACTLY TWO USERS)
 const USERS = {
-        'imsusu': {
+    'imsusu': {
         pin: '0804',
         name: 'Krishna',
         role: 'me'
@@ -21,22 +21,34 @@ const USERS = {
 let currentUser = null;
 let currentUserProfile = null;
 let expenses = [];
-let foodMemories = [];
-let selectedPhoto = null;
+let memories = [];
+let selectedPhotos = [];
 let lastBalance = null;
+let balanceBeforeAction = null;
 
 // Category emojis
 const categoryEmojis = {
     food: '🍕',
     dates: '🎬',
-    travel: '🚆',
+    gmasti: '☺️',
     gifts: '🎁',
-    home: '☺️',
+    home: '🏠',
     misc: '✨'
 };
 
+// Helper function to get partner pronoun
+function getPartnerPronoun() {
+    return currentUserProfile.role === 'me' ? 'her' : 'him';
+}
+
+function getPartnerName() {
+    const partnerId = Object.keys(USERS).find(id => USERS[id].role !== currentUserProfile.role);
+    return USERS[partnerId]?.name || 'Partner';
+}
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing app...');
     initializeAuth();
     setupEventListeners();
 });
@@ -44,21 +56,19 @@ document.addEventListener('DOMContentLoaded', () => {
 // Authentication
 function initializeAuth() {
     const savedUserId = localStorage.getItem('usual_us_user_id');
+    console.log('Checking for saved user:', savedUserId);
     
     if (savedUserId) {
-        // Returning user - show PIN only
         const user = USERS[savedUserId];
         if (user) {
             document.getElementById('returning-name').textContent = user.name;
             document.getElementById('first-login-form').classList.add('hidden');
             document.getElementById('returning-login-form').classList.remove('hidden');
         } else {
-            // Invalid saved user, clear storage
             localStorage.removeItem('usual_us_user_id');
             showFirstLogin();
         }
     } else {
-        // First time user
         showFirstLogin();
     }
     
@@ -71,33 +81,22 @@ function showFirstLogin() {
 }
 
 async function handleLogin(userId, pin, isReturning = false) {
-    console.log('handleLogin called with:', { userId, pin, isReturning });
-    console.log('Available users:', Object.keys(USERS));
-    
     const user = USERS[userId];
     
     if (!user) {
-        console.error('User not found:', userId);
         showError('Invalid User ID');
         return false;
     }
     
-    console.log('User found:', user);
-    
     if (user.pin !== pin) {
-        console.error('PIN mismatch');
         showError('Incorrect PIN');
         return false;
     }
     
-    console.log('PIN correct, logging in...');
-    
-    // Save user ID for future logins
     if (!isReturning) {
         localStorage.setItem('usual_us_user_id', userId);
     }
     
-    // Set current user
     currentUserProfile = {
         uid: userId,
         name: user.name,
@@ -106,8 +105,13 @@ async function handleLogin(userId, pin, isReturning = false) {
     
     currentUser = userId;
     
-    // Load or create user profile in Firestore
+    // Initialize Firebase
+    initializeFirebase();
+    
     await loadUserProfile();
+    
+    // Update dynamic labels
+    updateDynamicLabels();
     
     showApp();
     loadData();
@@ -136,6 +140,18 @@ function updateGreeting() {
     document.getElementById('greeting').textContent = `${timeOfDay}, ${currentUserProfile.name} 🤍`;
 }
 
+function updateDynamicLabels() {
+    const partnerPronoun = getPartnerPronoun();
+    const partnerName = getPartnerName();
+    
+    // Update "Paid by" label
+    document.getElementById('partner-label').textContent = partnerPronoun === 'her' ? 'Her' : 'Him';
+    
+    // Update stats label
+    document.getElementById('partner-contribution-label').textContent = 
+        partnerPronoun === 'her' ? 'Her Contribution' : 'His Contribution';
+}
+
 function showLogin() {
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('app').classList.add('hidden');
@@ -148,31 +164,23 @@ function showApp() {
 
 // Event Listeners
 function setupEventListeners() {
-    // First time login form
+    // First time login
     document.getElementById('first-login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        console.log('First login form submitted');
-        
         const userId = document.getElementById('user-id-input').value.toLowerCase().trim();
         const pin = document.getElementById('pin-input').value;
-        console.log('Attempting first login with userId:', userId);
-        
         await handleLogin(userId, pin, false);
     });
     
-    // Returning user login form
+    // Returning login
     document.getElementById('returning-login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        console.log('Returning login form submitted');
-        
         const savedUserId = localStorage.getItem('usual_us_user_id');
         const pin = document.getElementById('returning-pin-input').value;
-        console.log('Attempting returning login with userId:', savedUserId);
-        
         await handleLogin(savedUserId, pin, true);
     });
     
-    // Switch user button
+    // Switch user
     document.getElementById('switch-user-btn').addEventListener('click', () => {
         localStorage.removeItem('usual_us_user_id');
         document.getElementById('first-login-form').reset();
@@ -203,28 +211,51 @@ function setupEventListeners() {
     // Expense form
     document.getElementById('expense-form').addEventListener('submit', handleExpenseSubmit);
     
-    // Food modal
-    document.getElementById('add-food-btn').addEventListener('click', () => {
-        document.getElementById('food-modal').classList.remove('hidden');
+    // Settle button
+    document.getElementById('settle-btn').addEventListener('click', showSettleModal);
+    document.getElementById('confirm-settle-btn').addEventListener('click', handleSettle);
+    document.getElementById('cancel-settle-btn').addEventListener('click', () => {
+        document.getElementById('settle-modal').classList.add('hidden');
     });
     
-    document.getElementById('close-modal').addEventListener('click', () => {
-        document.getElementById('food-modal').classList.add('hidden');
-        resetFoodForm();
+    // Edit expense
+    document.getElementById('edit-expense-form').addEventListener('submit', handleExpenseEdit);
+    document.getElementById('close-edit-modal').addEventListener('click', () => {
+        document.getElementById('edit-expense-modal').classList.add('hidden');
     });
     
-    // Photo upload
-    document.getElementById('photo-upload-area').addEventListener('click', () => {
-        document.getElementById('photo-input').click();
+    // Memory modal
+    document.getElementById('add-memory-btn').addEventListener('click', () => {
+        document.getElementById('memory-modal').classList.remove('hidden');
+        document.getElementById('photo-selection').classList.remove('hidden');
+        document.getElementById('memory-form').classList.add('hidden');
+        selectedPhotos = [];
     });
     
-    document.getElementById('photo-input').addEventListener('change', handlePhotoSelect);
-    document.getElementById('food-form').addEventListener('submit', handleFoodUpload);
-    
-    // Photo viewer
-    document.getElementById('close-viewer').addEventListener('click', () => {
-        document.getElementById('photo-viewer').classList.add('hidden');
+    document.getElementById('close-memory-modal').addEventListener('click', () => {
+        document.getElementById('memory-modal').classList.add('hidden');
+        resetMemoryForm();
     });
+    
+    // Photo selection
+    document.getElementById('camera-btn').addEventListener('click', () => {
+        document.getElementById('camera-input').click();
+    });
+    
+    document.getElementById('gallery-btn').addEventListener('click', () => {
+        document.getElementById('gallery-input').click();
+    });
+    
+    document.getElementById('camera-input').addEventListener('change', handlePhotoSelect);
+    document.getElementById('gallery-input').addEventListener('change', handlePhotoSelect);
+    document.getElementById('memory-form').addEventListener('submit', handleMemoryUpload);
+    
+    // Memory viewer
+    document.getElementById('close-memory-viewer').addEventListener('click', () => {
+        document.getElementById('memory-viewer').classList.add('hidden');
+    });
+    
+    document.getElementById('delete-memory-btn').addEventListener('click', handleMemoryDelete);
     
     // Balance celebration
     document.getElementById('balance-celebration').addEventListener('click', () => {
@@ -233,19 +264,16 @@ function setupEventListeners() {
 }
 
 function switchTab(tabName) {
-    // Update nav
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
     });
     document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
     
-    // Update content
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
     });
     document.getElementById(`${tabName}-tab`).classList.add('active');
     
-    // Reload data if needed
     if (tabName === 'stats') {
         renderStats();
     }
@@ -256,7 +284,7 @@ async function loadData() {
     showLoading(true);
     await Promise.all([
         loadExpenses(),
-        loadFoodMemories()
+        loadMemories()
     ]);
     showLoading(false);
 }
@@ -276,22 +304,25 @@ async function loadExpenses() {
     renderAllExpenses();
 }
 
-async function loadFoodMemories() {
-    const snapshot = await foodMemoriesCollection
+async function loadMemories() {
+    const snapshot = await memoriesCollection
         .orderBy('createdAt', 'desc')
         .get();
     
-    foodMemories = snapshot.docs.map(doc => ({
+    memories = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
     }));
     
-    renderFoodTimeline();
+    renderMemoriesTimeline();
 }
 
 // Expense Handling
 async function handleExpenseSubmit(e) {
     e.preventDefault();
+    
+    // Store balance before adding
+    balanceBeforeAction = calculateCurrentBalance();
     
     const amount = parseFloat(document.getElementById('amount').value);
     const paidBy = document.querySelector('input[name="paidBy"]:checked').value;
@@ -299,21 +330,21 @@ async function handleExpenseSubmit(e) {
     const category = document.querySelector('input[name="category"]:checked').value;
     const note = document.getElementById('note').value.trim();
     
-    let myShare, herShare;
+    let myShare, partnerShare;
     
     if (splitType === 'equal') {
         myShare = amount / 2;
-        herShare = amount / 2;
+        partnerShare = amount / 2;
     } else {
         myShare = parseFloat(document.getElementById('my-share').value);
-        herShare = amount - myShare;
+        partnerShare = amount - myShare;
     }
     
     const expense = {
         amount: amount,
         paidBy: paidBy,
         myShare: myShare,
-        herShare: herShare,
+        partnerShare: partnerShare,
         category: category,
         note: note,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -335,8 +366,55 @@ async function handleExpenseSubmit(e) {
     showLoading(false);
 }
 
+async function handleExpenseEdit(e) {
+    e.preventDefault();
+    
+    const expenseId = document.getElementById('edit-expense-id').value;
+    const amount = parseFloat(document.getElementById('edit-amount').value);
+    const note = document.getElementById('edit-note').value.trim();
+    
+    const expense = expenses.find(e => e.id === expenseId);
+    if (!expense) return;
+    
+    // Recalculate shares proportionally
+    const ratio = amount / expense.amount;
+    const myShare = expense.myShare * ratio;
+    const partnerShare = expense.partnerShare * ratio;
+    
+    showLoading(true);
+    
+    try {
+        await expensesCollection.doc(expenseId).update({
+            amount: amount,
+            myShare: myShare,
+            partnerShare: partnerShare,
+            note: note
+        });
+        
+        document.getElementById('edit-expense-modal').classList.add('hidden');
+        await loadExpenses();
+    } catch (error) {
+        showError('Failed to update expense.');
+    }
+    
+    showLoading(false);
+}
+
+function showEditExpense(expenseId) {
+    const expense = expenses.find(e => e.id === expenseId);
+    if (!expense) return;
+    
+    document.getElementById('edit-expense-id').value = expenseId;
+    document.getElementById('edit-amount').value = expense.amount;
+    document.getElementById('edit-note').value = expense.note || '';
+    document.getElementById('edit-expense-modal').classList.remove('hidden');
+}
+
 async function deleteExpense(expenseId) {
     if (!confirm('Delete this expense?')) return;
+    
+    // Don't trigger celebration on delete
+    balanceBeforeAction = null;
     
     showLoading(true);
     try {
@@ -348,47 +426,121 @@ async function deleteExpense(expenseId) {
     showLoading(false);
 }
 
-// Rendering
-function renderBalance() {
+// Settle Functionality
+function showSettleModal() {
+    const balance = calculateCurrentBalance();
+    const partnerPronoun = getPartnerPronoun();
+    const partnerName = getPartnerName();
+    
+    if (balance === 0) {
+        showError('Already settled! Balance is ₹0');
+        return;
+    }
+    
+    const settleMsg = document.getElementById('settle-message');
+    const settleSubMsg = document.getElementById('settle-submessage');
+    
+    if (balance > 0) {
+        settleMsg.textContent = `${partnerName} owes you ₹${balance.toFixed(2)}`;
+        settleSubMsg.textContent = `Mark as settled?`;
+    } else {
+        settleMsg.textContent = `You owe ${partnerName} ₹${Math.abs(balance).toFixed(2)}`;
+        settleSubMsg.textContent = `Mark as settled?`;
+    }
+    
+    document.getElementById('settle-modal').classList.remove('hidden');
+}
+
+async function handleSettle() {
+    const balance = calculateCurrentBalance();
+    
+    if (balance === 0) {
+        document.getElementById('settle-modal').classList.add('hidden');
+        return;
+    }
+    
+    const partnerPronoun = getPartnerPronoun();
+    const settlementNote = balance > 0 
+        ? `Settlement - ${partnerPronoun} paid ₹${balance.toFixed(2)}`
+        : `Settlement - I paid ₹${Math.abs(balance).toFixed(2)}`;
+    
+    const settlement = {
+        amount: Math.abs(balance),
+        paidBy: balance > 0 ? 'partner' : 'me',
+        myShare: Math.abs(balance),
+        partnerShare: Math.abs(balance),
+        category: 'misc',
+        note: settlementNote,
+        isSettlement: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        createdBy: currentUserProfile.role
+    };
+    
+    showLoading(true);
+    
+    try {
+        await expensesCollection.add(settlement);
+        document.getElementById('settle-modal').classList.add('hidden');
+        await loadExpenses();
+        showBalanceCelebration();
+    } catch (error) {
+        showError('Settlement failed. Please try again.');
+    }
+    
+    showLoading(false);
+}
+
+function calculateCurrentBalance() {
     let balance = 0;
     
     expenses.forEach(expense => {
         if (expense.paidBy === 'me') {
-            balance += expense.herShare;
+            balance += expense.partnerShare;
         } else {
             balance -= expense.myShare;
         }
     });
     
+    return balance;
+}
+
+// Rendering Functions
+function renderBalance() {
+    const balance = calculateCurrentBalance();
+    
     const balanceAmount = document.getElementById('balance-amount');
     const balanceStatus = document.getElementById('balance-status');
     const whoPayIndicator = document.getElementById('who-pays-indicator');
+    const partnerPronoun = getPartnerPronoun();
+    const partnerName = getPartnerName();
     
     if (balance > 0) {
         balanceAmount.textContent = `₹${balance.toFixed(2)}`;
-        balanceStatus.textContent = 'She owes you';
-        whoPayIndicator.textContent = '👩';
+        balanceStatus.textContent = `${partnerName} owes you`;
+        whoPayIndicator.textContent = partnerPronoun === 'her' ? '👩' : '👨';
     } else if (balance < 0) {
         balanceAmount.textContent = `₹${Math.abs(balance).toFixed(2)}`;
-        balanceStatus.textContent = 'You owe her';
-        whoPayIndicator.textContent = '👨';
+        balanceStatus.textContent = `You owe ${partnerName}`;
+        whoPayIndicator.textContent = '🙋';
     } else {
         balanceAmount.textContent = '₹0';
         balanceStatus.textContent = 'All settled';
         whoPayIndicator.textContent = '✨';
         
-        // Show celebration if balance just became zero
-        if (lastBalance !== null && lastBalance !== 0) {
+        // Show celebration only if balance just became zero from adding/settling
+        if (balanceBeforeAction !== null && balanceBeforeAction !== 0) {
             showBalanceCelebration();
         }
     }
     
     lastBalance = balance;
+    balanceBeforeAction = null;
 }
 
 function renderRecentExpenses() {
     const container = document.getElementById('recent-expenses');
     const recentExpenses = expenses.slice(0, 5);
+    const partnerPronoun = getPartnerPronoun();
     
     if (recentExpenses.length === 0) {
         container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💸</div><p>No expenses yet</p></div>';
@@ -398,13 +550,14 @@ function renderRecentExpenses() {
     container.innerHTML = recentExpenses.map(expense => {
         const date = expense.createdAt ? expense.createdAt.toDate() : new Date();
         const formattedDate = formatDate(date);
+        const paidByText = expense.paidBy === 'me' ? 'you' : partnerPronoun;
         
         return `
             <div class="expense-item">
                 <div class="expense-details">
                     <div class="expense-category">${categoryEmojis[expense.category]}</div>
                     ${expense.note ? `<div class="expense-note">${expense.note}</div>` : ''}
-                    <div class="expense-meta">${formattedDate} • Paid by ${expense.paidBy === 'me' ? 'you' : 'her'}</div>
+                    <div class="expense-meta">${formattedDate} • Paid by ${paidByText}</div>
                 </div>
                 <div class="expense-amount">₹${expense.amount.toFixed(2)}</div>
             </div>
@@ -414,6 +567,7 @@ function renderRecentExpenses() {
 
 function renderAllExpenses() {
     const container = document.getElementById('expenses-list');
+    const partnerPronoun = getPartnerPronoun();
     
     if (expenses.length === 0) {
         container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><p>No expenses yet</p></div>';
@@ -423,6 +577,8 @@ function renderAllExpenses() {
     container.innerHTML = expenses.map(expense => {
         const date = expense.createdAt ? expense.createdAt.toDate() : new Date();
         const formattedDate = formatDate(date);
+        const paidByText = expense.paidBy === 'me' ? 'you' : partnerPronoun;
+        const partnerShareLabel = partnerPronoun === 'her' ? 'Her share' : 'His share';
         
         return `
             <div class="expense-item-full">
@@ -434,11 +590,12 @@ function renderAllExpenses() {
                     <div class="expense-price">₹${expense.amount.toFixed(2)}</div>
                 </div>
                 <div class="expense-split-info">
-                    Paid by ${expense.paidBy === 'me' ? 'you' : 'her'} • 
+                    Paid by ${paidByText} • 
                     Your share: ₹${expense.myShare.toFixed(2)} • 
-                    Her share: ₹${expense.herShare.toFixed(2)}
+                    ${partnerShareLabel}: ₹${expense.partnerShare.toFixed(2)}
                 </div>
                 <div class="expense-actions">
+                    <button class="btn-small edit" onclick="showEditExpense('${expense.id}')">Edit</button>
                     <button class="btn-small delete" onclick="deleteExpense('${expense.id}')">Delete</button>
                 </div>
             </div>
@@ -457,13 +614,12 @@ function renderStats() {
     
     const totalSpent = thisMonth.reduce((sum, e) => sum + e.amount, 0);
     const myContribution = thisMonth.reduce((sum, e) => sum + (e.paidBy === 'me' ? e.amount : 0), 0);
-    const herContribution = thisMonth.reduce((sum, e) => sum + (e.paidBy === 'her' ? e.amount : 0), 0);
+    const partnerContribution = thisMonth.reduce((sum, e) => sum + (e.paidBy === 'partner' ? e.amount : 0), 0);
     
     document.getElementById('total-spent').textContent = `₹${totalSpent.toFixed(2)}`;
     document.getElementById('my-contribution').textContent = `₹${myContribution.toFixed(2)}`;
-    document.getElementById('her-contribution').textContent = `₹${herContribution.toFixed(2)}`;
+    document.getElementById('partner-contribution').textContent = `₹${partnerContribution.toFixed(2)}`;
     
-    // Category breakdown
     const categoryTotals = {};
     thisMonth.forEach(expense => {
         categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + expense.amount;
@@ -489,124 +645,182 @@ function renderStats() {
     `).join('');
 }
 
-// Food Memory Handling
+// Memory Handling
 function handlePhotoSelect(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
     
-    selectedPhoto = file;
+    selectedPhotos = files;
     
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        document.getElementById('photo-preview').src = e.target.result;
-        document.getElementById('preview-container').classList.remove('hidden');
-        document.getElementById('upload-placeholder').classList.add('hidden');
-        document.getElementById('upload-btn').disabled = false;
-    };
-    reader.readAsDataURL(file);
+    document.getElementById('photo-selection').classList.add('hidden');
+    document.getElementById('memory-form').classList.remove('hidden');
+    
+    const previewContainer = document.getElementById('photos-preview');
+    previewContainer.innerHTML = '';
+    
+    files.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const preview = document.createElement('div');
+            preview.className = 'photo-preview-item';
+            preview.innerHTML = `
+                <img src="${e.target.result}" alt="Preview ${index + 1}">
+                <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
+            `;
+            previewContainer.appendChild(preview);
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
-async function handleFoodUpload(e) {
+function removePhoto(index) {
+    selectedPhotos.splice(index, 1);
+    
+    if (selectedPhotos.length === 0) {
+        resetMemoryForm();
+        return;
+    }
+    
+    const previewContainer = document.getElementById('photos-preview');
+    previewContainer.children[index].remove();
+}
+
+async function handleMemoryUpload(e) {
     e.preventDefault();
     
-    if (!selectedPhoto) return;
+    if (selectedPhotos.length === 0) return;
     
-    const caption = document.getElementById('food-caption').value.trim();
+    const caption = document.getElementById('memory-caption').value.trim();
     
     showLoading(true);
     
     try {
-        // Upload to Cloudinary
-        const formData = new FormData();
-        formData.append('file', selectedPhoto);
-        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-        formData.append('folder', CLOUDINARY_FOLDER);
+        const imageUrls = [];
         
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-            method: 'POST',
-            body: formData
-        });
-        
-        const data = await response.json();
+        // Upload all photos to Cloudinary
+        for (const photo of selectedPhotos) {
+            const formData = new FormData();
+            formData.append('file', photo);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            formData.append('folder', CLOUDINARY_FOLDER);
+            
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            imageUrls.push(data.secure_url);
+        }
         
         // Save to Firestore
-        const foodMemory = {
-            imageUrl: data.secure_url,
+        const memory = {
+            images: imageUrls,
             caption: caption,
             uploadedBy: currentUserProfile.role,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
-        await foodMemoriesCollection.add(foodMemory);
+        await memoriesCollection.add(memory);
         
-        // Reset and reload
-        resetFoodForm();
-        document.getElementById('food-modal').classList.add('hidden');
-        await loadFoodMemories();
-        switchTab('food');
+        resetMemoryForm();
+        document.getElementById('memory-modal').classList.add('hidden');
+        await loadMemories();
+        switchTab('us');
     } catch (error) {
-        showError('Failed to upload photo. Please try again.');
+        showError('Failed to upload memory. Please try again.');
     }
     
     showLoading(false);
 }
 
-function resetFoodForm() {
-    selectedPhoto = null;
-    document.getElementById('food-form').reset();
-    document.getElementById('preview-container').classList.add('hidden');
-    document.getElementById('upload-placeholder').classList.remove('hidden');
-    document.getElementById('upload-btn').disabled = true;
+function resetMemoryForm() {
+    selectedPhotos = [];
+    document.getElementById('memory-form').reset();
+    document.getElementById('photos-preview').innerHTML = '';
+    document.getElementById('photo-selection').classList.remove('hidden');
+    document.getElementById('memory-form').classList.add('hidden');
 }
 
-function renderFoodTimeline() {
-    const container = document.getElementById('food-timeline');
+function renderMemoriesTimeline() {
+    const container = document.getElementById('memories-timeline');
     
-    if (foodMemories.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🍽️</div><p>No food memories yet.<br>Start capturing your meals together.</p></div>';
+    if (memories.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💕</div><p>No memories yet.<br>Start capturing your moments together.</p></div>';
         return;
     }
     
-    container.innerHTML = foodMemories.map((memory, index) => {
+    container.innerHTML = memories.map((memory, index) => {
         const date = memory.createdAt ? memory.createdAt.toDate() : new Date();
         const formattedDate = formatDate(date);
+        const imageCount = memory.images.length;
         
         return `
-            <div class="food-memory">
-                ${index > 0 ? '<div class="photo-string"></div>' : ''}
-                <div class="photo-frame" onclick="viewPhoto('${memory.id}')">
-                    <img src="${memory.imageUrl}" alt="${memory.caption || 'Food memory'}" loading="lazy">
+            <div class="memory-item">
+                ${index > 0 ? '<div class="memory-string"></div>' : ''}
+                <div class="memory-album ${imageCount === 1 ? 'single' : 'multiple'}" onclick="viewMemory('${memory.id}')">
+                    ${imageCount === 1 ? `
+                        <div class="photo-frame">
+                            <img src="${memory.images[0]}" alt="${memory.caption || 'Memory'}" loading="lazy">
+                        </div>
+                    ` : `
+                        <div class="photo-frame album-cover">
+                            <img src="${memory.images[0]}" alt="${memory.caption || 'Memory'}" loading="lazy">
+                            <div class="album-badge">${imageCount} photos</div>
+                        </div>
+                    `}
                 </div>
                 <div class="memory-info">
                     ${memory.caption ? `<div class="memory-caption">${memory.caption}</div>` : ''}
                     <div class="memory-date">${formattedDate}</div>
                 </div>
-                <button class="btn-delete-photo" onclick="deleteFood('${memory.id}')">Delete</button>
             </div>
         `;
     }).join('');
 }
 
-function viewPhoto(memoryId) {
-    const memory = foodMemories.find(m => m.id === memoryId);
+let currentViewingMemoryId = null;
+
+function viewMemory(memoryId) {
+    const memory = memories.find(m => m.id === memoryId);
     if (!memory) return;
+    
+    currentViewingMemoryId = memoryId;
     
     const date = memory.createdAt ? memory.createdAt.toDate() : new Date();
     const formattedDate = formatDate(date);
     
-    document.getElementById('viewer-image').src = memory.imageUrl;
-    document.getElementById('viewer-caption').textContent = memory.caption || '';
-    document.getElementById('viewer-date').textContent = formattedDate;
-    document.getElementById('photo-viewer').classList.remove('hidden');
+    const albumViewer = document.getElementById('album-viewer');
+    
+    if (memory.images.length === 1) {
+        albumViewer.innerHTML = `<img src="${memory.images[0]}" class="viewer-single-image" alt="Memory">`;
+    } else {
+        albumViewer.innerHTML = `
+            <div class="album-grid">
+                ${memory.images.map((img, idx) => `
+                    <div class="album-grid-item">
+                        <img src="${img}" alt="Photo ${idx + 1}">
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    document.getElementById('memory-viewer-caption').textContent = memory.caption || '';
+    document.getElementById('memory-viewer-date').textContent = formattedDate;
+    document.getElementById('memory-viewer').classList.remove('hidden');
 }
 
-async function deleteFood(memoryId) {
+async function handleMemoryDelete() {
+    if (!currentViewingMemoryId) return;
     if (!confirm('Delete this memory?')) return;
     
     showLoading(true);
     try {
-        await foodMemoriesCollection.doc(memoryId).delete();
-        await loadFoodMemories();
+        await memoriesCollection.doc(currentViewingMemoryId).delete();
+        document.getElementById('memory-viewer').classList.add('hidden');
+        currentViewingMemoryId = null;
+        await loadMemories();
     } catch (error) {
         showError('Failed to delete memory.');
     }
@@ -657,10 +871,11 @@ function showError(message) {
     alert(message);
 }
 
-// Make functions globally accessible for onclick handlers
+// Global functions
 window.deleteExpense = deleteExpense;
-window.viewPhoto = viewPhoto;
-window.deleteFood = deleteFood;
+window.showEditExpense = showEditExpense;
+window.viewMemory = viewMemory;
+window.removePhoto = removePhoto;
 
 // Service Worker Registration
 if ('serviceWorker' in navigator) {
@@ -670,3 +885,4 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('SW registration failed'));
     });
 }
+
