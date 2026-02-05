@@ -490,20 +490,24 @@ function renderFoodTimeline() {
         return;
     }
     
-    container.innerHTML = foodMemories.map(memory => {
-        const date = memory.createdAt ? memory.createdAt.toDate() : new Date();
-        const formattedDate = formatDate(date);
-        
-        return `
-            <div class="food-memory">
-                <div class="photo-frame" onclick="viewPhoto('${memory.id}')">
-                    <img src="${memory.imageUrl}" alt="${memory.caption || 'Food memory'}" loading="lazy">
-                </div>
+    container.innerHTML = foodMemories.map((memory, index) => {
+    const date = memory.createdAt ? memory.createdAt.toDate() : new Date();
+    const formattedDate = formatDate(date);
+    
+    return `
+        <div class="food-memory">
+            ${index > 0 ? '<div class="photo-string"></div>' : ''}
+            <div class="photo-frame" onclick="viewPhoto('${memory.id}')">
+                <img src="${memory.imageUrl}" alt="${memory.caption || 'Food memory'}" loading="lazy">
+            </div>
+            <div class="memory-info">
                 ${memory.caption ? `<div class="memory-caption">${memory.caption}</div>` : ''}
                 <div class="memory-date">${formattedDate}</div>
             </div>
-        `;
-    }).join('');
+            <button class="btn-delete-photo" onclick="deleteFood('${memory.id}')">Delete</button>
+        </div>
+    `;
+}).join('');
 }
 
 function viewPhoto(memoryId) {
@@ -517,6 +521,19 @@ function viewPhoto(memoryId) {
     document.getElementById('viewer-caption').textContent = memory.caption || '';
     document.getElementById('viewer-date').textContent = formattedDate;
     document.getElementById('photo-viewer').classList.remove('hidden');
+}
+
+async function deleteFood(memoryId) {
+    if (!confirm('Delete this memory?')) return;
+    
+    showLoading(true);
+    try {
+        await foodMemoriesCollection.doc(memoryId).delete();
+        await loadFoodMemories();
+    } catch (error) {
+        showError('Failed to delete memory.');
+    }
+    showLoading(false);
 }
 
 // Utilities
@@ -566,6 +583,7 @@ function showError(message) {
 // Make functions globally accessible for onclick handlers
 window.deleteExpense = deleteExpense;
 window.viewPhoto = viewPhoto;
+window.deleteFood = deleteFood;
 
 // Service Worker Registration
 if ('serviceWorker' in navigator) {
