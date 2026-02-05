@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>usual us</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+    <div id="app" class="hidden">
+        <!-- Header -->
+        <header id="app-header">
+            <h1 id="greeting"></h1>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content">
+            <!-- Home Tab -->
+            <section id="home-tab" class="tab-content active">
+                <div class="balance-card">
+                    <div class="balance-label">Current Balance</div>
+                    <div id="balance-amount" class="balance-amount">₹0</div>
+                    <div id="balance-status" class="balance-status"></div>
+                </div>
+                
+                <div class="who-pays-next">
+                    <div class="who-pays-label">Who pays next?</div>
+                    <div id="who-pays-indicator" class="who-pays-indicator">🎲</div>
+                </div>
+
+                <div class="recent-section">
+                    <h2>Recent Expenses</h2>
+                    <div id="recent-expenses"></div>
+                </div>
+            </section>
+
+            <!-- Add Expense Tab -->
+            <section id="add-tab" class="tab-content">
+                <form id="expense-form">
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <div class="amount-input-wrapper">
+                            <span class="currency">₹</span>
+                            <input type="number" id="amount" placeholder="0" step="0.01" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Paid by</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="paidBy" value="me" checked>
+                                <span>Me</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="paidBy" value="her">
+                                <span>Her</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Split Type</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="splitType" value="equal" checked>
+                                <span>50-50</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="splitType" value="custom">
+                                <span>Custom</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="custom-split" class="form-group hidden">
+                        <label>My Share (₹)</label>
+                        <input type="number" id="my-share" placeholder="0" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Category</label>
+                        <div class="category-grid">
+                            <label class="category-option">
+                                <input type="radio" name="category" value="food" checked>
+                                <span>🍕 Food</span>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="dates">
+                                <span>🎬 Dates</span>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="travel">
+                                <span>🚆 Travel</span>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="gifts">
+                                <span>🎁 Gifts</span>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="home">
+                                <span>🏠 Home</span>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="misc">
+                                <span>✨ Misc</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Note (optional)</label>
+                        <input type="text" id="note" placeholder="Late night momos 🌙">
+                    </div>
+
+                    <button type="submit" class="btn-primary">Add Expense</button>
+                </form>
+            </section>
+
+            <!-- History Tab -->
+            <section id="history-tab" class="tab-content">
+                <h2>Our Expenses</h2>
+                <div id="expenses-list"></div>
+            </section>
+
+            <!-- Stats Tab -->
+            <section id="stats-tab" class="tab-content">
+                <h2>This Month</h2>
+                
+                <div class="stats-card">
+                    <div class="stat-item">
+                        <div class="stat-label">Total Spent</div>
+                        <div id="total-spent" class="stat-value">₹0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">My Contribution</div>
+                        <div id="my-contribution" class="stat-value">₹0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Her Contribution</div>
+                        <div id="her-contribution" class="stat-value">₹0</div>
+                    </div>
+                </div>
+
+                <h3>By Category</h3>
+                <div id="category-breakdown"></div>
+            </section>
+
+            <!-- Food Tab -->
+            <section id="food-tab" class="tab-content">
+                <div class="food-header">
+                    <h2>Our Food Memories</h2>
+                    <button id="add-food-btn" class="btn-add-food">+</button>
+                </div>
+                
+                <div id="food-timeline"></div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav id="bottom-nav">
+            <button class="nav-item active" data-tab="home">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Home</span>
+            </button>
+            <button class="nav-item" data-tab="add">
+                <span class="nav-icon">➕</span>
+                <span class="nav-label">Add</span>
+            </button>
+            <button class="nav-item" data-tab="history">
+                <span class="nav-icon">📋</span>
+                <span class="nav-label">History</span>
+            </button>
+            <button class="nav-item" data-tab="stats">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Stats</span>
+            </button>
+            <button class="nav-item" data-tab="food">
+                <span class="nav-icon">🍽️</span>
+                <span class="nav-label">Food</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div class="login-container">
+            <h1 class="app-title">usual us</h1>
+            <p class="app-subtitle">Our private space 🤍</p>
+            <button id="google-login-btn" class="btn-login">Sign in with Google</button>
+        </div>
+    </div>
+
+    <!-- Food Upload Modal -->
+    <div id="food-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Food Memory</h3>
+                <button id="close-modal" class="btn-close">×</button>
+            </div>
+            <form id="food-form">
+                <div class="photo-upload-area" id="photo-upload-area">
+                    <input type="file" id="photo-input" accept="image/*" capture="environment" hidden>
+                    <div id="preview-container" class="hidden">
+                        <img id="photo-preview" alt="Preview">
+                    </div>
+                    <div id="upload-placeholder">
+                        <div class="upload-icon">📷</div>
+                        <p>Tap to add photo</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Caption (optional)</label>
+                    <input type="text" id="food-caption" placeholder="That small café ☕">
+                </div>
+                <button type="submit" id="upload-btn" class="btn-primary" disabled>Upload Memory</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Full Screen Photo Viewer -->
+    <div id="photo-viewer" class="modal hidden">
+        <div class="photo-viewer-content">
+            <button id="close-viewer" class="btn-close-viewer">×</button>
+            <img id="viewer-image" alt="Food memory">
+            <div id="viewer-caption" class="viewer-caption"></div>
+            <div id="viewer-date" class="viewer-date"></div>
+        </div>
+    </div>
+
+    <!-- Balance Zero Celebration -->
+    <div id="balance-celebration" class="modal hidden">
+        <div class="celebration-content">
+            <div class="celebration-emoji">🩷</div>
+            <h2>Perfectly balanced.</h2>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading hidden">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script src="firebase.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
