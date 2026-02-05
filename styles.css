@@ -48,7 +48,7 @@ body {
 }
 
 #greeting {
-    font-size: 24px;
+    font-size: 18px;
     font-weight: 600;
     letter-spacing: -0.5px;
 }
@@ -544,6 +544,47 @@ input[type="text"]:focus {
 .memory-date {
     font-size: 14px;
     color: var(--text-secondary);
+}
+
+.photo-string {
+    width: 2px;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent 0%, var(--text-secondary) 50%, transparent 100%);
+    margin: 0 auto 16px;
+    position: relative;
+}
+
+.photo-string::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+}
+
+.memory-info {
+    margin-bottom: 12px;
+}
+
+.btn-delete-photo {
+    width: 100%;
+    background: var(--bg-card);
+    color: #ff6b6b;
+    border: none;
+    border-radius: 12px;
+    padding: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-delete-photo:active {
+    transform: scale(0.95);
+    background: #1f1f1f;
 }
 
 /* Food Modal */
