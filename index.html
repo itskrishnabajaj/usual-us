@@ -96,7 +96,7 @@
                             </label>
                             <label class="category-option">
                                 <input type="radio" name="category" value="travel">
-                                <span>☺️ G.Masti</span>
+                                <span>🚆 Travel</span>
                             </label>
                             <label class="category-option">
                                 <input type="radio" name="category" value="gifts">
@@ -104,7 +104,7 @@
                             </label>
                             <label class="category-option">
                                 <input type="radio" name="category" value="home">
-                                <span>🏠 Home</span></span>
+                                <span>☺️ G.Masti</span>
                             </label>
                             <label class="category-option">
                                 <input type="radio" name="category" value="misc">
@@ -193,28 +193,28 @@
             <h1 class="app-title">usual us</h1>
             <p class="app-subtitle">Our private space 🤍</p>
             
-            <form id="login-form">
-                <div id="first-login" class="login-section">
-                    <div class="form-group">
-                        <label>User ID</label>
-                        <input type="text" id="user-id-input" placeholder="Enter your user ID" required>
-                    </div>
-                    <div class="form-group">
-                        <label>PIN</label>
-                        <input type="password" id="pin-input" placeholder="Enter your PIN" maxlength="6" required>
-                    </div>
-                    <button type="submit" class="btn-login">Continue</button>
+            <!-- First Time Login -->
+            <form id="first-login-form" class="login-section">
+                <div class="form-group">
+                    <label>User ID</label>
+                    <input type="text" id="user-id-input" placeholder="Enter your user ID" autocomplete="off" required>
                 </div>
-                
-                <div id="returning-login" class="login-section hidden">
-                    <p class="welcome-back">Welcome back, <span id="returning-name"></span> 🤍</p>
-                    <div class="form-group">
-                        <label>Enter PIN</label>
-                        <input type="password" id="returning-pin-input" placeholder="••••" maxlength="6" required>
-                    </div>
-                    <button type="submit" class="btn-login">Unlock</button>
-                    <button type="button" id="switch-user-btn" class="btn-switch">Switch User</button>
+                <div class="form-group">
+                    <label>PIN</label>
+                    <input type="password" id="pin-input" placeholder="Enter your PIN" maxlength="6" autocomplete="off" required>
                 </div>
+                <button type="submit" class="btn-login">Continue</button>
+            </form>
+            
+            <!-- Returning User Login -->
+            <form id="returning-login-form" class="login-section hidden">
+                <p class="welcome-back">Welcome back, <span id="returning-name"></span> 🤍</p>
+                <div class="form-group">
+                    <label>Enter PIN</label>
+                    <input type="password" id="returning-pin-input" placeholder="••••" maxlength="6" autocomplete="off" required>
+                </div>
+                <button type="submit" class="btn-login">Unlock</button>
+                <button type="button" id="switch-user-btn" class="btn-switch">Switch User</button>
             </form>
         </div>
     </div>

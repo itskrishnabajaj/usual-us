@@ -1,11 +1,11 @@
 // Cloudinary configuration
-const CLOUDINARY_CLOUD_NAME = 'dqpqm0xqg';
+const CLOUDINARY_CLOUD_NAME = 'ddyj2njes';
 const CLOUDINARY_UPLOAD_PRESET = 'usual_us';
 const CLOUDINARY_FOLDER = 'usual-us/food';
 
 // User credentials (EXACTLY TWO USERS)
 const USERS = {
-    'imsusu': {
+        'imsusu': {
         pin: '0804',
         name: 'Krishna',
         role: 'me'
@@ -50,8 +50,8 @@ function initializeAuth() {
         const user = USERS[savedUserId];
         if (user) {
             document.getElementById('returning-name').textContent = user.name;
-            document.getElementById('first-login').classList.add('hidden');
-            document.getElementById('returning-login').classList.remove('hidden');
+            document.getElementById('first-login-form').classList.add('hidden');
+            document.getElementById('returning-login-form').classList.remove('hidden');
         } else {
             // Invalid saved user, clear storage
             localStorage.removeItem('usual_us_user_id');
@@ -66,8 +66,8 @@ function initializeAuth() {
 }
 
 function showFirstLogin() {
-    document.getElementById('first-login').classList.remove('hidden');
-    document.getElementById('returning-login').classList.add('hidden');
+    document.getElementById('first-login-form').classList.remove('hidden');
+    document.getElementById('returning-login-form').classList.add('hidden');
 }
 
 async function handleLogin(userId, pin, isReturning = false) {
@@ -148,32 +148,35 @@ function showApp() {
 
 // Event Listeners
 function setupEventListeners() {
-    // Login form
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
+    // First time login form
+    document.getElementById('first-login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        console.log('Login form submitted');
+        console.log('First login form submitted');
+        
+        const userId = document.getElementById('user-id-input').value.toLowerCase().trim();
+        const pin = document.getElementById('pin-input').value;
+        console.log('Attempting first login with userId:', userId);
+        
+        await handleLogin(userId, pin, false);
+    });
+    
+    // Returning user login form
+    document.getElementById('returning-login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        console.log('Returning login form submitted');
         
         const savedUserId = localStorage.getItem('usual_us_user_id');
-        console.log('Saved user ID:', savedUserId);
+        const pin = document.getElementById('returning-pin-input').value;
+        console.log('Attempting returning login with userId:', savedUserId);
         
-        if (savedUserId) {
-            // Returning user - verify PIN
-            const pin = document.getElementById('returning-pin-input').value;
-            console.log('Attempting returning login');
-            await handleLogin(savedUserId, pin, true);
-        } else {
-            // First time - get both User ID and PIN
-            const userId = document.getElementById('user-id-input').value.toLowerCase().trim();
-            const pin = document.getElementById('pin-input').value;
-            console.log('Attempting first login with userId:', userId);
-            await handleLogin(userId, pin, false);
-        }
+        await handleLogin(savedUserId, pin, true);
     });
     
     // Switch user button
     document.getElementById('switch-user-btn').addEventListener('click', () => {
         localStorage.removeItem('usual_us_user_id');
-        document.getElementById('login-form').reset();
+        document.getElementById('first-login-form').reset();
+        document.getElementById('returning-login-form').reset();
         showFirstLogin();
     });
     
