@@ -104,7 +104,7 @@
                             </label>
                             <label class="category-option">
                                 <input type="radio" name="category" value="home">
-                                <span>🏠 Home</span>
+                                <span>🏠 Home</span></span>
                             </label>
                             <label class="category-option">
                                 <input type="radio" name="category" value="misc">
@@ -192,7 +192,30 @@
         <div class="login-container">
             <h1 class="app-title">usual us</h1>
             <p class="app-subtitle">Our private space 🤍</p>
-            <button id="google-login-btn" class="btn-login">Sign in with Google</button>
+            
+            <form id="login-form">
+                <div id="first-login" class="login-section">
+                    <div class="form-group">
+                        <label>User ID</label>
+                        <input type="text" id="user-id-input" placeholder="Enter your user ID" required>
+                    </div>
+                    <div class="form-group">
+                        <label>PIN</label>
+                        <input type="password" id="pin-input" placeholder="Enter your PIN" maxlength="6" required>
+                    </div>
+                    <button type="submit" class="btn-login">Continue</button>
+                </div>
+                
+                <div id="returning-login" class="login-section hidden">
+                    <p class="welcome-back">Welcome back, <span id="returning-name"></span> 🤍</p>
+                    <div class="form-group">
+                        <label>Enter PIN</label>
+                        <input type="password" id="returning-pin-input" placeholder="••••" maxlength="6" required>
+                    </div>
+                    <button type="submit" class="btn-login">Unlock</button>
+                    <button type="button" id="switch-user-btn" class="btn-switch">Switch User</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -245,10 +268,10 @@
     <div id="loading" class="loading hidden">
         <div class="loading-spinner"></div>
     </div>
-    
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <script src="firebase.js"></script>
     <script src="app.js"></script>
 </body>

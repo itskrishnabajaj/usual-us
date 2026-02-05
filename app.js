@@ -17,7 +17,7 @@ const categoryEmojis = {
     dates: '🎬',
     travel: '🚆',
     gifts: '🎁',
-    home: '🏠',
+    home: '☺️',
     misc: '✨'
 };
 
@@ -29,42 +29,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Authentication
 function initializeAuth() {
-    auth.onAuthStateChanged(async (user) => {
+    const savedUserId = localStorage.getItem('usual_us_user_id');
+    
+    if (savedUserId) {
+        // Returning user - show PIN only
+        const user = USERS[savedUserId];
         if (user) {
-            if (!WHITELISTED_EMAILS.includes(user.email)) {
-                showError('Access denied. This app is private.');
-                await auth.signOut();
-                return;
-            }
-            
-            currentUser = user;
-            await loadUserProfile();
-            showApp();
-            loadData();
+            document.getElementById('returning-name').textContent = user.name;
+            document.getElementById('first-login').classList.add('hidden');
+            document.getElementById('returning-login').classList.remove('hidden');
         } else {
-            showLogin();
+            // Invalid saved user, clear storage
+            localStorage.removeItem('usual_us_user_id');
+            showFirstLogin();
         }
-    });
+    } else {
+        // First time user
+        showFirstLogin();
+    }
+    
+    showLogin();
+}
+
+function showFirstLogin() {
+    document.getElementById('first-login').classList.remove('hidden');
+    document.getElementById('returning-login').classList.add('hidden');
+}
+
+async function handleLogin(userId, pin, isReturning = false) {
+    const user = USERS[userId];
+    
+    if (!user) {
+        showError('Invalid User ID');
+        return false;
+    }
+    
+    if (user.pin !== pin) {
+        showError('Incorrect PIN');
+        return false;
+    }
+    
+    // Save user ID for future logins
+    if (!isReturning) {
+        localStorage.setItem('usual_us_user_id', userId);
+    }
+    
+    // Set current user
+    currentUserProfile = {
+        uid: userId,
+        name: user.name,
+        role: user.role
+    };
+    
+    currentUser = userId;
+    
+    // Load or create user profile in Firestore
+    await loadUserProfile();
+    
+    showApp();
+    loadData();
+    
+    return true;
 }
 
 async function loadUserProfile() {
-    const userDoc = await usersCollection.doc(currentUser.uid).get();
+    const userDoc = await usersCollection.doc(currentUser).get();
     
-    if (userDoc.exists) {
-        currentUserProfile = userDoc.data();
-    } else {
-        const email = currentUser.email;
-        const role = email === WHITELISTED_EMAILS[0] ? 'me' : 'her';
-        const name = currentUser.displayName || (role === 'me' ? 'Me' : 'Her');
-        
-        currentUserProfile = {
-            uid: currentUser.uid,
-            email: email,
-            name: name,
-            role: role
-        };
-        
-        await usersCollection.doc(currentUser.uid).set(currentUserProfile);
+    if (!userDoc.exists) {
+        await usersCollection.doc(currentUser).set(currentUserProfile);
     }
     
     updateGreeting();
@@ -93,14 +125,29 @@ function showApp() {
 
 // Event Listeners
 function setupEventListeners() {
-    // Login
-    document.getElementById('google-login-btn').addEventListener('click', async () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        try {
-            await auth.signInWithPopup(provider);
-        } catch (error) {
-            showError('Login failed. Please try again.');
+    // Login form
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const savedUserId = localStorage.getItem('usual_us_user_id');
+        
+        if (savedUserId) {
+            // Returning user - verify PIN
+            const pin = document.getElementById('returning-pin-input').value;
+            await handleLogin(savedUserId, pin, true);
+        } else {
+            // First time - get both User ID and PIN
+            const userId = document.getElementById('user-id-input').value.toLowerCase().trim();
+            const pin = document.getElementById('pin-input').value;
+            await handleLogin(userId, pin, false);
         }
+    });
+    
+    // Switch user button
+    document.getElementById('switch-user-btn').addEventListener('click', () => {
+        localStorage.removeItem('usual_us_user_id');
+        document.getElementById('login-form').reset();
+        showFirstLogin();
     });
     
     // Bottom navigation
@@ -491,23 +538,23 @@ function renderFoodTimeline() {
     }
     
     container.innerHTML = foodMemories.map((memory, index) => {
-    const date = memory.createdAt ? memory.createdAt.toDate() : new Date();
-    const formattedDate = formatDate(date);
-    
-    return `
-        <div class="food-memory">
-            ${index > 0 ? '<div class="photo-string"></div>' : ''}
-            <div class="photo-frame" onclick="viewPhoto('${memory.id}')">
-                <img src="${memory.imageUrl}" alt="${memory.caption || 'Food memory'}" loading="lazy">
+        const date = memory.createdAt ? memory.createdAt.toDate() : new Date();
+        const formattedDate = formatDate(date);
+        
+        return `
+            <div class="food-memory">
+                ${index > 0 ? '<div class="photo-string"></div>' : ''}
+                <div class="photo-frame" onclick="viewPhoto('${memory.id}')">
+                    <img src="${memory.imageUrl}" alt="${memory.caption || 'Food memory'}" loading="lazy">
+                </div>
+                <div class="memory-info">
+                    ${memory.caption ? `<div class="memory-caption">${memory.caption}</div>` : ''}
+                    <div class="memory-date">${formattedDate}</div>
+                </div>
+                <button class="btn-delete-photo" onclick="deleteFood('${memory.id}')">Delete</button>
             </div>
-            <div class="memory-info">
-                ${memory.caption ? `<div class="memory-caption">${memory.caption}</div>` : ''}
-                <div class="memory-date">${formattedDate}</div>
-            </div>
-            <button class="btn-delete-photo" onclick="deleteFood('${memory.id}')">Delete</button>
-        </div>
-    `;
-}).join('');
+        `;
+    }).join('');
 }
 
 function viewPhoto(memoryId) {

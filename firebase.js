@@ -8,15 +8,22 @@ const firebaseConfig = {
   appId: "1:283117249056:web:181200adfb4b862aee9245"
 };
 
-// Whitelisted email addresses (EXACTLY TWO)
-const WHITELISTED_EMAILS = [
-    "imkrishnabajaj@gmail.com",
-    "rashiganorkar@gmail.com"
-];
+// User credentials (EXACTLY TWO USERS)
+const USERS = {
+    'imsusu': {
+        pin: '1707',
+        name: 'Krishna',
+        role: 'me'
+    },
+    'imgugu': {
+        pin: '2203',
+        name: 'Rashi',
+        role: 'her'
+    }
+};
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
 const db = firebase.firestore();
 
 // Enable offline persistence
