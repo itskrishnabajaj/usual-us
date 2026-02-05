@@ -1,7 +1,21 @@
 // Cloudinary configuration
-const CLOUDINARY_CLOUD_NAME = 'ddyj2njes';
+const CLOUDINARY_CLOUD_NAME = 'dqpqm0xqg';
 const CLOUDINARY_UPLOAD_PRESET = 'usual_us';
 const CLOUDINARY_FOLDER = 'usual-us/food';
+
+// User credentials (EXACTLY TWO USERS)
+const USERS = {
+    'imsusu': {
+        pin: '0804',
+        name: 'Krishna',
+        role: 'me'
+    },
+    'imgugu': {
+        pin: '2801',
+        name: 'Rashi',
+        role: 'her'
+    }
+};
 
 // Global state
 let currentUser = null;
@@ -57,17 +71,26 @@ function showFirstLogin() {
 }
 
 async function handleLogin(userId, pin, isReturning = false) {
+    console.log('handleLogin called with:', { userId, pin, isReturning });
+    console.log('Available users:', Object.keys(USERS));
+    
     const user = USERS[userId];
     
     if (!user) {
+        console.error('User not found:', userId);
         showError('Invalid User ID');
         return false;
     }
     
+    console.log('User found:', user);
+    
     if (user.pin !== pin) {
+        console.error('PIN mismatch');
         showError('Incorrect PIN');
         return false;
     }
+    
+    console.log('PIN correct, logging in...');
     
     // Save user ID for future logins
     if (!isReturning) {
@@ -128,17 +151,21 @@ function setupEventListeners() {
     // Login form
     document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
+        console.log('Login form submitted');
         
         const savedUserId = localStorage.getItem('usual_us_user_id');
+        console.log('Saved user ID:', savedUserId);
         
         if (savedUserId) {
             // Returning user - verify PIN
             const pin = document.getElementById('returning-pin-input').value;
+            console.log('Attempting returning login');
             await handleLogin(savedUserId, pin, true);
         } else {
             // First time - get both User ID and PIN
             const userId = document.getElementById('user-id-input').value.toLowerCase().trim();
             const pin = document.getElementById('pin-input').value;
+            console.log('Attempting first login with userId:', userId);
             await handleLogin(userId, pin, false);
         }
     });
