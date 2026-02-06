@@ -13,6 +13,7 @@ let db = null;
 let usersCollection = null;
 let expensesCollection = null;
 let memoriesCollection = null;
+let notesCollection = null;
 let firebaseInitialized = false;
 
 // Initialize Firebase (called after successful login)
@@ -33,6 +34,7 @@ function initializeFirebase() {
         usersCollection = db.collection('users');
         expensesCollection = db.collection('expenses');
         memoriesCollection = db.collection('memories');
+        notesCollection = db.collection('notes');
         
         firebaseInitialized = true;
         console.log('Firebase initialized successfully');

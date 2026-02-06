@@ -3,7 +3,7 @@ const CLOUDINARY_CLOUD_NAME = 'ddyj2njes';
 const CLOUDINARY_UPLOAD_PRESET = 'usual_us';
 const CLOUDINARY_FOLDER = 'usual-us/memories';
 
-// User credentials (EXACTLY TWO USERS)
+// User credentials
 const USERS = {
     'imsusu': {
         pin: '0804',
@@ -17,14 +17,85 @@ const USERS = {
     }
 };
 
+// Relationship start date
+const RELATIONSHIP_START = new Date('2025-01-28');
+
+// Daily romantic quotes (60 quotes)
+const DAILY_QUOTES = [
+    "Still my favorite person.",
+    "No matter the balance, I choose you.",
+    "Today felt warmer because of you.",
+    "You make the ordinary feel magical.",
+    "Thank you for being you.",
+    "Every day with you is my favorite day.",
+    "You're the reason I smile more.",
+    "Home is wherever you are.",
+    "You make everything better.",
+    "I'm grateful for us.",
+    "You're my safe place.",
+    "I love the way we are together.",
+    "You make my heart feel full.",
+    "Being with you feels right.",
+    "You're my person.",
+    "I choose us, every single day.",
+    "You make life sweeter.",
+    "Thank you for loving me.",
+    "You're the best part of my days.",
+    "I love our little world.",
+    "You make me want to be better.",
+    "Every moment with you matters.",
+    "You're my favorite hello and hardest goodbye.",
+    "I'm so lucky it's you.",
+    "You feel like home.",
+    "You're my calm in the chaos.",
+    "I love how we fit together.",
+    "You make everything feel possible.",
+    "Thank you for choosing me too.",
+    "You're my greatest adventure.",
+    "I love the us we've become.",
+    "You make my world brighter.",
+    "Every day, I fall a little more.",
+    "You're exactly what I needed.",
+    "I love our story.",
+    "You make me believe in forever.",
+    "You're my favorite feeling.",
+    "I'm proud to be yours.",
+    "You make life beautiful.",
+    "Thank you for being patient with me.",
+    "You're my comfort and my joy.",
+    "I love the little things we share.",
+    "You make ordinary days special.",
+    "You're my happy place.",
+    "I'm better because of you.",
+    "You're the one I want forever.",
+    "Every day with you is a gift.",
+    "You make me feel understood.",
+    "I love how you see me.",
+    "You're my favorite person to do nothing with.",
+    "Thank you for being my constant.",
+    "You make everything worthwhile.",
+    "I love the way you love me.",
+    "You're my peace.",
+    "I'm grateful for every moment.",
+    "You make me laugh the most.",
+    "You're my best decision.",
+    "I love growing with you.",
+    "You're my yesterday, today, and tomorrow.",
+    "Thank you for making life sweeter."
+];
+
 // Global state
 let currentUser = null;
 let currentUserProfile = null;
 let expenses = [];
 let memories = [];
+let notes = [];
 let selectedPhotos = [];
 let lastBalance = null;
 let balanceBeforeAction = null;
+let currentAlbumIndex = 0;
+let currentViewingMemoryId = null;
+let longPressTimer = null;
 
 // Category emojis
 const categoryEmojis = {
@@ -44,6 +115,27 @@ function getPartnerPronoun() {
 function getPartnerName() {
     const partnerId = Object.keys(USERS).find(id => USERS[id].role !== currentUserProfile.role);
     return USERS[partnerId]?.name || 'Partner';
+}
+
+// Calculate days together
+function getDaysTogether() {
+    const today = new Date();
+    const diffTime = Math.abs(today - RELATIONSHIP_START);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+}
+
+// Get daily quote (rotates based on day number)
+function getDailyQuote() {
+    const dayNumber = getDaysTogether();
+    const quoteIndex = (dayNumber - 1) % DAILY_QUOTES.length;
+    return DAILY_QUOTES[quoteIndex];
+}
+
+// Check if it's late night (after 11 PM)
+function isLateNight() {
+    const hour = new Date().getHours();
+    return hour >= 23 || hour < 6;
 }
 
 // Initialize app
@@ -142,7 +234,6 @@ function updateGreeting() {
 
 function updateDynamicLabels() {
     const partnerPronoun = getPartnerPronoun();
-    const partnerName = getPartnerName();
     
     // Update "Paid by" label
     document.getElementById('partner-label').textContent = partnerPronoun === 'her' ? 'Her' : 'Him';
@@ -250,17 +341,91 @@ function setupEventListeners() {
     document.getElementById('gallery-input').addEventListener('change', handlePhotoSelect);
     document.getElementById('memory-form').addEventListener('submit', handleMemoryUpload);
     
-    // Memory viewer
-    document.getElementById('close-memory-viewer').addEventListener('click', () => {
-        document.getElementById('memory-viewer').classList.add('hidden');
+    // Album viewer controls
+    document.getElementById('close-album-viewer').addEventListener('click', () => {
+        document.getElementById('album-viewer-modal').classList.add('hidden');
     });
     
-    document.getElementById('delete-memory-btn').addEventListener('click', handleMemoryDelete);
+    document.getElementById('prev-photo').addEventListener('click', () => navigateAlbum(-1));
+    document.getElementById('next-photo').addEventListener('click', () => navigateAlbum(1));
+    
+    document.getElementById('delete-album-btn').addEventListener('click', handleMemoryDelete);
+    
+    // Single photo viewer
+    document.getElementById('close-photo-viewer').addEventListener('click', () => {
+        document.getElementById('photo-viewer-modal').classList.add('hidden');
+    });
+    
+    document.getElementById('delete-photo-btn').addEventListener('click', handleMemoryDelete);
+    
+    // Notes
+    document.getElementById('add-note-btn').addEventListener('click', () => {
+        document.getElementById('note-modal').classList.remove('hidden');
+    });
+    
+    document.getElementById('close-note-modal').addEventListener('click', () => {
+        document.getElementById('note-modal').classList.add('hidden');
+    });
+    
+    document.getElementById('note-form').addEventListener('submit', handleNoteSubmit);
     
     // Balance celebration
     document.getElementById('balance-celebration').addEventListener('click', () => {
         document.getElementById('balance-celebration').classList.add('hidden');
     });
+    
+    // Easter egg - long press on Us title
+    const usTitle = document.getElementById('us-title');
+    
+    usTitle.addEventListener('touchstart', (e) => {
+        longPressTimer = setTimeout(() => {
+            showEasterEgg();
+        }, 2000); // 2 second long press
+    });
+    
+    usTitle.addEventListener('touchend', () => {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+    });
+    
+    usTitle.addEventListener('touchmove', () => {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+    });
+    
+    // Desktop fallback for easter egg
+    usTitle.addEventListener('mousedown', () => {
+        longPressTimer = setTimeout(() => {
+            showEasterEgg();
+        }, 2000);
+    });
+    
+    usTitle.addEventListener('mouseup', () => {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+    });
+    
+    usTitle.addEventListener('mouseleave', () => {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+    });
+}
+
+function showEasterEgg() {
+    const easterEgg = document.getElementById('easter-egg');
+    easterEgg.classList.remove('hidden');
+    
+    setTimeout(() => {
+        easterEgg.classList.add('hidden');
+    }, 4000);
 }
 
 function switchTab(tabName) {
@@ -276,6 +441,28 @@ function switchTab(tabName) {
     
     if (tabName === 'stats') {
         renderStats();
+    } else if (tabName === 'us') {
+        initializeUsTab();
+    }
+}
+
+// Initialize Us Tab
+function initializeUsTab() {
+    // Update day counter
+    const days = getDaysTogether();
+    document.getElementById('us-day-counter').textContent = `Day ${days} of us`;
+    
+    // Update daily quote
+    document.getElementById('ritual-quote').textContent = getDailyQuote();
+    
+    // Apply late night mode if applicable
+    const usTab = document.getElementById('us-tab');
+    if (isLateNight()) {
+        usTab.classList.add('late-night');
+        document.getElementById('late-night-message').classList.remove('hidden');
+    } else {
+        usTab.classList.remove('late-night');
+        document.getElementById('late-night-message').classList.add('hidden');
     }
 }
 
@@ -284,7 +471,8 @@ async function loadData() {
     showLoading(true);
     await Promise.all([
         loadExpenses(),
-        loadMemories()
+        loadMemories(),
+        loadNotes()
     ]);
     showLoading(false);
 }
@@ -315,6 +503,20 @@ async function loadMemories() {
     }));
     
     renderMemoriesTimeline();
+}
+
+async function loadNotes() {
+    const snapshot = await notesCollection
+        .orderBy('createdAt', 'desc')
+        .limit(20)
+        .get();
+    
+    notes = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    }));
+    
+    renderNotes();
 }
 
 // Expense Handling
@@ -426,10 +628,9 @@ async function deleteExpense(expenseId) {
     showLoading(false);
 }
 
-// Settle Functionality
+// Settle Functionality - With Custom Amount
 function showSettleModal() {
     const balance = calculateCurrentBalance();
-    const partnerPronoun = getPartnerPronoun();
     const partnerName = getPartnerName();
     
     if (balance === 0) {
@@ -439,36 +640,50 @@ function showSettleModal() {
     
     const settleMsg = document.getElementById('settle-message');
     const settleSubMsg = document.getElementById('settle-submessage');
+    const settleAmountInput = document.getElementById('settle-amount');
+    
+    // Pre-fill with full balance
+    settleAmountInput.value = Math.abs(balance).toFixed(2);
     
     if (balance > 0) {
         settleMsg.textContent = `${partnerName} owes you ₹${balance.toFixed(2)}`;
-        settleSubMsg.textContent = `Mark as settled?`;
+        settleSubMsg.textContent = `Enter amount to settle`;
     } else {
         settleMsg.textContent = `You owe ${partnerName} ₹${Math.abs(balance).toFixed(2)}`;
-        settleSubMsg.textContent = `Mark as settled?`;
+        settleSubMsg.textContent = `Enter amount to settle`;
     }
     
     document.getElementById('settle-modal').classList.remove('hidden');
 }
 
 async function handleSettle() {
-    const balance = calculateCurrentBalance();
+    const currentBalance = calculateCurrentBalance();
     
-    if (balance === 0) {
+    if (currentBalance === 0) {
         document.getElementById('settle-modal').classList.add('hidden');
         return;
     }
     
+    const settleAmountInput = document.getElementById('settle-amount');
+    let settleAmount = parseFloat(settleAmountInput.value) || Math.abs(currentBalance);
+    
+    // Cap at current balance
+    if (settleAmount > Math.abs(currentBalance)) {
+        settleAmount = Math.abs(currentBalance);
+    }
+    
     const partnerPronoun = getPartnerPronoun();
-    const settlementNote = balance > 0 
-        ? `Settlement - ${partnerPronoun} paid ₹${balance.toFixed(2)}`
-        : `Settlement - I paid ₹${Math.abs(balance).toFixed(2)}`;
+    const partnerName = getPartnerName();
+    
+    const settlementNote = currentBalance > 0 
+        ? `Settlement - ${partnerName} paid ₹${settleAmount.toFixed(2)}`
+        : `Settlement - I paid ₹${settleAmount.toFixed(2)}`;
     
     const settlement = {
-        amount: Math.abs(balance),
-        paidBy: balance > 0 ? 'partner' : 'me',
-        myShare: Math.abs(balance),
-        partnerShare: Math.abs(balance),
+        amount: settleAmount,
+        paidBy: currentBalance > 0 ? 'partner' : 'me',
+        myShare: settleAmount,
+        partnerShare: settleAmount,
         category: 'misc',
         note: settlementNote,
         isSettlement: true,
@@ -476,13 +691,16 @@ async function handleSettle() {
         createdBy: currentUserProfile.role
     };
     
+    // Store balance before settlement
+    balanceBeforeAction = currentBalance;
+    
     showLoading(true);
     
     try {
         await expensesCollection.add(settlement);
         document.getElementById('settle-modal').classList.add('hidden');
+        settleAmountInput.value = '';
         await loadExpenses();
-        showBalanceCelebration();
     } catch (error) {
         showError('Settlement failed. Please try again.');
     }
@@ -728,6 +946,7 @@ async function handleMemoryUpload(e) {
         await loadMemories();
         switchTab('us');
     } catch (error) {
+        console.error('Upload error:', error);
         showError('Failed to upload memory. Please try again.');
     }
     
@@ -742,89 +961,227 @@ function resetMemoryForm() {
     document.getElementById('memory-form').classList.add('hidden');
 }
 
+// Get random tilt for Polaroid effect (-3 to 3 degrees)
+function getRandomTilt() {
+    return (Math.random() * 6 - 3).toFixed(2);
+}
+
+// Render memories as intimate Polaroid timeline
 function renderMemoriesTimeline() {
     const container = document.getElementById('memories-timeline');
     
     if (memories.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💕</div><p>No memories yet.<br>Start capturing your moments together.</p></div>';
+        container.innerHTML = `
+            <div class="empty-memories">
+                <p>No memories yet.</p>
+                <p class="empty-memories-sub">Start capturing your moments together</p>
+            </div>
+        `;
         return;
     }
     
     container.innerHTML = memories.map((memory, index) => {
         const date = memory.createdAt ? memory.createdAt.toDate() : new Date();
-        const formattedDate = formatDate(date);
+        const formattedDate = formatMemoryDate(date);
         const imageCount = memory.images.length;
+        const tilt = getRandomTilt();
         
-        return `
-            <div class="memory-item">
-                ${index > 0 ? '<div class="memory-string"></div>' : ''}
-                <div class="memory-album ${imageCount === 1 ? 'single' : 'multiple'}" onclick="viewMemory('${memory.id}')">
-                    ${imageCount === 1 ? `
-                        <div class="photo-frame">
+        if (imageCount === 1) {
+            // Single Polaroid
+            return `
+                <div class="polaroid-wrapper">
+                    <div class="polaroid" style="transform: rotate(${tilt}deg)" onclick="viewSinglePhoto('${memory.id}')">
+                        <div class="polaroid-photo">
                             <img src="${memory.images[0]}" alt="${memory.caption || 'Memory'}" loading="lazy">
                         </div>
-                    ` : `
-                        <div class="photo-frame album-cover">
-                            <img src="${memory.images[0]}" alt="${memory.caption || 'Memory'}" loading="lazy">
-                            <div class="album-badge">${imageCount} photos</div>
+                        <div class="polaroid-caption-area">
+                            <p class="polaroid-date">${formattedDate}</p>
+                            ${memory.caption ? `<p class="polaroid-caption">${memory.caption}</p>` : ''}
                         </div>
-                    `}
+                    </div>
                 </div>
-                <div class="memory-info">
-                    ${memory.caption ? `<div class="memory-caption">${memory.caption}</div>` : ''}
-                    <div class="memory-date">${formattedDate}</div>
+            `;
+        } else {
+            // Photo Stack
+            return `
+                <div class="polaroid-wrapper">
+                    <div class="photo-stack" style="transform: rotate(${tilt}deg)" onclick="viewAlbum('${memory.id}')">
+                        <div class="stack-card stack-back-2"></div>
+                        <div class="stack-card stack-back-1"></div>
+                        <div class="polaroid">
+                            <div class="polaroid-photo">
+                                <img src="${memory.images[0]}" alt="${memory.caption || 'Album'}" loading="lazy">
+                            </div>
+                            <div class="polaroid-caption-area">
+                                <p class="polaroid-date">${formattedDate}</p>
+                                ${memory.caption ? `<p class="polaroid-caption">${memory.caption}</p>` : ''}
+                            </div>
+                            <div class="album-count-badge">${imageCount} photos</div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
     }).join('');
 }
 
-let currentViewingMemoryId = null;
-
-function viewMemory(memoryId) {
+// View single photo in full screen
+function viewSinglePhoto(memoryId) {
     const memory = memories.find(m => m.id === memoryId);
-    if (!memory) return;
+    if (!memory || memory.images.length === 0) return;
     
     currentViewingMemoryId = memoryId;
     
     const date = memory.createdAt ? memory.createdAt.toDate() : new Date();
-    const formattedDate = formatDate(date);
+    const formattedDate = formatMemoryDate(date);
     
-    const albumViewer = document.getElementById('album-viewer');
-    
-    if (memory.images.length === 1) {
-        albumViewer.innerHTML = `<img src="${memory.images[0]}" class="viewer-single-image" alt="Memory">`;
-    } else {
-        albumViewer.innerHTML = `
-            <div class="album-grid">
-                ${memory.images.map((img, idx) => `
-                    <div class="album-grid-item">
-                        <img src="${img}" alt="Photo ${idx + 1}">
-                    </div>
-                `).join('')}
+    const container = document.getElementById('single-photo-container');
+    container.innerHTML = `
+        <div class="viewer-polaroid">
+            <div class="viewer-polaroid-photo">
+                <img src="${memory.images[0]}" alt="Memory">
             </div>
-        `;
+            <div class="viewer-polaroid-caption">
+                <p class="viewer-date">${formattedDate}</p>
+                ${memory.caption ? `<p class="viewer-caption-text">${memory.caption}</p>` : ''}
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('photo-viewer-modal').classList.remove('hidden');
+}
+
+// View album with swipeable Polaroids
+function viewAlbum(memoryId) {
+    const memory = memories.find(m => m.id === memoryId);
+    if (!memory || memory.images.length === 0) return;
+    
+    currentViewingMemoryId = memoryId;
+    currentAlbumIndex = 0;
+    
+    renderAlbumPhoto(memory);
+    updatePhotoCounter(memory.images.length);
+    
+    const date = memory.createdAt ? memory.createdAt.toDate() : new Date();
+    const formattedDate = formatMemoryDate(date);
+    
+    const infoContainer = document.getElementById('album-viewer-info');
+    infoContainer.innerHTML = `
+        <p class="viewer-date">${formattedDate}</p>
+        ${memory.caption ? `<p class="viewer-caption-text">${memory.caption}</p>` : ''}
+    `;
+    
+    document.getElementById('album-viewer-modal').classList.remove('hidden');
+}
+
+function renderAlbumPhoto(memory) {
+    const container = document.getElementById('album-photos-container');
+    const currentImage = memory.images[currentAlbumIndex];
+    
+    container.innerHTML = `
+        <div class="viewer-polaroid swipeable-polaroid">
+            <div class="viewer-polaroid-photo">
+                <img src="${currentImage}" alt="Photo ${currentAlbumIndex + 1}">
+            </div>
+        </div>
+    `;
+}
+
+function navigateAlbum(direction) {
+    const memory = memories.find(m => m.id === currentViewingMemoryId);
+    if (!memory) return;
+    
+    currentAlbumIndex += direction;
+    
+    if (currentAlbumIndex < 0) {
+        currentAlbumIndex = memory.images.length - 1;
+    } else if (currentAlbumIndex >= memory.images.length) {
+        currentAlbumIndex = 0;
     }
     
-    document.getElementById('memory-viewer-caption').textContent = memory.caption || '';
-    document.getElementById('memory-viewer-date').textContent = formattedDate;
-    document.getElementById('memory-viewer').classList.remove('hidden');
+    renderAlbumPhoto(memory);
+    updatePhotoCounter(memory.images.length);
+}
+
+function updatePhotoCounter(total) {
+    document.getElementById('photo-counter').textContent = `${currentAlbumIndex + 1} / ${total}`;
 }
 
 async function handleMemoryDelete() {
     if (!currentViewingMemoryId) return;
-    if (!confirm('Delete this memory?')) return;
+    if (!confirm('Delete this memory forever?')) return;
     
     showLoading(true);
     try {
         await memoriesCollection.doc(currentViewingMemoryId).delete();
-        document.getElementById('memory-viewer').classList.add('hidden');
+        document.getElementById('album-viewer-modal').classList.add('hidden');
+        document.getElementById('photo-viewer-modal').classList.add('hidden');
         currentViewingMemoryId = null;
         await loadMemories();
     } catch (error) {
         showError('Failed to delete memory.');
     }
     showLoading(false);
+}
+
+// Format date for memories (handwritten style)
+function formatMemoryDate(date) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    
+    return `${day} ${month} ${year}`;
+}
+
+// Notes Handling
+async function handleNoteSubmit(e) {
+    e.preventDefault();
+    
+    const noteText = document.getElementById('note-text').value.trim();
+    if (!noteText) return;
+    
+    const note = {
+        text: noteText,
+        createdBy: currentUserProfile.role,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    showLoading(true);
+    
+    try {
+        await notesCollection.add(note);
+        document.getElementById('note-modal').classList.add('hidden');
+        document.getElementById('note-form').reset();
+        await loadNotes();
+    } catch (error) {
+        showError('Failed to save note.');
+    }
+    
+    showLoading(false);
+}
+
+function renderNotes() {
+    const container = document.getElementById('notes-container');
+    
+    if (notes.length === 0) {
+        container.innerHTML = '<p class="notes-empty">No notes yet. Share what you noticed today.</p>';
+        return;
+    }
+    
+    // Pastel colors for sticky notes
+    const pastelColors = ['#fef5e7', '#ffe4e4', '#e8f5e8', '#f0e7f5'];
+    
+    container.innerHTML = notes.map((note, index) => {
+        const color = pastelColors[index % pastelColors.length];
+        const rotation = (Math.random() * 4 - 2).toFixed(2); // -2 to 2 degrees
+        
+        return `
+            <div class="sticky-note" style="background: ${color}; transform: rotate(${rotation}deg)">
+                <p>${note.text}</p>
+            </div>
+        `;
+    }).join('');
 }
 
 // Utilities
@@ -874,7 +1231,8 @@ function showError(message) {
 // Global functions
 window.deleteExpense = deleteExpense;
 window.showEditExpense = showEditExpense;
-window.viewMemory = viewMemory;
+window.viewAlbum = viewAlbum;
+window.viewSinglePhoto = viewSinglePhoto;
 window.removePhoto = removePhoto;
 
 // Service Worker Registration
@@ -885,4 +1243,8 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('SW registration failed'));
     });
 }
+
+
+
+
 

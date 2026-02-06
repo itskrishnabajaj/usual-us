@@ -10,6 +10,9 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Homemade+Apple&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="app" class="hidden">
@@ -153,14 +156,46 @@
                 <div id="category-breakdown"></div>
             </section>
 
-            <!-- Us Tab -->
-            <section id="us-tab" class="tab-content">
-                <div class="us-header">
-                    <h2>Our Memories</h2>
-                    <button id="add-memory-btn" class="btn-add-memory">+</button>
+            <!-- Us Tab - Completely Redesigned -->
+            <section id="us-tab" class="tab-content us-tab">
+                <!-- Intimate Header -->
+                <div class="us-header-section" id="us-header-section">
+                    <h1 class="us-title" id="us-title">Us</h1>
+                    <p class="us-subtitle">Our little corner of the internet</p>
+                    <p class="us-day-counter" id="us-day-counter">Day 1 of us</p>
                 </div>
-                
-                <div id="memories-timeline"></div>
+
+                <!-- Opening Ritual Card -->
+                <div class="ritual-card" id="ritual-card">
+                    <p class="ritual-quote" id="ritual-quote"></p>
+                </div>
+
+                <!-- Add Memory Button -->
+                <div class="add-memory-section">
+                    <button id="add-memory-btn" class="btn-add-memory-minimal">+ Add Memory</button>
+                </div>
+
+                <!-- Memories Timeline -->
+                <div class="memories-section">
+                    <div id="memories-timeline" class="memories-timeline"></div>
+                </div>
+
+                <!-- Tiny Notes Section -->
+                <div class="notes-section">
+                    <h3 class="notes-title">Little things I noticed</h3>
+                    <div id="notes-container" class="notes-container"></div>
+                    <button id="add-note-btn" class="btn-add-note">+ Add a note</button>
+                </div>
+
+                <!-- Late Night Message -->
+                <div id="late-night-message" class="late-night-message hidden">
+                    <p>Good night, us.</p>
+                </div>
+
+                <!-- Easter Egg Message -->
+                <div id="easter-egg" class="easter-egg hidden">
+                    <p>If you're reading this, I love you.</p>
+                </div>
             </section>
         </main>
 
@@ -249,21 +284,50 @@
                 
                 <div class="form-group">
                     <label>Caption (optional)</label>
-                    <input type="text" id="memory-caption" placeholder="A beautiful moment together 💕">
+                    <input type="text" id="memory-caption" placeholder="That evening" maxlength="50">
                 </div>
-                <button type="submit" id="upload-memory-btn" class="btn-primary">Upload Memory</button>
+                <button type="submit" id="upload-memory-btn" class="btn-primary">Save Memory</button>
             </form>
         </div>
     </div>
 
-    <!-- Memory Viewer -->
-    <div id="memory-viewer" class="modal hidden">
-        <div class="memory-viewer-content">
-            <button id="close-memory-viewer" class="btn-close-viewer">×</button>
-            <div id="album-viewer" class="album-viewer"></div>
-            <div id="memory-viewer-caption" class="viewer-caption"></div>
-            <div id="memory-viewer-date" class="viewer-date"></div>
-            <button id="delete-memory-btn" class="btn-delete-viewer">Delete Memory</button>
+    <!-- Album Viewer - Swipeable Polaroids -->
+    <div id="album-viewer-modal" class="album-modal hidden">
+        <button id="close-album-viewer" class="btn-close-album">×</button>
+        <div class="album-swiper">
+            <div id="album-photos-container" class="album-photos-container"></div>
+            <div class="album-nav">
+                <button id="prev-photo" class="album-nav-btn">‹</button>
+                <div id="photo-counter" class="photo-counter">1 / 1</div>
+                <button id="next-photo" class="album-nav-btn">›</button>
+            </div>
+        </div>
+        <div id="album-viewer-info" class="album-viewer-info"></div>
+        <button id="delete-album-btn" class="btn-delete-memory">Delete Memory</button>
+    </div>
+
+    <!-- Single Photo Viewer -->
+    <div id="photo-viewer-modal" class="photo-modal hidden">
+        <button id="close-photo-viewer" class="btn-close-photo">×</button>
+        <div id="single-photo-container" class="single-photo-container"></div>
+        <div id="photo-viewer-info" class="photo-viewer-info"></div>
+        <button id="delete-photo-btn" class="btn-delete-memory">Delete Memory</button>
+    </div>
+
+    <!-- Note Modal -->
+    <div id="note-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add a Note</h3>
+                <button id="close-note-modal" class="btn-close">×</button>
+            </div>
+            <form id="note-form">
+                <div class="form-group">
+                    <label>Your note (1-2 lines)</label>
+                    <input type="text" id="note-text" placeholder="You smiled a lot today" maxlength="60" required>
+                </div>
+                <button type="submit" class="btn-primary">Save Note</button>
+            </form>
         </div>
     </div>
 
@@ -292,14 +356,24 @@
         </div>
     </div>
 
-    <!-- Settle Modal -->
+    <!-- Settle Modal - With Custom Amount -->
     <div id="settle-modal" class="modal hidden">
         <div class="settle-content">
             <div class="settle-emoji">💰</div>
             <h2 id="settle-message"></h2>
             <p id="settle-submessage"></p>
+            
+            <div class="form-group">
+                <label>Settlement Amount</label>
+                <div class="amount-input-wrapper">
+                    <span class="currency">₹</span>
+                    <input type="number" id="settle-amount" placeholder="0" step="0.01" min="0">
+                </div>
+                <p class="settle-hint">Leave empty to settle full balance</p>
+            </div>
+            
             <div class="settle-actions">
-                <button id="confirm-settle-btn" class="btn-primary">Yes, Settle</button>
+                <button id="confirm-settle-btn" class="btn-primary">Settle</button>
                 <button id="cancel-settle-btn" class="btn-secondary">Cancel</button>
             </div>
         </div>

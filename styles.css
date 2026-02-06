@@ -16,10 +16,18 @@
     --shadow: rgba(0, 0, 0, 0.4);
     --success: #90ee90;
     --warning: #ffd700;
+    
+    /* Us Tab Colors */
+    --us-bg-gradient-start: #f5ebe0;
+    --us-bg-gradient-end: #ffd6e0;
+    --us-text-warm: #6b5446;
+    --us-text-soft: #9d8b80;
+    --polaroid-white: #f8f8f8;
+    --polaroid-shadow: rgba(0, 0, 0, 0.15);
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg-primary);
     color: var(--text-primary);
     overflow-x: hidden;
@@ -335,11 +343,6 @@ input[type="password"]:focus {
     transform: scale(0.98);
 }
 
-.btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 .btn-secondary {
     width: 100%;
     background: var(--bg-card);
@@ -368,7 +371,6 @@ input[type="password"]:focus {
     background: var(--bg-card);
     border-radius: 20px;
     padding: 20px;
-    position: relative;
 }
 
 .expense-header {
@@ -501,52 +503,155 @@ input[type="password"]:focus {
     color: var(--accent);
 }
 
-/* Us Tab - Memories */
-.us-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
+/* ============================================
+   US TAB - INTIMATE & AESTHETIC DESIGN
+   ============================================ */
+
+.us-tab {
+    background: linear-gradient(to bottom, var(--us-bg-gradient-start) 0%, var(--us-bg-gradient-end) 100%);
+    min-height: 100vh;
+    padding: 40px 24px 100px !important;
+    transition: all 0.5s ease;
 }
 
-.us-header h2 {
-    font-size: 24px;
-    font-weight: 600;
+/* Late Night Mode */
+.us-tab.late-night {
+    background: linear-gradient(to bottom, #1a1520 0%, #0f0a15 100%);
+    --us-text-warm: #d4c4b8;
+    --us-text-soft: #a89a90;
 }
 
-.btn-add-memory {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: var(--bg-primary);
-    border: none;
-    font-size: 28px;
+/* Header Section */
+.us-header-section {
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.us-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--us-text-warm);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    user-select: none;
+}
+
+.us-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--us-text-soft);
+    opacity: 0.7;
+    margin-bottom: 12px;
+}
+
+.us-day-counter {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--us-text-soft);
+    letter-spacing: 0.5px;
+    opacity: 0.6;
+}
+
+/* Ritual Card */
+.ritual-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 32px 24px;
+    margin: 0 auto 36px;
+    max-width: 340px;
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.08),
+        0 8px 24px rgba(0, 0, 0, 0.06);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Paper texture effect */
+.ritual-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+}
+
+.ritual-quote {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #4a3f35;
+    text-align: center;
+    position: relative;
+    font-style: italic;
+}
+
+.us-tab.late-night .ritual-card {
+    background: rgba(40, 35, 40, 0.95);
+}
+
+.us-tab.late-night .ritual-quote {
+    color: #d4c4b8;
+}
+
+/* Add Memory Button */
+.add-memory-section {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.btn-add-memory-minimal {
+    background: rgba(255, 255, 255, 0.8);
+    color: var(--us-text-warm);
+    border: 1px solid rgba(107, 84, 70, 0.2);
+    border-radius: 24px;
+    padding: 12px 28px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
     transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
 }
 
-.btn-add-memory:active {
-    transform: scale(0.9);
+.btn-add-memory-minimal:active {
+    transform: scale(0.96);
+    background: rgba(255, 255, 255, 1);
 }
 
-#memories-timeline {
+.us-tab.late-night .btn-add-memory-minimal {
+    background: rgba(60, 50, 60, 0.8);
+    color: #d4c4b8;
+    border-color: rgba(212, 196, 184, 0.2);
+}
+
+/* Memories Timeline - Polaroid Style */
+.memories-section {
+    margin-bottom: 48px;
+}
+
+.memories-timeline {
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 48px;
 }
 
-.memory-item {
-    animation: slideUp 0.4s ease;
+.polaroid-wrapper {
+    display: flex;
+    justify-content: center;
+    animation: polaroidAppear 0.6s ease;
 }
 
-@keyframes slideUp {
+@keyframes polaroidAppear {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(30px);
     }
     to {
         opacity: 1;
@@ -554,75 +659,448 @@ input[type="password"]:focus {
     }
 }
 
-.memory-string {
-    width: 2px;
-    height: 40px;
-    background: linear-gradient(to bottom, transparent 0%, var(--text-secondary) 50%, transparent 100%);
-    margin: 0 auto 16px;
-    position: relative;
-}
-
-.memory-string::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 8px;
-    height: 8px;
-    background: var(--text-secondary);
-    border-radius: 50%;
-}
-
-.memory-album {
+/* Single Polaroid */
+.polaroid {
+    background: var(--polaroid-white);
+    padding: 16px 16px 48px 16px;
+    border-radius: 4px;
+    box-shadow: 
+        0 4px 12px var(--polaroid-shadow),
+        0 8px 32px rgba(0, 0, 0, 0.08);
     cursor: pointer;
+    transition: transform 0.3s ease;
+    max-width: 320px;
+    width: 100%;
+}
+
+.polaroid:active {
+    transform: scale(0.97) !important;
+}
+
+.polaroid-photo {
+    width: 100%;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    background: #fafafa;
     margin-bottom: 12px;
 }
 
-.photo-frame {
-    background: #f8f8f8;
-    border-radius: 4px;
-    padding: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease;
-    position: relative;
-}
-
-.memory-album:active .photo-frame {
-    transform: scale(0.98);
-}
-
-.photo-frame img {
+.polaroid-photo img {
     width: 100%;
-    border-radius: 2px;
+    height: 100%;
+    object-fit: cover;
     display: block;
 }
 
-.album-badge {
-    position: absolute;
-    bottom: 24px;
-    right: 24px;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
+.polaroid-caption-area {
+    text-align: center;
 }
 
-.memory-info {
-    margin-bottom: 8px;
-}
-
-.memory-caption {
-    font-size: 16px;
-    color: var(--text-primary);
+.polaroid-date {
+    font-family: 'Homemade Apple', cursive;
+    font-size: 11px;
+    color: #6b5446;
     margin-bottom: 4px;
 }
 
-.memory-date {
+.polaroid-caption {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #8b7b6f;
+    font-weight: 400;
+}
+
+/* Photo Stack (Albums) */
+.photo-stack {
+    position: relative;
+    max-width: 320px;
+    width: 100%;
+    cursor: pointer;
+}
+
+.stack-card {
+    position: absolute;
+    background: var(--polaroid-white);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px var(--polaroid-shadow);
+}
+
+.stack-back-2 {
+    width: 100%;
+    height: 100%;
+    top: -8px;
+    left: 4px;
+    z-index: 1;
+}
+
+.stack-back-1 {
+    width: 100%;
+    height: 100%;
+    top: -4px;
+    left: 2px;
+    z-index: 2;
+}
+
+.photo-stack .polaroid {
+    position: relative;
+    z-index: 3;
+}
+
+.album-count-badge {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+}
+
+.us-tab.late-night .polaroid,
+.us-tab.late-night .stack-card {
+    background: #2a2530;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.us-tab.late-night .polaroid-date,
+.us-tab.late-night .polaroid-caption {
+    color: #d4c4b8;
+}
+
+/* Empty Memories */
+.empty-memories {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-memories p {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    color: var(--us-text-soft);
+    font-style: italic;
+}
+
+.empty-memories-sub {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13px !important;
+    font-style: normal !important;
+    opacity: 0.7;
+    margin-top: 8px;
+}
+
+/* Tiny Notes Section */
+.notes-section {
+    margin-bottom: 48px;
+}
+
+.notes-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-style: italic;
+    color: var(--us-text-warm);
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.notes-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.sticky-note {
+    padding: 16px 20px;
+    border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    max-width: 180px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #4a3f35;
+    transition: transform 0.2s ease;
+}
+
+.sticky-note:active {
+    transform: scale(0.98);
+}
+
+.us-tab.late-night .sticky-note {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    color: #3a3035;
+}
+
+.notes-empty {
+    text-align: center;
+    font-size: 13px;
+    color: var(--us-text-soft);
+    font-style: italic;
+    padding: 20px;
+}
+
+.btn-add-note {
+    display: block;
+    margin: 0 auto;
+    background: transparent;
+    color: var(--us-text-soft);
+    border: 1px dashed rgba(107, 84, 70, 0.3);
+    border-radius: 20px;
+    padding: 10px 24px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.btn-add-note:active {
+    transform: scale(0.96);
+}
+
+.us-tab.late-night .btn-add-note {
+    color: #a89a90;
+    border-color: rgba(168, 154, 144, 0.3);
+}
+
+/* Late Night Message */
+.late-night-message {
+    text-align: center;
+    padding: 24px;
+    margin-top: 40px;
+}
+
+.late-night-message p {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-style: italic;
+    color: var(--us-text-soft);
+    opacity: 0.5;
+}
+
+/* Easter Egg */
+.easter-egg {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.98);
+    padding: 40px 32px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    z-index: 3000;
+    animation: easterEggAppear 0.5s ease;
+}
+
+@keyframes easterEggAppear {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.easter-egg p {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-style: italic;
+    color: #4a3f35;
+    text-align: center;
+}
+
+/* Album Modal - Swipeable Polaroids */
+.album-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.album-swiper {
+    max-width: 90%;
+    margin-bottom: 20px;
+}
+
+.album-photos-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    margin-bottom: 16px;
+}
+
+.viewer-polaroid {
+    background: var(--polaroid-white);
+    padding: 20px 20px 60px 20px;
+    border-radius: 4px;
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.3),
+        0 4px 12px rgba(0, 0, 0, 0.2);
+    max-width: 360px;
+    animation: polaroidFlip 0.4s ease;
+}
+
+@keyframes polaroidFlip {
+    from {
+        opacity: 0;
+        transform: scale(0.9) rotateY(10deg);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotateY(0deg);
+    }
+}
+
+.viewer-polaroid-photo {
+    width: 100%;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    background: #fafafa;
+}
+
+.viewer-polaroid-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.viewer-polaroid-caption {
+    margin-top: 16px;
+    text-align: center;
+}
+
+.album-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.album-nav-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.album-nav-btn:active {
+    transform: scale(0.9);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.photo-counter {
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.album-viewer-info {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.viewer-date {
+    font-family: 'Homemade Apple', cursive;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 8px;
+}
+
+.viewer-caption-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.btn-close-album,
+.btn-close-photo {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 28px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.btn-delete-memory {
+    background: rgba(255, 107, 107, 0.15);
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s ease;
+}
+
+.btn-delete-memory:active {
+    transform: scale(0.95);
+    background: rgba(255, 107, 107, 0.25);
+}
+
+/* Single Photo Modal */
+.photo-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.single-photo-container {
+    margin-bottom: 20px;
+}
+
+.viewer-single-image {
+    max-width: 90vw;
+    max-height: 60vh;
+}
+
+.photo-viewer-info {
+    text-align: center;
+    margin-bottom: 20px;
 }
 
 /* Photo Selection */
@@ -656,11 +1134,6 @@ input[type="password"]:focus {
     font-size: 32px;
 }
 
-.btn-photo-option span:last-child {
-    font-size: 14px;
-    font-weight: 500;
-}
-
 .photos-preview {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -689,10 +1162,10 @@ input[type="password"]:focus {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.7);
     color: white;
     border: none;
-    font-size: 20px;
+    font-size: 18px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -767,123 +1240,36 @@ input[type="password"]:focus {
     justify-content: center;
 }
 
-/* Memory Viewer */
-.memory-viewer-content {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.btn-close-viewer {
-    position: absolute;
-    top: 40px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.6);
-    border: none;
-    border-radius: 50%;
-    width: 48px;
-    height: 48px;
-    font-size: 32px;
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-}
-
-#album-viewer {
-    max-width: 100%;
-    max-height: 60vh;
-    margin-bottom: 20px;
-}
-
-.viewer-single-image {
-    max-width: 100%;
-    max-height: 60vh;
-    border-radius: 8px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
-}
-
-.album-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    max-width: 100%;
-}
-
-.album-grid-item {
-    aspect-ratio: 1;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.album-grid-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.viewer-caption {
-    font-size: 18px;
-    color: white;
-    margin-top: 20px;
-    text-align: center;
-}
-
-.viewer-date {
-    font-size: 14px;
-    color: var(--text-secondary);
-    margin-top: 8px;
-    text-align: center;
-}
-
-.btn-delete-viewer {
-    background: rgba(255, 107, 107, 0.2);
-    color: #ff6b6b;
-    border: 1px solid #ff6b6b;
-    border-radius: 12px;
-    padding: 12px 24px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 16px;
-    transition: all 0.3s ease;
-}
-
-.btn-delete-viewer:active {
-    transform: scale(0.95);
-    background: rgba(255, 107, 107, 0.3);
-}
-
 /* Settle Modal */
 .settle-content {
     text-align: center;
-    padding: 60px 40px 40px;
-    animation: celebrationPop 0.6s ease;
+    padding: 40px 20px 20px;
 }
 
 .settle-emoji {
-    font-size: 80px;
-    margin-bottom: 24px;
+    font-size: 64px;
+    margin-bottom: 20px;
 }
 
 .settle-content h2 {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .settle-content p {
-    font-size: 16px;
+    font-size: 15px;
     color: var(--text-secondary);
-    margin-bottom: 32px;
+    margin-bottom: 24px;
+}
+
+.settle-hint {
+    font-size: 12px !important;
+    color: var(--text-secondary) !important;
+    margin-top: 8px !important;
+    margin-bottom: 0 !important;
+    text-align: center;
 }
 
 .settle-actions {
@@ -1028,11 +1414,6 @@ input[type="password"]:focus {
     transform: scale(0.98);
 }
 
-.btn-login:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 .login-section {
     width: 100%;
 }
@@ -1053,18 +1434,6 @@ input[type="password"]:focus {
 
 .login-section input {
     width: 100%;
-    background: var(--bg-card);
-    border: 2px solid transparent;
-    border-radius: 16px;
-    padding: 16px 20px;
-    font-size: 16px;
-    color: var(--text-primary);
-    transition: border-color 0.3s ease;
-}
-
-.login-section input:focus {
-    outline: none;
-    border-color: var(--accent);
 }
 
 .welcome-back {
@@ -1106,7 +1475,7 @@ input[type="password"]:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
+    z-index: 3000;
 }
 
 .loading-spinner {
@@ -1160,4 +1529,6 @@ body {
 #main-content {
     overscroll-behavior-y: contain;
 }
+
+
 
