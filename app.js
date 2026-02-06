@@ -22,21 +22,21 @@ const RELATIONSHIP_START = new Date('2025-01-28');
 
 // Music playlist (15 songs) - ADD YOUR CLOUDINARY LINKS HERE
 const PLAYLIST = [
-    { title: "Song 1", url: "YOUR_CLOUDINARY_LINK_1" },
-    { title: "Song 2", url: "YOUR_CLOUDINARY_LINK_2" },
-    { title: "Song 3", url: "YOUR_CLOUDINARY_LINK_3" },
-    { title: "Song 4", url: "YOUR_CLOUDINARY_LINK_4" },
-    { title: "Song 5", url: "YOUR_CLOUDINARY_LINK_5" },
-    { title: "Song 6", url: "YOUR_CLOUDINARY_LINK_6" },
-    { title: "Song 7", url: "YOUR_CLOUDINARY_LINK_7" },
-    { title: "Song 8", url: "YOUR_CLOUDINARY_LINK_8" },
-    { title: "Song 9", url: "YOUR_CLOUDINARY_LINK_9" },
-    { title: "Song 10", url: "YOUR_CLOUDINARY_LINK_10" },
-    { title: "Song 11", url: "YOUR_CLOUDINARY_LINK_11" },
-    { title: "Song 12", url: "YOUR_CLOUDINARY_LINK_12" },
-    { title: "Song 13", url: "YOUR_CLOUDINARY_LINK_13" },
-    { title: "Song 14", url: "YOUR_CLOUDINARY_LINK_14" },
-    { title: "Song 15", url: "YOUR_CLOUDINARY_LINK_15" }
+    { title: "Perfect", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391575/Perfect_-_Ed_Sheeran_nqryux.m4a" },
+    { title: "It's You", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391588/It_s_You_-_Ali_Gatie_2_aku2kh.m4a" },
+    { title: "You are the Reason", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391602/You_Are_The_Reason_-_Calum_Scott_vzelqf.m4a" },
+    { title: "Raabta", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391583/Raabta_helsab.m4a" },
+    { title: "Mere liye", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391581/Mere_liye_tum_kaafi_ho_rvgggr.m4a" },
+    { title: "All of Me", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391581/All_of_Me_-_John_Legend_mjr400.m4a" },
+    { title: "Until I found You", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391597/Until_I_Found_You_-_Stephen_Sanchez_ktkenw.m4a" },
+    { title: "Tum ho", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391601/Tum_ho_kgv3rb.m4a" },
+    { title: "Chaandaniya", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391582/Chaandaniya_eqf5vo.m4a" },
+    { title: "Saibo", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391588/Saibo_Lofi_Flip_-_VIBIE_ftit8a.m4a" },
+    { title: "Tum se hi", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391595/Tum_se_hi_cbobgn.m4a" },
+    { title: "Say You won't let me go", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391597/Say_You_Won_t_Let_Go_-_James_Arthur_e19y4j.m4a" },
+    { title: "Yellow", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391601/Yellow_-_Coldplay_b9mxit.m4a" },
+    { title: "Tera mujhse", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391604/Tera_mujhse_hai_pehle_ka_naata_koi_c0stlt.m4a" },
+    { title: "Bloom", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391584/Bloom_Bonus_Track_-_The_Paper_Kites_fyfkli.m4a" }
 ];
 
 // Daily romantic quotes (60 quotes)
