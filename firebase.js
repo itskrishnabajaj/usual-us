@@ -14,6 +14,7 @@ let usersCollection = null;
 let expensesCollection = null;
 let memoriesCollection = null;
 let notesCollection = null;
+let budgetCollection = null;
 let firebaseInitialized = false;
 
 // Initialize Firebase (called after successful login)
@@ -35,11 +36,12 @@ function initializeFirebase() {
         expensesCollection = db.collection('expenses');
         memoriesCollection = db.collection('memories');
         notesCollection = db.collection('notes');
+        budgetCollection = db.collection('budget');
         
         firebaseInitialized = true;
         console.log('Firebase initialized successfully');
     } catch (error) {
         console.error('Firebase initialization error:', error);
-        alert('Firebase configuration error. Please update firebase.js with your Firebase credentials to use expense tracking and food memories.');
+        alert('Firebase configuration error. Please update firebase.js with your Firebase credentials.');
     }
 }

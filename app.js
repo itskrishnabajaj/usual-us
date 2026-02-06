@@ -6,19 +6,38 @@ const CLOUDINARY_FOLDER = 'usual-us/memories';
 // User credentials
 const USERS = {
     'imsusu': {
-        pin: '0804',
-        name: 'Krishna',
-        role: 'me'
+        pin: '2801',
+        name: 'Susu',
+        actualRole: 'krishna'  // Absolute identifier
     },
     'imgugu': {
-        pin: '2801',
-        name: 'Rashi',
-        role: 'her'
+        pin: '0804',
+        name: 'Gugu',
+        actualRole: 'rashi'  // Absolute identifier
     }
 };
 
 // Relationship start date
 const RELATIONSHIP_START = new Date('2025-01-28');
+
+// Music playlist (15 songs) - ADD YOUR CLOUDINARY LINKS HERE
+const PLAYLIST = [
+    { title: "Song 1", url: "YOUR_CLOUDINARY_LINK_1" },
+    { title: "Song 2", url: "YOUR_CLOUDINARY_LINK_2" },
+    { title: "Song 3", url: "YOUR_CLOUDINARY_LINK_3" },
+    { title: "Song 4", url: "YOUR_CLOUDINARY_LINK_4" },
+    { title: "Song 5", url: "YOUR_CLOUDINARY_LINK_5" },
+    { title: "Song 6", url: "YOUR_CLOUDINARY_LINK_6" },
+    { title: "Song 7", url: "YOUR_CLOUDINARY_LINK_7" },
+    { title: "Song 8", url: "YOUR_CLOUDINARY_LINK_8" },
+    { title: "Song 9", url: "YOUR_CLOUDINARY_LINK_9" },
+    { title: "Song 10", url: "YOUR_CLOUDINARY_LINK_10" },
+    { title: "Song 11", url: "YOUR_CLOUDINARY_LINK_11" },
+    { title: "Song 12", url: "YOUR_CLOUDINARY_LINK_12" },
+    { title: "Song 13", url: "YOUR_CLOUDINARY_LINK_13" },
+    { title: "Song 14", url: "YOUR_CLOUDINARY_LINK_14" },
+    { title: "Song 15", url: "YOUR_CLOUDINARY_LINK_15" }
+];
 
 // Daily romantic quotes (60 quotes)
 const DAILY_QUOTES = [
@@ -90,12 +109,18 @@ let currentUserProfile = null;
 let expenses = [];
 let memories = [];
 let notes = [];
+let budget = null;
 let selectedPhotos = [];
 let lastBalance = null;
 let balanceBeforeAction = null;
 let currentAlbumIndex = 0;
 let currentViewingMemoryId = null;
 let longPressTimer = null;
+let longPressNoteTimer = null;
+let currentNoteLongPress = null;
+let musicPlayer = null;
+let currentSongIndex = -1;
+let musicWasPlaying = false;
 
 // Category emojis
 const categoryEmojis = {
@@ -107,17 +132,13 @@ const categoryEmojis = {
     misc: '✨'
 };
 
-// Helper function to get partner pronoun
-function getPartnerPronoun() {
-    return currentUserProfile.role === 'me' ? 'her' : 'him';
-}
-
+// Helper functions
 function getPartnerName() {
-    const partnerId = Object.keys(USERS).find(id => USERS[id].role !== currentUserProfile.role);
+    const partnerRole = currentUserProfile.actualRole === 'krishna' ? 'rashi' : 'krishna';
+    const partnerId = Object.keys(USERS).find(id => USERS[id].actualRole === partnerRole);
     return USERS[partnerId]?.name || 'Partner';
 }
 
-// Calculate days together
 function getDaysTogether() {
     const today = new Date();
     const diffTime = Math.abs(today - RELATIONSHIP_START);
@@ -125,30 +146,54 @@ function getDaysTogether() {
     return diffDays;
 }
 
-// Get daily quote (rotates based on day number)
 function getDailyQuote() {
     const dayNumber = getDaysTogether();
     const quoteIndex = (dayNumber - 1) % DAILY_QUOTES.length;
     return DAILY_QUOTES[quoteIndex];
 }
 
-// Check if it's late night (after 11 PM)
 function isLateNight() {
     const hour = new Date().getHours();
     return hour >= 23 || hour < 6;
 }
 
+function checkAndResetBudget() {
+    if (!budget) return;
+    
+    const now = new Date();
+    const budgetMonth = budget.month;
+    const budgetYear = budget.year;
+    
+    if (now.getMonth() !== budgetMonth || now.getFullYear() !== budgetYear) {
+        budget = null;
+        budgetCollection.doc('current').delete().catch(() => {});
+        document.getElementById('budget-progress-card').classList.add('hidden');
+    }
+}
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing app...');
     initializeAuth();
     setupEventListeners();
+    initializeMusicPlayer();
 });
+
+function initializeMusicPlayer() {
+    musicPlayer = document.getElementById('music-player');
+    const songSelector = document.getElementById('song-selector');
+    
+    // Populate playlist
+    PLAYLIST.forEach((song, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = song.title;
+        songSelector.appendChild(option);
+    });
+}
 
 // Authentication
 function initializeAuth() {
     const savedUserId = localStorage.getItem('usual_us_user_id');
-    console.log('Checking for saved user:', savedUserId);
     
     if (savedUserId) {
         const user = USERS[savedUserId];
@@ -192,19 +237,14 @@ async function handleLogin(userId, pin, isReturning = false) {
     currentUserProfile = {
         uid: userId,
         name: user.name,
-        role: user.role
+        actualRole: user.actualRole
     };
     
     currentUser = userId;
     
-    // Initialize Firebase
     initializeFirebase();
-    
     await loadUserProfile();
-    
-    // Update dynamic labels
     updateDynamicLabels();
-    
     showApp();
     loadData();
     
@@ -233,14 +273,16 @@ function updateGreeting() {
 }
 
 function updateDynamicLabels() {
-    const partnerPronoun = getPartnerPronoun();
+    const partnerName = getPartnerName();
+    const myName = currentUserProfile.name;
     
-    // Update "Paid by" label
-    document.getElementById('partner-label').textContent = partnerPronoun === 'her' ? 'Her' : 'Him';
+    // Update Add Expense labels
+    document.getElementById('my-name-label').textContent = myName;
+    document.getElementById('partner-name-label').textContent = partnerName;
     
-    // Update stats label
-    document.getElementById('partner-contribution-label').textContent = 
-        partnerPronoun === 'her' ? 'Her Contribution' : 'His Contribution';
+    // Update stats labels
+    document.getElementById('my-contribution-label').textContent = `${myName}'s Contribution`;
+    document.getElementById('partner-contribution-label').textContent = `${partnerName}'s Contribution`;
 }
 
 function showLogin() {
@@ -255,7 +297,7 @@ function showApp() {
 
 // Event Listeners
 function setupEventListeners() {
-    // First time login
+    // Auth
     document.getElementById('first-login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const userId = document.getElementById('user-id-input').value.toLowerCase().trim();
@@ -263,7 +305,6 @@ function setupEventListeners() {
         await handleLogin(userId, pin, false);
     });
     
-    // Returning login
     document.getElementById('returning-login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const savedUserId = localStorage.getItem('usual_us_user_id');
@@ -271,7 +312,6 @@ function setupEventListeners() {
         await handleLogin(savedUserId, pin, true);
     });
     
-    // Switch user
     document.getElementById('switch-user-btn').addEventListener('click', () => {
         localStorage.removeItem('usual_us_user_id');
         document.getElementById('first-login-form').reset();
@@ -279,7 +319,7 @@ function setupEventListeners() {
         showFirstLogin();
     });
     
-    // Bottom navigation
+    // Navigation
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', (e) => {
             const tab = e.currentTarget.dataset.tab;
@@ -299,27 +339,39 @@ function setupEventListeners() {
         });
     });
     
-    // Expense form
+    // Forms
     document.getElementById('expense-form').addEventListener('submit', handleExpenseSubmit);
-    
-    // Settle button
     document.getElementById('settle-btn').addEventListener('click', showSettleModal);
     document.getElementById('confirm-settle-btn').addEventListener('click', handleSettle);
     document.getElementById('cancel-settle-btn').addEventListener('click', () => {
         document.getElementById('settle-modal').classList.add('hidden');
     });
     
-    // Edit expense
     document.getElementById('edit-expense-form').addEventListener('submit', handleExpenseEdit);
     document.getElementById('close-edit-modal').addEventListener('click', () => {
         document.getElementById('edit-expense-modal').classList.add('hidden');
     });
+    
+    // Budget
+    document.getElementById('edit-budget-btn').addEventListener('click', () => {
+        document.getElementById('budget-modal').classList.remove('hidden');
+        if (budget) {
+            document.getElementById('budget-amount-input').value = budget.amount;
+        }
+    });
+    
+    document.getElementById('close-budget-modal').addEventListener('click', () => {
+        document.getElementById('budget-modal').classList.add('hidden');
+    });
+    
+    document.getElementById('budget-form').addEventListener('submit', handleBudgetSubmit);
     
     // Memory modal
     document.getElementById('add-memory-btn').addEventListener('click', () => {
         document.getElementById('memory-modal').classList.remove('hidden');
         document.getElementById('photo-selection').classList.remove('hidden');
         document.getElementById('memory-form').classList.add('hidden');
+        document.getElementById('memory-date').valueAsDate = new Date();
         selectedPhotos = [];
     });
     
@@ -328,7 +380,6 @@ function setupEventListeners() {
         resetMemoryForm();
     });
     
-    // Photo selection
     document.getElementById('camera-btn').addEventListener('click', () => {
         document.getElementById('camera-input').click();
     });
@@ -341,14 +392,13 @@ function setupEventListeners() {
     document.getElementById('gallery-input').addEventListener('change', handlePhotoSelect);
     document.getElementById('memory-form').addEventListener('submit', handleMemoryUpload);
     
-    // Album viewer controls
+    // Album viewer
     document.getElementById('close-album-viewer').addEventListener('click', () => {
         document.getElementById('album-viewer-modal').classList.add('hidden');
     });
     
     document.getElementById('prev-photo').addEventListener('click', () => navigateAlbum(-1));
     document.getElementById('next-photo').addEventListener('click', () => navigateAlbum(1));
-    
     document.getElementById('delete-album-btn').addEventListener('click', handleMemoryDelete);
     
     // Single photo viewer
@@ -369,93 +419,136 @@ function setupEventListeners() {
     
     document.getElementById('note-form').addEventListener('submit', handleNoteSubmit);
     
-    // Balance celebration
     document.getElementById('balance-celebration').addEventListener('click', () => {
         document.getElementById('balance-celebration').classList.add('hidden');
     });
     
-    // Easter egg - long press on Us title
+    // Easter egg
     const usTitle = document.getElementById('us-title');
     
-    usTitle.addEventListener('touchstart', (e) => {
-        longPressTimer = setTimeout(() => {
-            showEasterEgg();
-        }, 2000); // 2 second long press
+    usTitle.addEventListener('touchstart', () => {
+        longPressTimer = setTimeout(() => showEasterEgg(), 2000);
     });
     
     usTitle.addEventListener('touchend', () => {
-        if (longPressTimer) {
-            clearTimeout(longPressTimer);
-            longPressTimer = null;
-        }
+        if (longPressTimer) clearTimeout(longPressTimer);
     });
     
     usTitle.addEventListener('touchmove', () => {
-        if (longPressTimer) {
-            clearTimeout(longPressTimer);
-            longPressTimer = null;
-        }
+        if (longPressTimer) clearTimeout(longPressTimer);
     });
     
-    // Desktop fallback for easter egg
     usTitle.addEventListener('mousedown', () => {
-        longPressTimer = setTimeout(() => {
-            showEasterEgg();
-        }, 2000);
+        longPressTimer = setTimeout(() => showEasterEgg(), 2000);
     });
     
     usTitle.addEventListener('mouseup', () => {
-        if (longPressTimer) {
-            clearTimeout(longPressTimer);
-            longPressTimer = null;
-        }
+        if (longPressTimer) clearTimeout(longPressTimer);
     });
     
     usTitle.addEventListener('mouseleave', () => {
-        if (longPressTimer) {
-            clearTimeout(longPressTimer);
-            longPressTimer = null;
-        }
+        if (longPressTimer) clearTimeout(longPressTimer);
     });
+    
+    // Music player
+    document.getElementById('music-player-toggle').addEventListener('click', toggleMusicPlayer);
+    document.getElementById('close-music-player').addEventListener('click', () => {
+        document.getElementById('music-player-panel').classList.add('hidden');
+    });
+    
+    document.getElementById('song-selector').addEventListener('change', handleSongSelect);
+    document.getElementById('play-pause-btn').addEventListener('click', togglePlayPause);
+    document.getElementById('seek-bar').addEventListener('input', handleSeek);
+    
+    musicPlayer.addEventListener('timeupdate', updateSeekBar);
+    musicPlayer.addEventListener('loadedmetadata', () => {
+        document.getElementById('duration').textContent = formatTime(musicPlayer.duration);
+    });
+    musicPlayer.addEventListener('ended', () => {
+        document.getElementById('play-pause-btn').textContent = '▶';
+    });
+}
+
+function toggleMusicPlayer() {
+    const panel = document.getElementById('music-player-panel');
+    panel.classList.toggle('hidden');
+}
+
+function handleSongSelect(e) {
+    const index = parseInt(e.target.value);
+    if (index >= 0 && index < PLAYLIST.length) {
+        currentSongIndex = index;
+        musicPlayer.src = PLAYLIST[index].url;
+        musicPlayer.load();
+        document.getElementById('play-pause-btn').disabled = false;
+        document.getElementById('seek-bar').disabled = false;
+        document.getElementById('play-pause-btn').textContent = '▶';
+    }
+}
+
+function togglePlayPause() {
+    if (musicPlayer.paused) {
+        musicPlayer.play();
+        document.getElementById('play-pause-btn').textContent = '⏸';
+    } else {
+        musicPlayer.pause();
+        document.getElementById('play-pause-btn').textContent = '▶';
+    }
+}
+
+function handleSeek(e) {
+    const seekTime = (e.target.value / 100) * musicPlayer.duration;
+    musicPlayer.currentTime = seekTime;
+}
+
+function updateSeekBar() {
+    const progress = (musicPlayer.currentTime / musicPlayer.duration) * 100;
+    document.getElementById('seek-bar').value = progress || 0;
+    document.getElementById('current-time').textContent = formatTime(musicPlayer.currentTime);
+}
+
+function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 function showEasterEgg() {
     const easterEgg = document.getElementById('easter-egg');
     easterEgg.classList.remove('hidden');
-    
-    setTimeout(() => {
-        easterEgg.classList.add('hidden');
-    }, 4000);
+    setTimeout(() => easterEgg.classList.add('hidden'), 4000);
 }
 
 function switchTab(tabName) {
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-    });
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
     
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-    });
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
     document.getElementById(`${tabName}-tab`).classList.add('active');
+    
+    // Music player auto pause/resume
+    if (tabName === 'us') {
+        if (musicWasPlaying && !musicPlayer.paused) {
+            musicPlayer.play();
+        }
+        initializeUsTab();
+    } else {
+        if (!musicPlayer.paused) {
+            musicWasPlaying = true;
+            musicPlayer.pause();
+        }
+    }
     
     if (tabName === 'stats') {
         renderStats();
-    } else if (tabName === 'us') {
-        initializeUsTab();
     }
 }
 
-// Initialize Us Tab
 function initializeUsTab() {
-    // Update day counter
     const days = getDaysTogether();
     document.getElementById('us-day-counter').textContent = `Day ${days} of us`;
-    
-    // Update daily quote
     document.getElementById('ritual-quote').textContent = getDailyQuote();
     
-    // Apply late night mode if applicable
     const usTab = document.getElementById('us-tab');
     if (isLateNight()) {
         usTab.classList.add('late-night');
@@ -472,15 +565,14 @@ async function loadData() {
     await Promise.all([
         loadExpenses(),
         loadMemories(),
-        loadNotes()
+        loadNotes(),
+        loadBudget()
     ]);
     showLoading(false);
 }
 
 async function loadExpenses() {
-    const snapshot = await expensesCollection
-        .orderBy('createdAt', 'desc')
-        .get();
+    const snapshot = await expensesCollection.orderBy('createdAt', 'desc').get();
     
     expenses = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -490,12 +582,11 @@ async function loadExpenses() {
     renderBalance();
     renderRecentExpenses();
     renderAllExpenses();
+    updateBudgetProgress();
 }
 
 async function loadMemories() {
-    const snapshot = await memoriesCollection
-        .orderBy('createdAt', 'desc')
-        .get();
+    const snapshot = await memoriesCollection.orderBy('memoryDate', 'desc').get();
     
     memories = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -506,10 +597,7 @@ async function loadMemories() {
 }
 
 async function loadNotes() {
-    const snapshot = await notesCollection
-        .orderBy('createdAt', 'desc')
-        .limit(20)
-        .get();
+    const snapshot = await notesCollection.orderBy('createdAt', 'desc').limit(20).get();
     
     notes = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -519,18 +607,92 @@ async function loadNotes() {
     renderNotes();
 }
 
+async function loadBudget() {
+    checkAndResetBudget();
+    
+    const budgetDoc = await budgetCollection.doc('current').get();
+    
+    if (budgetDoc.exists) {
+        budget = budgetDoc.data();
+        document.getElementById('budget-progress-card').classList.remove('hidden');
+        updateBudgetProgress();
+    } else {
+        budget = null;
+        document.getElementById('budget-progress-card').classList.add('hidden');
+    }
+}
+
+async function handleBudgetSubmit(e) {
+    e.preventDefault();
+    
+    const amount = parseFloat(document.getElementById('budget-amount-input').value);
+    const now = new Date();
+    
+    budget = {
+        amount: amount,
+        month: now.getMonth(),
+        year: now.getFullYear(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    showLoading(true);
+    
+    try {
+        await budgetCollection.doc('current').set(budget);
+        document.getElementById('budget-modal').classList.add('hidden');
+        document.getElementById('budget-progress-card').classList.remove('hidden');
+        updateBudgetProgress();
+    } catch (error) {
+        showError('Failed to save budget');
+    }
+    
+    showLoading(false);
+}
+
+function updateBudgetProgress() {
+    if (!budget) return;
+    
+    const now = new Date();
+    const budgetExpenses = expenses.filter(e => {
+        if (!e.createdAt || !e.countTowardsBudget) return false;
+        const expenseDate = e.createdAt.toDate();
+        return expenseDate.getMonth() === now.getMonth() && 
+               expenseDate.getFullYear() === now.getFullYear();
+    });
+    
+    const spent = budgetExpenses.reduce((sum, e) => sum + e.amount, 0);
+    const percentage = (spent / budget.amount) * 100;
+    
+    document.getElementById('budget-spent').textContent = `₹${spent.toFixed(0)}`;
+    document.getElementById('budget-total').textContent = `₹${budget.amount.toFixed(0)}`;
+    document.getElementById('budget-progress-fill').style.width = `${Math.min(percentage, 100)}%`;
+    
+    const warning = document.getElementById('budget-warning');
+    if (percentage >= 80) {
+        warning.classList.remove('hidden');
+        document.getElementById('budget-progress-fill').classList.add('warning');
+    } else {
+        warning.classList.add('hidden');
+        document.getElementById('budget-progress-fill').classList.remove('warning');
+    }
+}
+
 // Expense Handling
 async function handleExpenseSubmit(e) {
     e.preventDefault();
     
-    // Store balance before adding
     balanceBeforeAction = calculateCurrentBalance();
     
     const amount = parseFloat(document.getElementById('amount').value);
-    const paidBy = document.querySelector('input[name="paidBy"]:checked').value;
+    const paidByValue = document.querySelector('input[name="paidBy"]:checked').value;
     const splitType = document.querySelector('input[name="splitType"]:checked').value;
     const category = document.querySelector('input[name="category"]:checked').value;
     const note = document.getElementById('note').value.trim();
+    const countTowardsBudget = document.getElementById('count-towards-budget').checked;
+    
+    // Store absolute paidBy value
+    const paidBy = paidByValue === 'me' ? currentUserProfile.actualRole : 
+                   (currentUserProfile.actualRole === 'krishna' ? 'rashi' : 'krishna');
     
     let myShare, partnerShare;
     
@@ -544,13 +706,14 @@ async function handleExpenseSubmit(e) {
     
     const expense = {
         amount: amount,
-        paidBy: paidBy,
+        paidBy: paidBy,  // Absolute: 'krishna' or 'rashi'
         myShare: myShare,
         partnerShare: partnerShare,
         category: category,
         note: note,
+        countTowardsBudget: countTowardsBudget,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        createdBy: currentUserProfile.role
+        createdBy: currentUserProfile.actualRole
     };
     
     showLoading(true);
@@ -559,10 +722,11 @@ async function handleExpenseSubmit(e) {
         await expensesCollection.add(expense);
         document.getElementById('expense-form').reset();
         document.getElementById('custom-split').classList.add('hidden');
+        document.getElementById('count-towards-budget').checked = true;
         await loadExpenses();
         switchTab('home');
     } catch (error) {
-        showError('Failed to add expense. Please try again.');
+        showError('Failed to add expense');
     }
     
     showLoading(false);
@@ -578,7 +742,6 @@ async function handleExpenseEdit(e) {
     const expense = expenses.find(e => e.id === expenseId);
     if (!expense) return;
     
-    // Recalculate shares proportionally
     const ratio = amount / expense.amount;
     const myShare = expense.myShare * ratio;
     const partnerShare = expense.partnerShare * ratio;
@@ -596,7 +759,7 @@ async function handleExpenseEdit(e) {
         document.getElementById('edit-expense-modal').classList.add('hidden');
         await loadExpenses();
     } catch (error) {
-        showError('Failed to update expense.');
+        showError('Failed to update expense');
     }
     
     showLoading(false);
@@ -615,7 +778,6 @@ function showEditExpense(expenseId) {
 async function deleteExpense(expenseId) {
     if (!confirm('Delete this expense?')) return;
     
-    // Don't trigger celebration on delete
     balanceBeforeAction = null;
     
     showLoading(true);
@@ -623,12 +785,11 @@ async function deleteExpense(expenseId) {
         await expensesCollection.doc(expenseId).delete();
         await loadExpenses();
     } catch (error) {
-        showError('Failed to delete expense.');
+        showError('Failed to delete expense');
     }
     showLoading(false);
 }
 
-// Settle Functionality - With Custom Amount
 function showSettleModal() {
     const balance = calculateCurrentBalance();
     const partnerName = getPartnerName();
@@ -642,7 +803,6 @@ function showSettleModal() {
     const settleSubMsg = document.getElementById('settle-submessage');
     const settleAmountInput = document.getElementById('settle-amount');
     
-    // Pre-fill with full balance
     settleAmountInput.value = Math.abs(balance).toFixed(2);
     
     if (balance > 0) {
@@ -667,31 +827,30 @@ async function handleSettle() {
     const settleAmountInput = document.getElementById('settle-amount');
     let settleAmount = parseFloat(settleAmountInput.value) || Math.abs(currentBalance);
     
-    // Cap at current balance
     if (settleAmount > Math.abs(currentBalance)) {
         settleAmount = Math.abs(currentBalance);
     }
     
-    const partnerPronoun = getPartnerPronoun();
     const partnerName = getPartnerName();
+    const partnerRole = currentUserProfile.actualRole === 'krishna' ? 'rashi' : 'krishna';
     
     const settlementNote = currentBalance > 0 
         ? `Settlement - ${partnerName} paid ₹${settleAmount.toFixed(2)}`
-        : `Settlement - I paid ₹${settleAmount.toFixed(2)}`;
+        : `Settlement - ${currentUserProfile.name} paid ₹${settleAmount.toFixed(2)}`;
     
     const settlement = {
         amount: settleAmount,
-        paidBy: currentBalance > 0 ? 'partner' : 'me',
+        paidBy: currentBalance > 0 ? partnerRole : currentUserProfile.actualRole,
         myShare: settleAmount,
         partnerShare: settleAmount,
         category: 'misc',
         note: settlementNote,
         isSettlement: true,
+        countTowardsBudget: false,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        createdBy: currentUserProfile.role
+        createdBy: currentUserProfile.actualRole
     };
     
-    // Store balance before settlement
     balanceBeforeAction = currentBalance;
     
     showLoading(true);
@@ -702,7 +861,7 @@ async function handleSettle() {
         settleAmountInput.value = '';
         await loadExpenses();
     } catch (error) {
-        showError('Settlement failed. Please try again.');
+        showError('Settlement failed');
     }
     
     showLoading(false);
@@ -712,9 +871,11 @@ function calculateCurrentBalance() {
     let balance = 0;
     
     expenses.forEach(expense => {
-        if (expense.paidBy === 'me') {
+        // If current user paid, partner owes their share (positive balance)
+        if (expense.paidBy === currentUserProfile.actualRole) {
             balance += expense.partnerShare;
         } else {
+            // Partner paid, I owe my share (negative balance)
             balance -= expense.myShare;
         }
     });
@@ -725,17 +886,15 @@ function calculateCurrentBalance() {
 // Rendering Functions
 function renderBalance() {
     const balance = calculateCurrentBalance();
-    
     const balanceAmount = document.getElementById('balance-amount');
     const balanceStatus = document.getElementById('balance-status');
     const whoPayIndicator = document.getElementById('who-pays-indicator');
-    const partnerPronoun = getPartnerPronoun();
     const partnerName = getPartnerName();
     
     if (balance > 0) {
         balanceAmount.textContent = `₹${balance.toFixed(2)}`;
         balanceStatus.textContent = `${partnerName} owes you`;
-        whoPayIndicator.textContent = partnerPronoun === 'her' ? '👩' : '👨';
+        whoPayIndicator.textContent = currentUserProfile.actualRole === 'krishna' ? '👩' : '👨';
     } else if (balance < 0) {
         balanceAmount.textContent = `₹${Math.abs(balance).toFixed(2)}`;
         balanceStatus.textContent = `You owe ${partnerName}`;
@@ -745,7 +904,6 @@ function renderBalance() {
         balanceStatus.textContent = 'All settled';
         whoPayIndicator.textContent = '✨';
         
-        // Show celebration only if balance just became zero from adding/settling
         if (balanceBeforeAction !== null && balanceBeforeAction !== 0) {
             showBalanceCelebration();
         }
@@ -758,7 +916,6 @@ function renderBalance() {
 function renderRecentExpenses() {
     const container = document.getElementById('recent-expenses');
     const recentExpenses = expenses.slice(0, 5);
-    const partnerPronoun = getPartnerPronoun();
     
     if (recentExpenses.length === 0) {
         container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💸</div><p>No expenses yet</p></div>';
@@ -768,7 +925,7 @@ function renderRecentExpenses() {
     container.innerHTML = recentExpenses.map(expense => {
         const date = expense.createdAt ? expense.createdAt.toDate() : new Date();
         const formattedDate = formatDate(date);
-        const paidByText = expense.paidBy === 'me' ? 'you' : partnerPronoun;
+        const paidByText = expense.paidBy === currentUserProfile.actualRole ? 'you' : getPartnerName();
         
         return `
             <div class="expense-item">
@@ -785,18 +942,18 @@ function renderRecentExpenses() {
 
 function renderAllExpenses() {
     const container = document.getElementById('expenses-list');
-    const partnerPronoun = getPartnerPronoun();
     
     if (expenses.length === 0) {
         container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><p>No expenses yet</p></div>';
         return;
     }
     
+    const partnerName = getPartnerName();
+    
     container.innerHTML = expenses.map(expense => {
         const date = expense.createdAt ? expense.createdAt.toDate() : new Date();
         const formattedDate = formatDate(date);
-        const paidByText = expense.paidBy === 'me' ? 'you' : partnerPronoun;
-        const partnerShareLabel = partnerPronoun === 'her' ? 'Her share' : 'His share';
+        const paidByText = expense.paidBy === currentUserProfile.actualRole ? 'you' : partnerName;
         
         return `
             <div class="expense-item-full">
@@ -810,7 +967,7 @@ function renderAllExpenses() {
                 <div class="expense-split-info">
                     Paid by ${paidByText} • 
                     Your share: ₹${expense.myShare.toFixed(2)} • 
-                    ${partnerShareLabel}: ₹${expense.partnerShare.toFixed(2)}
+                    ${partnerName}'s share: ₹${expense.partnerShare.toFixed(2)}
                 </div>
                 <div class="expense-actions">
                     <button class="btn-small edit" onclick="showEditExpense('${expense.id}')">Edit</button>
@@ -831,8 +988,10 @@ function renderStats() {
     });
     
     const totalSpent = thisMonth.reduce((sum, e) => sum + e.amount, 0);
-    const myContribution = thisMonth.reduce((sum, e) => sum + (e.paidBy === 'me' ? e.amount : 0), 0);
-    const partnerContribution = thisMonth.reduce((sum, e) => sum + (e.paidBy === 'partner' ? e.amount : 0), 0);
+    const myContribution = thisMonth.reduce((sum, e) => 
+        sum + (e.paidBy === currentUserProfile.actualRole ? e.amount : 0), 0);
+    const partnerContribution = thisMonth.reduce((sum, e) => 
+        sum + (e.paidBy !== currentUserProfile.actualRole ? e.amount : 0), 0);
     
     document.getElementById('total-spent').textContent = `₹${totalSpent.toFixed(2)}`;
     document.getElementById('my-contribution').textContent = `₹${myContribution.toFixed(2)}`;
@@ -844,8 +1003,7 @@ function renderStats() {
     });
     
     const breakdownContainer = document.getElementById('category-breakdown');
-    const sortedCategories = Object.entries(categoryTotals)
-        .sort((a, b) => b[1] - a[1]);
+    const sortedCategories = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
     
     if (sortedCategories.length === 0) {
         breakdownContainer.innerHTML = '<div class="empty-state"><p>No expenses this month</p></div>';
@@ -909,13 +1067,13 @@ async function handleMemoryUpload(e) {
     if (selectedPhotos.length === 0) return;
     
     const caption = document.getElementById('memory-caption').value.trim();
+    const memoryDate = new Date(document.getElementById('memory-date').value);
     
     showLoading(true);
     
     try {
         const imageUrls = [];
         
-        // Upload all photos to Cloudinary
         for (const photo of selectedPhotos) {
             const formData = new FormData();
             formData.append('file', photo);
@@ -931,11 +1089,11 @@ async function handleMemoryUpload(e) {
             imageUrls.push(data.secure_url);
         }
         
-        // Save to Firestore
         const memory = {
             images: imageUrls,
             caption: caption,
-            uploadedBy: currentUserProfile.role,
+            memoryDate: firebase.firestore.Timestamp.fromDate(memoryDate),
+            uploadedBy: currentUserProfile.actualRole,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
@@ -947,7 +1105,7 @@ async function handleMemoryUpload(e) {
         switchTab('us');
     } catch (error) {
         console.error('Upload error:', error);
-        showError('Failed to upload memory. Please try again.');
+        showError('Failed to upload memory');
     }
     
     showLoading(false);
@@ -961,12 +1119,10 @@ function resetMemoryForm() {
     document.getElementById('memory-form').classList.add('hidden');
 }
 
-// Get random tilt for Polaroid effect (-3 to 3 degrees)
 function getRandomTilt() {
     return (Math.random() * 6 - 3).toFixed(2);
 }
 
-// Render memories as intimate Polaroid timeline
 function renderMemoriesTimeline() {
     const container = document.getElementById('memories-timeline');
     
@@ -981,15 +1137,15 @@ function renderMemoriesTimeline() {
     }
     
     container.innerHTML = memories.map((memory, index) => {
-        const date = memory.createdAt ? memory.createdAt.toDate() : new Date();
+        const date = memory.memoryDate ? memory.memoryDate.toDate() : new Date();
         const formattedDate = formatMemoryDate(date);
         const imageCount = memory.images.length;
         const tilt = getRandomTilt();
         
         if (imageCount === 1) {
-            // Single Polaroid
             return `
                 <div class="polaroid-wrapper">
+                    <div class="polaroid-string"></div>
                     <div class="polaroid" style="transform: rotate(${tilt}deg)" onclick="viewSinglePhoto('${memory.id}')">
                         <div class="polaroid-photo">
                             <img src="${memory.images[0]}" alt="${memory.caption || 'Memory'}" loading="lazy">
@@ -1002,9 +1158,9 @@ function renderMemoriesTimeline() {
                 </div>
             `;
         } else {
-            // Photo Stack
             return `
                 <div class="polaroid-wrapper">
+                    <div class="polaroid-string"></div>
                     <div class="photo-stack" style="transform: rotate(${tilt}deg)" onclick="viewAlbum('${memory.id}')">
                         <div class="stack-card stack-back-2"></div>
                         <div class="stack-card stack-back-1"></div>
@@ -1025,14 +1181,13 @@ function renderMemoriesTimeline() {
     }).join('');
 }
 
-// View single photo in full screen
 function viewSinglePhoto(memoryId) {
     const memory = memories.find(m => m.id === memoryId);
     if (!memory || memory.images.length === 0) return;
     
     currentViewingMemoryId = memoryId;
     
-    const date = memory.createdAt ? memory.createdAt.toDate() : new Date();
+    const date = memory.memoryDate ? memory.memoryDate.toDate() : new Date();
     const formattedDate = formatMemoryDate(date);
     
     const container = document.getElementById('single-photo-container');
@@ -1051,7 +1206,6 @@ function viewSinglePhoto(memoryId) {
     document.getElementById('photo-viewer-modal').classList.remove('hidden');
 }
 
-// View album with swipeable Polaroids
 function viewAlbum(memoryId) {
     const memory = memories.find(m => m.id === memoryId);
     if (!memory || memory.images.length === 0) return;
@@ -1062,7 +1216,7 @@ function viewAlbum(memoryId) {
     renderAlbumPhoto(memory);
     updatePhotoCounter(memory.images.length);
     
-    const date = memory.createdAt ? memory.createdAt.toDate() : new Date();
+    const date = memory.memoryDate ? memory.memoryDate.toDate() : new Date();
     const formattedDate = formatMemoryDate(date);
     
     const infoContainer = document.getElementById('album-viewer-info');
@@ -1119,12 +1273,11 @@ async function handleMemoryDelete() {
         currentViewingMemoryId = null;
         await loadMemories();
     } catch (error) {
-        showError('Failed to delete memory.');
+        showError('Failed to delete memory');
     }
     showLoading(false);
 }
 
-// Format date for memories (handwritten style)
 function formatMemoryDate(date) {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const day = date.getDate();
@@ -1143,7 +1296,7 @@ async function handleNoteSubmit(e) {
     
     const note = {
         text: noteText,
-        createdBy: currentUserProfile.role,
+        createdBy: currentUserProfile.actualRole,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     
@@ -1155,9 +1308,22 @@ async function handleNoteSubmit(e) {
         document.getElementById('note-form').reset();
         await loadNotes();
     } catch (error) {
-        showError('Failed to save note.');
+        showError('Failed to save note');
     }
     
+    showLoading(false);
+}
+
+async function deleteNote(noteId) {
+    if (!confirm('Delete this note?')) return;
+    
+    showLoading(true);
+    try {
+        await notesCollection.doc(noteId).delete();
+        await loadNotes();
+    } catch (error) {
+        showError('Failed to delete note');
+    }
     showLoading(false);
 }
 
@@ -1169,19 +1335,48 @@ function renderNotes() {
         return;
     }
     
-    // Pastel colors for sticky notes
     const pastelColors = ['#fef5e7', '#ffe4e4', '#e8f5e8', '#f0e7f5'];
     
     container.innerHTML = notes.map((note, index) => {
         const color = pastelColors[index % pastelColors.length];
-        const rotation = (Math.random() * 4 - 2).toFixed(2); // -2 to 2 degrees
+        const rotation = (Math.random() * 4 - 2).toFixed(2);
         
         return `
-            <div class="sticky-note" style="background: ${color}; transform: rotate(${rotation}deg)">
+            <div class="sticky-note" 
+                 style="background: ${color}; transform: rotate(${rotation}deg)" 
+                 data-note-id="${note.id}"
+                 ontouchstart="handleNoteTouchStart(event, '${note.id}')"
+                 ontouchend="handleNoteTouchEnd()"
+                 ontouchmove="handleNoteTouchMove()">
                 <p>${note.text}</p>
             </div>
         `;
     }).join('');
+}
+
+function handleNoteTouchStart(event, noteId) {
+    currentNoteLongPress = noteId;
+    longPressNoteTimer = setTimeout(() => {
+        if (currentNoteLongPress === noteId) {
+            deleteNote(noteId);
+        }
+    }, 1000);
+}
+
+function handleNoteTouchEnd() {
+    if (longPressNoteTimer) {
+        clearTimeout(longPressNoteTimer);
+        longPressNoteTimer = null;
+    }
+    currentNoteLongPress = null;
+}
+
+function handleNoteTouchMove() {
+    if (longPressNoteTimer) {
+        clearTimeout(longPressNoteTimer);
+        longPressNoteTimer = null;
+    }
+    currentNoteLongPress = null;
 }
 
 // Utilities
@@ -1234,6 +1429,9 @@ window.showEditExpense = showEditExpense;
 window.viewAlbum = viewAlbum;
 window.viewSinglePhoto = viewSinglePhoto;
 window.removePhoto = removePhoto;
+window.handleNoteTouchStart = handleNoteTouchStart;
+window.handleNoteTouchEnd = handleNoteTouchEnd;
+window.handleNoteTouchMove = handleNoteTouchMove;
 
 // Service Worker Registration
 if ('serviceWorker' in navigator) {
@@ -1243,8 +1441,3 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('SW registration failed'));
     });
 }
-
-
-
-
-

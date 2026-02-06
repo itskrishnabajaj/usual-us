@@ -25,6 +25,23 @@
         <main id="main-content">
             <!-- Home Tab -->
             <section id="home-tab" class="tab-content active">
+                <!-- Budget Progress -->
+                <div id="budget-progress-card" class="budget-progress-card hidden">
+                    <div class="budget-header">
+                        <span class="budget-label">Monthly Budget</span>
+                        <button id="edit-budget-btn" class="btn-edit-budget">⚙️</button>
+                    </div>
+                    <div class="budget-amount-display">
+                        <span id="budget-spent">₹0</span>
+                        <span class="budget-separator">/</span>
+                        <span id="budget-total">₹0</span>
+                    </div>
+                    <div class="budget-progress-bar">
+                        <div id="budget-progress-fill" class="budget-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div id="budget-warning" class="budget-warning hidden">⚠️ Over 80% of budget used!</div>
+                </div>
+
                 <div class="balance-card">
                     <div class="balance-label">Current Balance</div>
                     <div id="balance-amount" class="balance-amount">₹0</div>
@@ -60,11 +77,11 @@
                         <div class="radio-group">
                             <label class="radio-option">
                                 <input type="radio" name="paidBy" value="me" checked>
-                                <span>Me</span>
+                                <span id="my-name-label">Me</span>
                             </label>
                             <label class="radio-option">
                                 <input type="radio" name="paidBy" value="partner">
-                                <span id="partner-label">Partner</span>
+                                <span id="partner-name-label">Partner</span>
                             </label>
                         </div>
                     </div>
@@ -123,6 +140,13 @@
                         <input type="text" id="note" placeholder="Late night momos 🌙">
                     </div>
 
+                    <div class="form-group budget-checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="count-towards-budget" checked>
+                            <span>Count towards monthly budget</span>
+                        </label>
+                    </div>
+
                     <button type="submit" class="btn-primary">Add Expense</button>
                 </form>
             </section>
@@ -143,7 +167,7 @@
                         <div id="total-spent" class="stat-value">₹0</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">My Contribution</div>
+                        <div class="stat-label" id="my-contribution-label">My Contribution</div>
                         <div id="my-contribution" class="stat-value">₹0</div>
                     </div>
                     <div class="stat-item">
@@ -158,11 +182,42 @@
 
             <!-- Us Tab - Completely Redesigned -->
             <section id="us-tab" class="tab-content us-tab">
+                <!-- Music Player Button -->
+                <button id="music-player-toggle" class="music-player-toggle">🎵</button>
+                
+                <!-- Music Player Panel -->
+                <div id="music-player-panel" class="music-player-panel hidden">
+                    <div class="music-player-header">
+                        <span>Our Playlist</span>
+                        <button id="close-music-player" class="btn-close-music">×</button>
+                    </div>
+                    <select id="song-selector" class="song-selector">
+                        <option value="">Select a song...</option>
+                    </select>
+                    <div class="music-controls">
+                        <button id="play-pause-btn" class="btn-play-pause" disabled>▶</button>
+                        <div class="seek-bar-container">
+                            <input type="range" id="seek-bar" class="seek-bar" min="0" max="100" value="0" disabled>
+                            <div class="time-display">
+                                <span id="current-time">0:00</span>
+                                <span id="duration">0:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Intimate Header -->
                 <div class="us-header-section" id="us-header-section">
                     <h1 class="us-title" id="us-title">Us</h1>
                     <p class="us-subtitle">Our little corner of the internet</p>
                     <p class="us-day-counter" id="us-day-counter">Day 1 of us</p>
+                </div>
+
+                <!-- Beautiful Divider -->
+                <div class="us-divider">
+                    <svg viewBox="0 0 200 20" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0 10 Q50 5, 100 10 T200 10" stroke="currentColor" fill="none" stroke-width="1" opacity="0.3"/>
+                    </svg>
                 </div>
 
                 <!-- Opening Ritual Card -->
@@ -230,7 +285,6 @@
             <h1 class="app-title">usual us</h1>
             <p class="app-subtitle">Our private space 🤍</p>
             
-            <!-- First Time Login -->
             <form id="first-login-form" class="login-section">
                 <div class="form-group">
                     <label>User ID</label>
@@ -243,7 +297,6 @@
                 <button type="submit" class="btn-login">Continue</button>
             </form>
             
-            <!-- Returning User Login -->
             <form id="returning-login-form" class="login-section hidden">
                 <p class="welcome-back">Welcome back, <span id="returning-name"></span> 🤍</p>
                 <div class="form-group">
@@ -256,6 +309,27 @@
         </div>
     </div>
 
+    <!-- Budget Modal -->
+    <div id="budget-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Monthly Budget</h3>
+                <button id="close-budget-modal" class="btn-close">×</button>
+            </div>
+            <form id="budget-form">
+                <div class="form-group">
+                    <label>Monthly Budget Amount</label>
+                    <div class="amount-input-wrapper">
+                        <span class="currency">₹</span>
+                        <input type="number" id="budget-amount-input" placeholder="10000" step="100" required>
+                    </div>
+                    <p class="form-hint">Total amount both of you plan to spend this month</p>
+                </div>
+                <button type="submit" class="btn-primary">Save Budget</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Memory Upload Modal -->
     <div id="memory-modal" class="modal hidden">
         <div class="modal-content">
@@ -264,7 +338,6 @@
                 <button id="close-memory-modal" class="btn-close">×</button>
             </div>
             
-            <!-- Photo Selection Options -->
             <div id="photo-selection" class="photo-selection">
                 <button type="button" id="camera-btn" class="btn-photo-option">
                     <span class="photo-option-icon">📷</span>
@@ -283,15 +356,21 @@
                 <div id="photos-preview" class="photos-preview"></div>
                 
                 <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="memory-date" required>
+                </div>
+                
+                <div class="form-group">
                     <label>Caption (optional)</label>
                     <input type="text" id="memory-caption" placeholder="That evening" maxlength="50">
                 </div>
+                
                 <button type="submit" id="upload-memory-btn" class="btn-primary">Save Memory</button>
             </form>
         </div>
     </div>
 
-    <!-- Album Viewer - Swipeable Polaroids -->
+    <!-- Album Viewer -->
     <div id="album-viewer-modal" class="album-modal hidden">
         <button id="close-album-viewer" class="btn-close-album">×</button>
         <div class="album-swiper">
@@ -356,7 +435,7 @@
         </div>
     </div>
 
-    <!-- Settle Modal - With Custom Amount -->
+    <!-- Settle Modal -->
     <div id="settle-modal" class="modal hidden">
         <div class="settle-content">
             <div class="settle-emoji">💰</div>
@@ -379,7 +458,7 @@
         </div>
     </div>
 
-    <!-- Balance Zero Celebration -->
+    <!-- Balance Celebration -->
     <div id="balance-celebration" class="modal hidden">
         <div class="celebration-content">
             <div class="celebration-emoji">🩷</div>
@@ -391,6 +470,9 @@
     <div id="loading" class="loading hidden">
         <div class="loading-spinner"></div>
     </div>
+
+    <!-- Audio Element -->
+    <audio id="music-player" preload="metadata"></audio>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
