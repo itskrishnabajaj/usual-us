@@ -3,7 +3,7 @@ const CLOUDINARY_CLOUD_NAME = 'ddyj2njes';
 const CLOUDINARY_UPLOAD_PRESET = 'usual_us';
 const CLOUDINARY_FOLDER = 'usual-us/memories';
 
-// User credentials  
+// User credentials
 const USERS = {
     'imsusu': { pin: '2801', name: 'Susu', role: 'krishna' },
     'imgugu': { pin: '0804', name: 'Gugu', role: 'rashi' }
@@ -12,7 +12,7 @@ const USERS = {
 // Relationship start date
 const RELATIONSHIP_START = new Date('2025-01-28');
 
-// Music playlist
+// Music playlist - Your 15 songs
 const PLAYLIST = [
     { title: "Perfect", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391575/Perfect_-_Ed_Sheeran_nqryux.m4a" },
     { title: "It's You", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391588/It_s_You_-_Ali_Gatie_2_aku2kh.m4a" },
@@ -31,7 +31,7 @@ const PLAYLIST = [
     { title: "Bloom", url: "https://res.cloudinary.com/ddyj2njes/video/upload/v1770391584/Bloom_Bonus_Track_-_The_Paper_Kites_fyfkli.m4a" }
 ];
 
-// Daily romantic quotes
+// Daily romantic quotes (60 quotes that cycle based on day number)
 const DAILY_QUOTES = [
     "Still my favorite person.", "No matter the balance, I choose you.", "Today felt warmer because of you.",
     "You make the ordinary feel magical.", "Thank you for being you.", "Every day with you is my favorite day.",
@@ -73,12 +73,15 @@ const getPartnerName = () => {
     return USERS[partnerId]?.name || 'Partner';
 };
 const getDaysTogether = () => Math.ceil(Math.abs(new Date() - RELATIONSHIP_START) / (1000 * 60 * 60 * 24));
-const getDailyQuote = () => DAILY_QUOTES[(getDaysTogether() - 1) % DAILY_QUOTES.length];
+const getDailyQuote = () => {
+    const dayNumber = getDaysTogether();
+    return DAILY_QUOTES[(dayNumber - 1) % DAILY_QUOTES.length];
+};
 const isLateNight = () => { const h = new Date().getHours(); return h >= 23 || h < 6; };
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 App initializing...');
+    console.log('🚀 usual us - Initializing...');
     initializeAuth();
     setupEventListeners();
     initializeMusicPlayer();
@@ -88,13 +91,18 @@ function initializeMusicPlayer() {
     musicPlayer = document.getElementById('music-player');
     const songSelector = document.getElementById('song-selector');
     
+    // Clear existing options first
+    songSelector.innerHTML = '<option value="">Select a song...</option>';
+    
+    // Populate playlist
     PLAYLIST.forEach((song, idx) => {
         const option = document.createElement('option');
         option.value = idx;
         option.textContent = song.title;
         songSelector.appendChild(option);
     });
-    console.log('🎵 Loaded', PLAYLIST.length, 'songs');
+    
+    console.log('🎵 Music player initialized with', PLAYLIST.length, 'songs');
 }
 
 // Auth
@@ -572,7 +580,7 @@ function calculateCurrentBalance() {
                 console.log(`  ✓ Partner paid ${expense.amount}, I owe ${iOwe}`);
             }
         } 
-        // OLD FORMAT: Fallback for existing expenses (will be migrated)
+        // OLD FORMAT: Fallback for existing expenses
         else if (expense.myShare !== undefined) {
             console.warn('⚠️ Old format expense:', expense.id);
             if (expense.paidBy === myRole) {
@@ -959,413 +967,4 @@ function renderStats() {
     `).join('');
 }
 
-// Memory Handling
-function handlePhotoSelect(e) {
-    const files = Array.from(e.target.files);
-    if (files.length === 0) return;
-    
-    selectedPhotos = files;
-    
-    document.getElementById('photo-selection').classList.add('hidden');
-    document.getElementById('memory-form').classList.remove('hidden');
-    
-    const previewContainer = document.getElementById('photos-preview');
-    previewContainer.innerHTML = '';
-    
-    files.forEach((file, idx) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const preview = document.createElement('div');
-            preview.className = 'photo-preview-item';
-            preview.innerHTML = `
-                <img src="${e.target.result}" alt="Preview">
-                <button type="button" class="btn-remove-photo" onclick="removePhoto(${idx})">×</button>
-            `;
-            previewContainer.appendChild(preview);
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-function removePhoto(idx) {
-    selectedPhotos.splice(idx, 1);
-    if (selectedPhotos.length === 0) {
-        resetMemoryForm();
-    } else {
-        document.getElementById('photos-preview').children[idx].remove();
-    }
-}
-
-async function handleMemoryUpload(e) {
-    e.preventDefault();
-    
-    if (selectedPhotos.length === 0) return;
-    
-    const caption = document.getElementById('memory-caption').value.trim();
-    const memoryDateInput = document.getElementById('memory-date').value;
-    
-    const [year, month, day] = memoryDateInput.split('-').map(Number);
-    const memoryDate = new Date(year, month - 1, day, 12, 0, 0);
-    
-    showLoading(true);
-    
-    try {
-        const imageUrls = [];
-        
-        for (const photo of selectedPhotos) {
-            const formData = new FormData();
-            formData.append('file', photo);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            formData.append('folder', CLOUDINARY_FOLDER);
-            
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (!response.ok) throw new Error('Upload failed');
-            
-            const data = await response.json();
-            imageUrls.push(data.secure_url);
-        }
-        
-        const memory = {
-            images: imageUrls,
-            caption: caption,
-            memoryDate: firebase.firestore.Timestamp.fromDate(memoryDate),
-            uploadedBy: currentUserProfile.role,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        
-        await memoriesCollection.add(memory);
-        
-        console.log('✅ Memory uploaded');
-        resetMemoryForm();
-        document.getElementById('memory-modal').classList.add('hidden');
-        await loadMemories();
-        switchTab('us');
-    } catch (error) {
-        console.error('❌ Upload error:', error);
-        showError('Failed to upload memory');
-    }
-    
-    showLoading(false);
-}
-
-function resetMemoryForm() {
-    selectedPhotos = [];
-    document.getElementById('memory-form').reset();
-    document.getElementById('photos-preview').innerHTML = '';
-    document.getElementById('photo-selection').classList.remove('hidden');
-    document.getElementById('memory-form').classList.add('hidden');
-}
-
-function getRandomTilt() {
-    return (Math.random() * 6 - 3).toFixed(2);
-}
-
-function renderMemoriesTimeline() {
-    const container = document.getElementById('memories-timeline');
-    
-    if (memories.length === 0) {
-        container.innerHTML = `
-            <div class="empty-memories">
-                <p>No memories yet.</p>
-                <p class="empty-memories-sub">Start capturing your moments together</p>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = memories.map(memory => {
-        const date = memory.memoryDate ? memory.memoryDate.toDate() : new Date();
-        const formattedDate = formatMemoryDate(date);
-        const imageCount = memory.images.length;
-        const tilt = getRandomTilt();
-        
-        if (imageCount === 1) {
-            return `
-                <div class="polaroid-wrapper">
-                    <div class="polaroid-string"></div>
-                    <div class="polaroid" style="transform: rotate(${tilt}deg)" onclick="viewSinglePhoto('${memory.id}')">
-                        <div class="polaroid-photo">
-                            <img src="${memory.images[0]}" alt="${memory.caption || 'Memory'}" loading="lazy">
-                        </div>
-                        <div class="polaroid-caption-area">
-                            <p class="polaroid-date">${formattedDate}</p>
-                            ${memory.caption ? `<p class="polaroid-caption">${memory.caption}</p>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-        } else {
-            return `
-                <div class="polaroid-wrapper">
-                    <div class="polaroid-string"></div>
-                    <div class="photo-stack" style="transform: rotate(${tilt}deg)" onclick="viewAlbum('${memory.id}')">
-                        <div class="stack-card stack-back-2"></div>
-                        <div class="stack-card stack-back-1"></div>
-                        <div class="polaroid">
-                            <div class="polaroid-photo">
-                                <img src="${memory.images[0]}" alt="${memory.caption || 'Album'}" loading="lazy">
-                            </div>
-                            <div class="polaroid-caption-area">
-                                <p class="polaroid-date">${formattedDate}</p>
-                                ${memory.caption ? `<p class="polaroid-caption">${memory.caption}</p>` : ''}
-                            </div>
-                            <div class="album-count-badge">${imageCount} photos</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-    }).join('');
-}
-
-function viewSinglePhoto(memoryId) {
-    const memory = memories.find(m => m.id === memoryId);
-    if (!memory || memory.images.length === 0) return;
-    
-    currentViewingMemoryId = memoryId;
-    
-    const date = memory.memoryDate ? memory.memoryDate.toDate() : new Date();
-    const formattedDate = formatMemoryDate(date);
-    
-    const container = document.getElementById('single-photo-container');
-    container.innerHTML = `
-        <div class="viewer-polaroid">
-            <div class="viewer-polaroid-photo">
-                <img src="${memory.images[0]}" alt="Memory">
-            </div>
-            <div class="viewer-polaroid-caption">
-                <p class="viewer-date">${formattedDate}</p>
-                ${memory.caption ? `<p class="viewer-caption-text">${memory.caption}</p>` : ''}
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('photo-viewer-modal').classList.remove('hidden');
-}
-
-function viewAlbum(memoryId) {
-    const memory = memories.find(m => m.id === memoryId);
-    if (!memory || memory.images.length === 0) return;
-    
-    currentViewingMemoryId = memoryId;
-    currentAlbumIndex = 0;
-    
-    renderAlbumPhoto(memory);
-    updatePhotoCounter(memory.images.length);
-    
-    const date = memory.memoryDate ? memory.memoryDate.toDate() : new Date();
-    const formattedDate = formatMemoryDate(date);
-    
-    const infoContainer = document.getElementById('album-viewer-info');
-    infoContainer.innerHTML = `
-        <p class="viewer-date">${formattedDate}</p>
-        ${memory.caption ? `<p class="viewer-caption-text">${memory.caption}</p>` : ''}
-    `;
-    
-    document.getElementById('album-viewer-modal').classList.remove('hidden');
-}
-
-function renderAlbumPhoto(memory) {
-    const container = document.getElementById('album-photos-container');
-    const currentImage = memory.images[currentAlbumIndex];
-    
-    container.innerHTML = `
-        <div class="viewer-polaroid swipeable-polaroid">
-            <div class="viewer-polaroid-photo">
-                <img src="${currentImage}" alt="Photo">
-            </div>
-        </div>
-    `;
-}
-
-function navigateAlbum(direction) {
-    const memory = memories.find(m => m.id === currentViewingMemoryId);
-    if (!memory) return;
-    
-    currentAlbumIndex += direction;
-    
-    if (currentAlbumIndex < 0) currentAlbumIndex = memory.images.length - 1;
-    else if (currentAlbumIndex >= memory.images.length) currentAlbumIndex = 0;
-    
-    renderAlbumPhoto(memory);
-    updatePhotoCounter(memory.images.length);
-}
-
-function updatePhotoCounter(total) {
-    document.getElementById('photo-counter').textContent = `${currentAlbumIndex + 1} / ${total}`;
-}
-
-async function handleMemoryDelete() {
-    if (!currentViewingMemoryId) return;
-    if (!confirm('Delete this memory forever?')) return;
-    
-    showLoading(true);
-    try {
-        await memoriesCollection.doc(currentViewingMemoryId).delete();
-        console.log('✅ Memory deleted');
-        document.getElementById('album-viewer-modal').classList.add('hidden');
-        document.getElementById('photo-viewer-modal').classList.add('hidden');
-        currentViewingMemoryId = null;
-        await loadMemories();
-    } catch (error) {
-        console.error('❌ Delete failed:', error);
-        showError('Failed to delete memory');
-    }
-    showLoading(false);
-}
-
-function formatMemoryDate(date) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
-}
-
-// Notes Handling
-async function handleNoteSubmit(e) {
-    e.preventDefault();
-    
-    const noteText = document.getElementById('note-text').value.trim();
-    if (!noteText) return;
-    
-    const note = {
-        text: noteText,
-        createdBy: currentUserProfile.role,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    
-    showLoading(true);
-    
-    try {
-        await notesCollection.add(note);
-        console.log('✅ Note added');
-        document.getElementById('note-modal').classList.add('hidden');
-        document.getElementById('note-form').reset();
-        await loadNotes();
-    } catch (error) {
-        console.error('❌ Note failed:', error);
-        showError('Failed to save note');
-    }
-    
-    showLoading(false);
-}
-
-async function deleteNote(noteId) {
-    if (!confirm('Delete this note?')) return;
-    
-    showLoading(true);
-    try {
-        await notesCollection.doc(noteId).delete();
-        console.log('✅ Note deleted');
-        await loadNotes();
-    } catch (error) {
-        console.error('❌ Delete failed:', error);
-        showError('Failed to delete note');
-    }
-    showLoading(false);
-}
-
-function renderNotes() {
-    const container = document.getElementById('notes-container');
-    
-    if (notes.length === 0) {
-        container.innerHTML = '<p class="notes-empty">No notes yet. Share what you noticed today.</p>';
-        return;
-    }
-    
-    const pastelColors = ['#fef5e7', '#ffe4e4', '#e8f5e8', '#f0e7f5'];
-    
-    container.innerHTML = notes.map((note, idx) => {
-        const color = pastelColors[idx % pastelColors.length];
-        const rotation = (Math.random() * 4 - 2).toFixed(2);
-        
-        return `
-            <div class="sticky-note" 
-                 style="background: ${color}; transform: rotate(${rotation}deg)" 
-                 data-note-id="${note.id}"
-                 ontouchstart="handleNoteTouchStart(event, '${note.id}')"
-                 ontouchend="handleNoteTouchEnd()"
-                 ontouchmove="handleNoteTouchMove()">
-                <p>${note.text}</p>
-            </div>
-        `;
-    }).join('');
-}
-
-function handleNoteTouchStart(event, noteId) {
-    currentNoteLongPress = noteId;
-    longPressNoteTimer = setTimeout(() => {
-        if (currentNoteLongPress === noteId) deleteNote(noteId);
-    }, 1000);
-}
-
-function handleNoteTouchEnd() {
-    if (longPressNoteTimer) {
-        clearTimeout(longPressNoteTimer);
-        longPressNoteTimer = null;
-    }
-    currentNoteLongPress = null;
-}
-
-function handleNoteTouchMove() {
-    if (longPressNoteTimer) {
-        clearTimeout(longPressNoteTimer);
-        longPressNoteTimer = null;
-    }
-    currentNoteLongPress = null;
-}
-
-// Utilities
-function formatDate(date) {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    const inputDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    
-    if (inputDate.getTime() === today.getTime()) return 'Today';
-    else if (inputDate.getTime() === yesterday.getTime()) return 'Yesterday';
-    else {
-        const options = { month: 'short', day: 'numeric' };
-        if (date.getFullYear() !== now.getFullYear()) options.year = 'numeric';
-        return date.toLocaleDateString('en-US', options);
-    }
-}
-
-function showBalanceCelebration() {
-    const celebration = document.getElementById('balance-celebration');
-    celebration.classList.remove('hidden');
-    setTimeout(() => celebration.classList.add('hidden'), 3000);
-}
-
-function showLoading(show) {
-    document.getElementById('loading').classList.toggle('hidden', !show);
-}
-
-function showError(message) {
-    alert(message);
-}
-
-// Global functions
-window.deleteExpense = deleteExpense;
-window.showEditExpense = showEditExpense;
-window.viewAlbum = viewAlbum;
-window.viewSinglePhoto = viewSinglePhoto;
-window.removePhoto = removePhoto;
-window.handleNoteTouchStart = handleNoteTouchStart;
-window.handleNoteTouchEnd = handleNoteTouchEnd;
-window.handleNoteTouchMove = handleNoteTouchMove;
-
-// Service Worker
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-            .then(() => console.log('✅ Service Worker registered'))
-            .catch(err => console.log('⚠️ SW registration failed:', err));
-    });
-}
-
-console.log('✨ usual us - Loaded successfully');
+// Memory Handling (CONTINUES IN NEXT FILE DUE TO LENGTH...)
