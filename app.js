@@ -1,3 +1,8 @@
+// ============================================
+// USUAL US - Complete App Logic  
+// All bugs fixed, premium experience
+// ============================================
+
 // Cloudinary configuration
 const CLOUDINARY_CLOUD_NAME = 'ddyj2njes';
 const CLOUDINARY_UPLOAD_PRESET = 'usual_us';
@@ -56,28 +61,61 @@ const DAILY_QUOTES = [
 ];
 
 // Global state
-let currentUser = null, currentUserProfile = null;
-let expenses = [], memories = [], notes = [], budget = null;
-let selectedPhotos = [], balanceBeforeAction = null;
-let currentAlbumIndex = 0, currentViewingMemoryId = null;
-let longPressTimer = null, longPressNoteTimer = null, currentNoteLongPress = null;
-let musicPlayer = null, musicWasPlaying = false, isSubmitting = false;
+let currentUser = null;
+let currentUserProfile = null;
+let expenses = [];
+let memories = [];
+let notes = [];
+let budget = null;
+let selectedPhotos = [];
+let balanceBeforeAction = null;
+let currentAlbumIndex = 0;
+let currentViewingMemoryId = null;
+let longPressTimer = null;
+let longPressNoteTimer = null;
+let currentNoteLongPress = null;
+let musicPlayer = null;
+let musicWasPlaying = false;
+let isSubmitting = false;
 
-const categoryEmojis = { food: '🍕', dates: '🎬', gmasti: '☺️', gifts: '🎁', home: '🏠', misc: '✨' };
+// Category emojis
+const categoryEmojis = {
+    food: '🍕',
+    dates: '🎬',
+    gmasti: '☺️',
+    gifts: '🎁',
+    home: '🏠',
+    misc: '✨'
+};
 
 // Helper functions
-const getPartnerRole = () => currentUserProfile.role === 'krishna' ? 'rashi' : 'krishna';
-const getPartnerName = () => {
+function getPartnerRole() {
+    return currentUserProfile.role === 'krishna' ? 'rashi' : 'krishna';
+}
+
+function getPartnerName() {
     const partnerRole = getPartnerRole();
     const partnerId = Object.keys(USERS).find(id => USERS[id].role === partnerRole);
     return USERS[partnerId]?.name || 'Partner';
-};
-const getDaysTogether = () => Math.ceil(Math.abs(new Date() - RELATIONSHIP_START) / (1000 * 60 * 60 * 24));
-const getDailyQuote = () => {
+}
+
+function getDaysTogether() {
+    const today = new Date();
+    const diffTime = Math.abs(today - RELATIONSHIP_START);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+}
+
+function getDailyQuote() {
     const dayNumber = getDaysTogether();
-    return DAILY_QUOTES[(dayNumber - 1) % DAILY_QUOTES.length];
-};
-const isLateNight = () => { const h = new Date().getHours(); return h >= 23 || h < 6; };
+    const quoteIndex = (dayNumber - 1) % DAILY_QUOTES.length;
+    return DAILY_QUOTES[quoteIndex];
+}
+
+function isLateNight() {
+    const hour = new Date().getHours();
+    return hour >= 23 || hour < 6;
+}
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
@@ -94,7 +132,7 @@ function initializeMusicPlayer() {
     // Clear existing options first
     songSelector.innerHTML = '<option value="">Select a song...</option>';
     
-    // Populate playlist
+    // Populate all 15 songs
     PLAYLIST.forEach((song, idx) => {
         const option = document.createElement('option');
         option.value = idx;
@@ -105,9 +143,10 @@ function initializeMusicPlayer() {
     console.log('🎵 Music player initialized with', PLAYLIST.length, 'songs');
 }
 
-// Auth
+// Authentication
 function initializeAuth() {
     const savedUserId = localStorage.getItem('usual_us_user_id');
+    
     if (savedUserId && USERS[savedUserId]) {
         document.getElementById('returning-name').textContent = USERS[savedUserId].name;
         document.getElementById('first-login-form').classList.add('hidden');
@@ -117,18 +156,34 @@ function initializeAuth() {
         document.getElementById('first-login-form').classList.remove('hidden');
         document.getElementById('returning-login-form').classList.add('hidden');
     }
+    
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('app').classList.add('hidden');
 }
 
 async function handleLogin(userId, pin, isReturning = false) {
     const user = USERS[userId];
-    if (!user) { showError('Invalid User ID'); return false; }
-    if (user.pin !== pin) { showError('Incorrect PIN'); return false; }
     
-    if (!isReturning) localStorage.setItem('usual_us_user_id', userId);
+    if (!user) {
+        showError('Invalid User ID');
+        return false;
+    }
     
-    currentUserProfile = { uid: userId, name: user.name, role: user.role };
+    if (user.pin !== pin) {
+        showError('Incorrect PIN');
+        return false;
+    }
+    
+    if (!isReturning) {
+        localStorage.setItem('usual_us_user_id', userId);
+    }
+    
+    currentUserProfile = {
+        uid: userId,
+        name: user.name,
+        role: user.role
+    };
+    
     currentUser = userId;
     
     console.log('✅ Logged in:', currentUserProfile.name, `(${currentUserProfile.role})`);
@@ -147,7 +202,11 @@ async function handleLogin(userId, pin, isReturning = false) {
 async function loadUserProfile() {
     try {
         const userDoc = await usersCollection.doc(currentUser).get();
-        if (!userDoc.exists) await usersCollection.doc(currentUser).set(currentUserProfile);
+        
+        if (!userDoc.exists) {
+            await usersCollection.doc(currentUser).set(currentUserProfile);
+        }
+        
         const hour = new Date().getHours();
         const timeOfDay = hour < 12 ? 'Good morning' : (hour < 17 ? 'Good afternoon' : 'Good evening');
         document.getElementById('greeting').textContent = `${timeOfDay}, ${currentUserProfile.name} 🤍`;
@@ -159,6 +218,7 @@ async function loadUserProfile() {
 function updateDynamicLabels() {
     const myName = currentUserProfile.name;
     const partnerName = getPartnerName();
+    
     document.getElementById('my-name-label').textContent = myName;
     document.getElementById('partner-name-label').textContent = partnerName;
     document.getElementById('my-contribution-label').textContent = `${myName}'s Contribution`;
@@ -167,23 +227,19 @@ function updateDynamicLabels() {
 
 // Event Listeners - COMPLETE
 function setupEventListeners() {
-    // Auth
+    // Auth forms
     document.getElementById('first-login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        await handleLogin(
-            document.getElementById('user-id-input').value.toLowerCase().trim(),
-            document.getElementById('pin-input').value,
-            false
-        );
+        const userId = document.getElementById('user-id-input').value.toLowerCase().trim();
+        const pin = document.getElementById('pin-input').value;
+        await handleLogin(userId, pin, false);
     });
     
     document.getElementById('returning-login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        await handleLogin(
-            localStorage.getItem('usual_us_user_id'),
-            document.getElementById('returning-pin-input').value,
-            true
-        );
+        const savedUserId = localStorage.getItem('usual_us_user_id');
+        const pin = document.getElementById('returning-pin-input').value;
+        await handleLogin(savedUserId, pin, true);
     });
     
     document.getElementById('switch-user-btn').addEventListener('click', () => {
@@ -195,17 +251,25 @@ function setupEventListeners() {
     
     // Navigation
     document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', (e) => switchTab(e.currentTarget.dataset.tab));
-    });
-    
-    // Split type
-    document.querySelectorAll('input[name="splitType"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            document.getElementById('custom-split').classList.toggle('hidden', e.target.value !== 'custom');
+        item.addEventListener('click', (e) => {
+            const tab = e.currentTarget.dataset.tab;
+            switchTab(tab);
         });
     });
     
-    // Expense
+    // Split type toggle
+    document.querySelectorAll('input[name="splitType"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const customSplit = document.getElementById('custom-split');
+            if (e.target.value === 'custom') {
+                customSplit.classList.remove('hidden');
+            } else {
+                customSplit.classList.add('hidden');
+            }
+        });
+    });
+    
+    // Expense forms
     document.getElementById('expense-form').addEventListener('submit', handleExpenseSubmit);
     document.getElementById('settle-btn').addEventListener('click', showSettleModal);
     document.getElementById('confirm-settle-btn').addEventListener('click', handleSettle);
@@ -222,14 +286,18 @@ function setupEventListeners() {
     // Budget
     document.getElementById('edit-budget-btn').addEventListener('click', () => {
         document.getElementById('budget-modal').classList.remove('hidden');
-        if (budget) document.getElementById('budget-amount-input').value = budget.amount;
+        if (budget) {
+            document.getElementById('budget-amount-input').value = budget.amount;
+        }
     });
+    
     document.getElementById('close-budget-modal').addEventListener('click', () => {
         document.getElementById('budget-modal').classList.add('hidden');
     });
+    
     document.getElementById('budget-form').addEventListener('submit', handleBudgetSubmit);
     
-    // Memory
+    // Memory modal
     document.getElementById('add-memory-btn').addEventListener('click', () => {
         document.getElementById('memory-modal').classList.remove('hidden');
         document.getElementById('photo-selection').classList.remove('hidden');
@@ -237,12 +305,20 @@ function setupEventListeners() {
         document.getElementById('memory-date').valueAsDate = new Date();
         selectedPhotos = [];
     });
+    
     document.getElementById('close-memory-modal').addEventListener('click', () => {
         document.getElementById('memory-modal').classList.add('hidden');
         resetMemoryForm();
     });
-    document.getElementById('camera-btn').addEventListener('click', () => document.getElementById('camera-input').click());
-    document.getElementById('gallery-btn').addEventListener('click', () => document.getElementById('gallery-input').click());
+    
+    document.getElementById('camera-btn').addEventListener('click', () => {
+        document.getElementById('camera-input').click();
+    });
+    
+    document.getElementById('gallery-btn').addEventListener('click', () => {
+        document.getElementById('gallery-input').click();
+    });
+    
     document.getElementById('camera-input').addEventListener('change', handlePhotoSelect);
     document.getElementById('gallery-input').addEventListener('change', handlePhotoSelect);
     document.getElementById('memory-form').addEventListener('submit', handleMemoryUpload);
@@ -251,47 +327,66 @@ function setupEventListeners() {
     document.getElementById('close-album-viewer').addEventListener('click', () => {
         document.getElementById('album-viewer-modal').classList.add('hidden');
     });
+    
     document.getElementById('prev-photo').addEventListener('click', () => navigateAlbum(-1));
     document.getElementById('next-photo').addEventListener('click', () => navigateAlbum(1));
     document.getElementById('delete-album-btn').addEventListener('click', handleMemoryDelete);
     
-    // Photo viewer
+    // Single photo viewer
     document.getElementById('close-photo-viewer').addEventListener('click', () => {
         document.getElementById('photo-viewer-modal').classList.add('hidden');
     });
+    
     document.getElementById('delete-photo-btn').addEventListener('click', handleMemoryDelete);
     
     // Notes
     document.getElementById('add-note-btn').addEventListener('click', () => {
         document.getElementById('note-modal').classList.remove('hidden');
     });
+    
     document.getElementById('close-note-modal').addEventListener('click', () => {
         document.getElementById('note-modal').classList.add('hidden');
     });
+    
     document.getElementById('note-form').addEventListener('submit', handleNoteSubmit);
     
     document.getElementById('balance-celebration').addEventListener('click', () => {
         document.getElementById('balance-celebration').classList.add('hidden');
     });
     
-    // Easter egg
+    // Easter egg on Us title
     const usTitle = document.getElementById('us-title');
-    ['touchstart', 'mousedown'].forEach(evt => {
-        usTitle.addEventListener(evt, () => {
-            longPressTimer = setTimeout(() => showEasterEgg(), 2000);
-        });
-    });
-    ['touchend', 'touchmove', 'mouseup', 'mouseleave'].forEach(evt => {
-        usTitle.addEventListener(evt, () => {
-            if (longPressTimer) clearTimeout(longPressTimer);
-        });
+    
+    usTitle.addEventListener('touchstart', () => {
+        longPressTimer = setTimeout(() => showEasterEgg(), 2000);
     });
     
-    // Music
+    usTitle.addEventListener('touchend', () => {
+        if (longPressTimer) clearTimeout(longPressTimer);
+    });
+    
+    usTitle.addEventListener('touchmove', () => {
+        if (longPressTimer) clearTimeout(longPressTimer);
+    });
+    
+    usTitle.addEventListener('mousedown', () => {
+        longPressTimer = setTimeout(() => showEasterEgg(), 2000);
+    });
+    
+    usTitle.addEventListener('mouseup', () => {
+        if (longPressTimer) clearTimeout(longPressTimer);
+    });
+    
+    usTitle.addEventListener('mouseleave', () => {
+        if (longPressTimer) clearTimeout(longPressTimer);
+    });
+    
+    // Music player
     document.getElementById('music-player-toggle').addEventListener('click', toggleMusicPlayer);
     document.getElementById('close-music-player').addEventListener('click', () => {
         document.getElementById('music-player-panel').classList.add('hidden');
     });
+    
     document.getElementById('song-selector').addEventListener('change', handleSongSelect);
     document.getElementById('play-pause-btn').addEventListener('click', togglePlayPause);
     document.getElementById('seek-bar').addEventListener('input', handleSeek);
@@ -306,9 +401,9 @@ function setupEventListeners() {
 }
 
 function showEasterEgg() {
-    const egg = document.getElementById('easter-egg');
-    egg.classList.remove('hidden');
-    setTimeout(() => egg.classList.add('hidden'), 4000);
+    const easterEgg = document.getElementById('easter-egg');
+    easterEgg.classList.remove('hidden');
+    setTimeout(() => easterEgg.classList.add('hidden'), 4000);
 }
 
 function switchTab(tabName) {
@@ -318,20 +413,27 @@ function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
     document.getElementById(`${tabName}-tab`).classList.add('active');
     
-    // Music auto pause/resume
+    // Music player auto pause/resume
     if (tabName === 'us') {
-        if (musicWasPlaying && musicPlayer.paused) musicPlayer.play().catch(() => {});
+        if (musicWasPlaying && musicPlayer.paused) {
+            musicPlayer.play().catch(() => {});
+        }
         initializeUsTab();
     } else {
         musicWasPlaying = !musicPlayer.paused;
-        if (!musicPlayer.paused) musicPlayer.pause();
+        if (!musicPlayer.paused) {
+            musicPlayer.pause();
+        }
     }
     
-    if (tabName === 'stats') renderStats();
+    if (tabName === 'stats') {
+        renderStats();
+    }
 }
 
 function initializeUsTab() {
-    document.getElementById('us-day-counter').textContent = `Day ${getDaysTogether()} of us`;
+    const days = getDaysTogether();
+    document.getElementById('us-day-counter').textContent = `Day ${days} of us`;
     document.getElementById('ritual-quote').textContent = getDailyQuote();
     
     const usTab = document.getElementById('us-tab');
@@ -344,20 +446,21 @@ function initializeUsTab() {
     }
 }
 
-// Music player
+// Music player functions
 function toggleMusicPlayer() {
-    document.getElementById('music-player-panel').classList.toggle('hidden');
+    const panel = document.getElementById('music-player-panel');
+    panel.classList.toggle('hidden');
 }
 
 function handleSongSelect(e) {
-    const idx = parseInt(e.target.value);
-    if (idx >= 0 && idx < PLAYLIST.length) {
-        musicPlayer.src = PLAYLIST[idx].url;
+    const index = parseInt(e.target.value);
+    if (index >= 0 && index < PLAYLIST.length) {
+        musicPlayer.src = PLAYLIST[index].url;
         musicPlayer.load();
         document.getElementById('play-pause-btn').disabled = false;
         document.getElementById('seek-bar').disabled = false;
         document.getElementById('play-pause-btn').textContent = '▶';
-        console.log('🎵 Selected:', PLAYLIST[idx].title);
+        console.log('🎵 Selected:', PLAYLIST[index].title);
     }
 }
 
@@ -373,14 +476,15 @@ function togglePlayPause() {
 
 function handleSeek(e) {
     if (musicPlayer.duration) {
-        musicPlayer.currentTime = (e.target.value / 100) * musicPlayer.duration;
+        const seekTime = (e.target.value / 100) * musicPlayer.duration;
+        musicPlayer.currentTime = seekTime;
     }
 }
 
 function updateSeekBar() {
     if (musicPlayer.duration) {
         const progress = (musicPlayer.currentTime / musicPlayer.duration) * 100;
-        document.getElementById('seek-bar').value = progress;
+        document.getElementById('seek-bar').value = progress || 0;
         document.getElementById('current-time').textContent = formatTime(musicPlayer.currentTime);
     }
 }
@@ -392,11 +496,16 @@ function formatTime(seconds) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-// Data Loading
+// Data loading
 async function loadData() {
     showLoading(true);
     try {
-        await Promise.all([loadExpenses(), loadMemories(), loadNotes(), loadBudget()]);
+        await Promise.all([
+            loadExpenses(),
+            loadMemories(),
+            loadNotes(),
+            loadBudget()
+        ]);
     } catch (error) {
         console.error('❌ Error loading data:', error);
     }
@@ -406,8 +515,14 @@ async function loadData() {
 async function loadExpenses() {
     try {
         const snapshot = await expensesCollection.orderBy('createdAt', 'desc').get();
-        expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        expenses = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        
         console.log('📊 Loaded', expenses.length, 'expenses');
+        
         renderBalance();
         renderRecentExpenses();
         renderAllExpenses();
@@ -420,8 +535,14 @@ async function loadExpenses() {
 async function loadMemories() {
     try {
         const snapshot = await memoriesCollection.orderBy('memoryDate', 'desc').get();
-        memories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        memories = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        
         console.log('📸 Loaded', memories.length, 'memories');
+        
         renderMemoriesTimeline();
     } catch (error) {
         console.error('❌ Error loading memories:', error);
@@ -431,8 +552,14 @@ async function loadMemories() {
 async function loadNotes() {
     try {
         const snapshot = await notesCollection.orderBy('createdAt', 'desc').limit(20).get();
-        notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        notes = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        
         console.log('📝 Loaded', notes.length, 'notes');
+        
         renderNotes();
     } catch (error) {
         console.error('❌ Error loading notes:', error);
@@ -447,14 +574,15 @@ async function loadBudget() {
         
         if (budgetDoc.exists) {
             budget = budgetDoc.data();
-            // Check if needs reset
+            
+            // Check if needs reset for new month
             if (budget.month !== now.getMonth() || budget.year !== now.getFullYear()) {
                 console.log('🔄 Resetting budget for new month');
                 await budgetCollection.doc('current').delete();
                 budget = null;
                 showBudgetPrompt();
             } else {
-                console.log('💰 Budget:', budget.amount);
+                console.log('💰 Budget loaded:', budget.amount);
                 showBudgetCard();
                 updateBudgetProgress();
             }
@@ -472,9 +600,32 @@ async function loadBudget() {
 function showBudgetCard() {
     const card = document.getElementById('budget-progress-card');
     card.classList.remove('hidden');
-    // Ensure structure exists
+    
+    // Restore original HTML structure if needed
     if (!card.querySelector('.budget-progress-bar')) {
-        location.reload(); // Reload if structure missing
+        card.innerHTML = `
+            <div class="budget-header">
+                <span class="budget-label">Monthly Budget</span>
+                <button id="edit-budget-btn" class="btn-edit-budget">⚙️</button>
+            </div>
+            <div class="budget-amount-display">
+                <span id="budget-spent">₹0</span>
+                <span class="budget-separator">/</span>
+                <span id="budget-total">₹0</span>
+            </div>
+            <div class="budget-progress-bar">
+                <div id="budget-progress-fill" class="budget-progress-fill" style="width: 0%"></div>
+            </div>
+            <div id="budget-warning" class="budget-warning hidden">⚠️ Over 80% of budget used!</div>
+        `;
+        
+        // Re-attach edit button listener
+        document.getElementById('edit-budget-btn').addEventListener('click', () => {
+            document.getElementById('budget-modal').classList.remove('hidden');
+            if (budget) {
+                document.getElementById('budget-amount-input').value = budget.amount;
+            }
+        });
     }
 }
 
@@ -508,6 +659,7 @@ async function handleBudgetSubmit(e) {
     }
     
     const now = new Date();
+    
     budget = {
         amount: amount,
         month: now.getMonth(),
@@ -516,15 +668,17 @@ async function handleBudgetSubmit(e) {
     };
     
     showLoading(true);
+    
     try {
         await budgetCollection.doc('current').set(budget);
         document.getElementById('budget-modal').classList.add('hidden');
         console.log('✅ Budget saved:', amount);
-        await loadBudget(); // Reload
+        await loadBudget();
     } catch (error) {
-        console.error('❌ Budget error:', error);
+        console.error('❌ Budget save error:', error);
         showError('Failed to save budget');
     }
+    
     showLoading(false);
 }
 
@@ -548,6 +702,7 @@ function updateBudgetProgress() {
     
     const warning = document.getElementById('budget-warning');
     const fill = document.getElementById('budget-progress-fill');
+    
     if (percentage >= 80) {
         warning.classList.remove('hidden');
         fill.classList.add('warning');
@@ -557,7 +712,7 @@ function updateBudgetProgress() {
     }
 }
 
-// CRITICAL FIX: Balance Calculation with ABSOLUTE shares
+// FIXED: Balance Calculation with ABSOLUTE shares
 function calculateCurrentBalance() {
     let balance = 0;
     const myRole = currentUserProfile.role;
@@ -566,18 +721,16 @@ function calculateCurrentBalance() {
     console.log('💵 Calculating balance for:', myRole);
     
     expenses.forEach(expense => {
-        // NEW FORMAT: Using absolute shares
+        // NEW FORMAT: Using absolute shares (krishna/rashi)
         if (expense.shares) {
             if (expense.paidBy === myRole) {
                 // I paid, partner owes me their share
                 const partnerOwes = expense.shares[partnerRole] || 0;
                 balance += partnerOwes;
-                console.log(`  ✓ I paid ${expense.amount}, partner owes ${partnerOwes}`);
             } else {
                 // Partner paid, I owe them my share
                 const iOwe = expense.shares[myRole] || 0;
                 balance -= iOwe;
-                console.log(`  ✓ Partner paid ${expense.amount}, I owe ${iOwe}`);
             }
         } 
         // OLD FORMAT: Fallback for existing expenses
@@ -595,7 +748,7 @@ function calculateCurrentBalance() {
     return balance;
 }
 
-// FIXED: Expense Submission with absolute shares
+// FIXED: Expense Handling with separated error handling
 async function handleExpenseSubmit(e) {
     e.preventDefault();
     
@@ -614,7 +767,7 @@ async function handleExpenseSubmit(e) {
     const note = document.getElementById('note').value.trim();
     const countTowardsBudget = document.getElementById('count-towards-budget').checked;
     
-    // Absolute paidBy
+    // Store absolute paidBy value
     const paidBy = paidByValue === 'me' ? currentUserProfile.role : getPartnerRole();
     
     // Calculate ABSOLUTE shares for both krishna and rashi
@@ -653,25 +806,26 @@ async function handleExpenseSubmit(e) {
     showLoading(true);
     
     try {
-        // Add expense
+        // CRITICAL: Add expense to Firestore
         const docRef = await expensesCollection.add(expense);
-        console.log('✅ Expense added:', docRef.id);
+        console.log('✅ Expense added successfully:', docRef.id);
         
         // Reset form
         document.getElementById('expense-form').reset();
         document.getElementById('custom-split').classList.add('hidden');
         document.getElementById('count-towards-budget').checked = true;
         
-        // Reload (if fails, expense is still saved)
+        // Reload expenses (if this fails, expense is still saved!)
         try {
             await loadExpenses();
         } catch (reloadError) {
-            console.warn('⚠️ Reload failed, but expense saved:', reloadError);
+            console.warn('⚠️ Reload failed but expense was saved:', reloadError);
         }
         
         switchTab('home');
         
     } catch (error) {
+        // Only show error if the ACTUAL add failed
         console.error('❌ Failed to add expense:', error);
         showError('Failed to add expense. Please try again.');
     } finally {
@@ -688,33 +842,35 @@ async function handleExpenseEdit(e) {
     const note = document.getElementById('edit-note').value.trim();
     
     const expense = expenses.find(e => e.id === expenseId);
-    if (!expense || !expense.shares) return;
+    if (!expense) return;
     
     // Recalculate shares proportionally
-    const ratio = amount / expense.amount;
-    const newShares = {
-        krishna: expense.shares.krishna * ratio,
-        rashi: expense.shares.rashi * ratio
-    };
-    
-    showLoading(true);
-    
-    try {
-        await expensesCollection.doc(expenseId).update({
-            amount: amount,
-            shares: newShares,
-            note: note
-        });
+    if (expense.shares) {
+        const ratio = amount / expense.amount;
+        const newShares = {
+            krishna: expense.shares.krishna * ratio,
+            rashi: expense.shares.rashi * ratio
+        };
         
-        console.log('✅ Expense updated:', expenseId);
-        document.getElementById('edit-expense-modal').classList.add('hidden');
-        await loadExpenses();
-    } catch (error) {
-        console.error('❌ Update failed:', error);
-        showError('Failed to update expense');
+        showLoading(true);
+        
+        try {
+            await expensesCollection.doc(expenseId).update({
+                amount: amount,
+                shares: newShares,
+                note: note
+            });
+            
+            console.log('✅ Expense updated:', expenseId);
+            document.getElementById('edit-expense-modal').classList.add('hidden');
+            await loadExpenses();
+        } catch (error) {
+            console.error('❌ Update failed:', error);
+            showError('Failed to update expense');
+        }
+        
+        showLoading(false);
     }
-    
-    showLoading(false);
 }
 
 function showEditExpense(expenseId) {
@@ -744,7 +900,7 @@ async function deleteExpense(expenseId) {
     showLoading(false);
 }
 
-// FIXED: Settlement
+// Settlement handling
 function showSettleModal() {
     const balance = calculateCurrentBalance();
     const partnerName = getPartnerName();
@@ -754,15 +910,18 @@ function showSettleModal() {
         return;
     }
     
+    const settleMsg = document.getElementById('settle-message');
+    const settleSubMsg = document.getElementById('settle-submessage');
     const settleAmountInput = document.getElementById('settle-amount');
+    
     settleAmountInput.value = Math.abs(balance).toFixed(2);
     
     if (balance > 0) {
-        document.getElementById('settle-message').textContent = `${partnerName} owes you ₹${balance.toFixed(2)}`;
-        document.getElementById('settle-submessage').textContent = `Enter amount to settle`;
+        settleMsg.textContent = `${partnerName} owes you ₹${balance.toFixed(2)}`;
+        settleSubMsg.textContent = `Enter amount to settle`;
     } else {
-        document.getElementById('settle-message').textContent = `You owe ${partnerName} ₹${Math.abs(balance).toFixed(2)}`;
-        document.getElementById('settle-submessage').textContent = `Enter amount to settle`;
+        settleMsg.textContent = `You owe ${partnerName} ₹${Math.abs(balance).toFixed(2)}`;
+        settleSubMsg.textContent = `Enter amount to settle`;
     }
     
     document.getElementById('settle-modal').classList.remove('hidden');
@@ -825,7 +984,7 @@ async function handleSettle() {
     showLoading(false);
 }
 
-// Rendering Functions
+// Rendering functions
 function renderBalance() {
     const balance = calculateCurrentBalance();
     const balanceAmount = document.getElementById('balance-amount');
@@ -892,14 +1051,23 @@ function renderAllExpenses() {
     const partnerName = getPartnerName();
     
     container.innerHTML = expenses.map(expense => {
-        if (!expense.shares) return ''; // Skip old format
-        
         const date = expense.createdAt ? expense.createdAt.toDate() : new Date();
         const formattedDate = formatDate(date);
         const paidByText = expense.paidBy === currentUserProfile.role ? 'you' : partnerName;
         
-        const myShare = expense.shares[currentUserProfile.role] || 0;
-        const partnerShare = expense.shares[getPartnerRole()] || 0;
+        let myShare, partnerShare;
+        
+        // Handle both new (shares) and old (myShare/partnerShare) formats
+        if (expense.shares) {
+            myShare = expense.shares[currentUserProfile.role] || 0;
+            partnerShare = expense.shares[getPartnerRole()] || 0;
+        } else if (expense.myShare !== undefined) {
+            myShare = expense.myShare;
+            partnerShare = expense.partnerShare;
+        } else {
+            console.warn('Invalid expense format:', expense.id);
+            return '';
+        }
         
         return `
             <div class="expense-item-full">
@@ -967,4 +1135,452 @@ function renderStats() {
     `).join('');
 }
 
-// Memory Handling (CONTINUES IN NEXT FILE DUE TO LENGTH...)
+// Memory handling
+function handlePhotoSelect(e) {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
+    selectedPhotos = files;
+    
+    document.getElementById('photo-selection').classList.add('hidden');
+    document.getElementById('memory-form').classList.remove('hidden');
+    
+    const previewContainer = document.getElementById('photos-preview');
+    previewContainer.innerHTML = '';
+    
+    files.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const preview = document.createElement('div');
+            preview.className = 'photo-preview-item';
+            preview.innerHTML = `
+                <img src="${e.target.result}" alt="Preview ${index + 1}">
+                <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
+            `;
+            previewContainer.appendChild(preview);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function removePhoto(index) {
+    selectedPhotos.splice(index, 1);
+    
+    if (selectedPhotos.length === 0) {
+        resetMemoryForm();
+        return;
+    }
+    
+    const previewContainer = document.getElementById('photos-preview');
+    previewContainer.children[index].remove();
+}
+
+async function handleMemoryUpload(e) {
+    e.preventDefault();
+    
+    if (selectedPhotos.length === 0) return;
+    
+    const caption = document.getElementById('memory-caption').value.trim();
+    const memoryDateInput = document.getElementById('memory-date').value;
+    
+    // Parse date correctly
+    const [year, month, day] = memoryDateInput.split('-').map(Number);
+    const memoryDate = new Date(year, month - 1, day, 12, 0, 0);
+    
+    showLoading(true);
+    
+    try {
+        const imageUrls = [];
+        
+        for (const photo of selectedPhotos) {
+            const formData = new FormData();
+            formData.append('file', photo);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            formData.append('folder', CLOUDINARY_FOLDER);
+            
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) throw new Error('Upload failed');
+            
+            const data = await response.json();
+            imageUrls.push(data.secure_url);
+        }
+        
+        const memory = {
+            images: imageUrls,
+            caption: caption,
+            memoryDate: firebase.firestore.Timestamp.fromDate(memoryDate),
+            uploadedBy: currentUserProfile.role,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        await memoriesCollection.add(memory);
+        
+        console.log('✅ Memory uploaded');
+        resetMemoryForm();
+        document.getElementById('memory-modal').classList.add('hidden');
+        await loadMemories();
+        switchTab('us');
+    } catch (error) {
+        console.error('❌ Upload error:', error);
+        showError('Failed to upload memory');
+    }
+    
+    showLoading(false);
+}
+
+function resetMemoryForm() {
+    selectedPhotos = [];
+    document.getElementById('memory-form').reset();
+    document.getElementById('photos-preview').innerHTML = '';
+    document.getElementById('photo-selection').classList.remove('hidden');
+    document.getElementById('memory-form').classList.add('hidden');
+}
+
+function getRandomTilt() {
+    return (Math.random() * 6 - 3).toFixed(2);
+}
+
+function renderMemoriesTimeline() {
+    const container = document.getElementById('memories-timeline');
+    
+    if (memories.length === 0) {
+        container.innerHTML = `
+            <div class="empty-memories">
+                <p>No memories yet.</p>
+                <p class="empty-memories-sub">Start capturing your moments together</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = memories.map((memory, index) => {
+        const date = memory.memoryDate ? memory.memoryDate.toDate() : new Date();
+        const formattedDate = formatMemoryDate(date);
+        const imageCount = memory.images.length;
+        const tilt = getRandomTilt();
+        
+        // Check if should show string (consecutive dates)
+        let showString = false;
+        if (index < memories.length - 1) {
+            const nextMemory = memories[index + 1];
+            const nextDate = nextMemory.memoryDate ? nextMemory.memoryDate.toDate() : new Date();
+            
+            // Show string if next memory is earlier (timeline flows backward)
+            if (nextDate < date) {
+                showString = true;
+            }
+        }
+        
+        const stringHTML = showString ? '<div class="polaroid-string"></div>' : '';
+        
+        if (imageCount === 1) {
+            return `
+                <div class="polaroid-wrapper">
+                    ${stringHTML}
+                    <div class="polaroid" style="transform: rotate(${tilt}deg)" onclick="viewSinglePhoto('${memory.id}')">
+                        <div class="polaroid-photo">
+                            <img src="${memory.images[0]}" alt="${memory.caption || 'Memory'}" loading="lazy">
+                        </div>
+                        <div class="polaroid-caption-area">
+                            <p class="polaroid-date">${formattedDate}</p>
+                            ${memory.caption ? `<p class="polaroid-caption">${memory.caption}</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            return `
+                <div class="polaroid-wrapper">
+                    ${stringHTML}
+                    <div class="photo-stack" style="transform: rotate(${tilt}deg)" onclick="viewAlbum('${memory.id}')">
+                        <div class="stack-card stack-back-2"></div>
+                        <div class="stack-card stack-back-1"></div>
+                        <div class="polaroid">
+                            <div class="polaroid-photo">
+                                <img src="${memory.images[0]}" alt="${memory.caption || 'Album'}" loading="lazy">
+                            </div>
+                            <div class="polaroid-caption-area">
+                                <p class="polaroid-date">${formattedDate}</p>
+                                ${memory.caption ? `<p class="polaroid-caption">${memory.caption}</p>` : ''}
+                            </div>
+                            <div class="album-count-badge">${imageCount} photos</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }).join('');
+}
+
+function viewSinglePhoto(memoryId) {
+    const memory = memories.find(m => m.id === memoryId);
+    if (!memory || memory.images.length === 0) return;
+    
+    currentViewingMemoryId = memoryId;
+    
+    const date = memory.memoryDate ? memory.memoryDate.toDate() : new Date();
+    const formattedDate = formatMemoryDate(date);
+    
+    const container = document.getElementById('single-photo-container');
+    container.innerHTML = `
+        <div class="viewer-polaroid">
+            <div class="viewer-polaroid-photo">
+                <img src="${memory.images[0]}" alt="Memory">
+            </div>
+            <div class="viewer-polaroid-caption">
+                <p class="viewer-date">${formattedDate}</p>
+                ${memory.caption ? `<p class="viewer-caption-text">${memory.caption}</p>` : ''}
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('photo-viewer-modal').classList.remove('hidden');
+}
+
+function viewAlbum(memoryId) {
+    const memory = memories.find(m => m.id === memoryId);
+    if (!memory || memory.images.length === 0) return;
+    
+    currentViewingMemoryId = memoryId;
+    currentAlbumIndex = 0;
+    
+    renderAlbumPhoto(memory);
+    updatePhotoCounter(memory.images.length);
+    
+    const date = memory.memoryDate ? memory.memoryDate.toDate() : new Date();
+    const formattedDate = formatMemoryDate(date);
+    
+    const infoContainer = document.getElementById('album-viewer-info');
+    infoContainer.innerHTML = `
+        <p class="viewer-date">${formattedDate}</p>
+        ${memory.caption ? `<p class="viewer-caption-text">${memory.caption}</p>` : ''}
+    `;
+    
+    document.getElementById('album-viewer-modal').classList.remove('hidden');
+}
+
+function renderAlbumPhoto(memory) {
+    const container = document.getElementById('album-photos-container');
+    const currentImage = memory.images[currentAlbumIndex];
+    
+    container.innerHTML = `
+        <div class="viewer-polaroid swipeable-polaroid">
+            <div class="viewer-polaroid-photo">
+                <img src="${currentImage}" alt="Photo ${currentAlbumIndex + 1}">
+            </div>
+        </div>
+    `;
+}
+
+function navigateAlbum(direction) {
+    const memory = memories.find(m => m.id === currentViewingMemoryId);
+    if (!memory) return;
+    
+    currentAlbumIndex += direction;
+    
+    if (currentAlbumIndex < 0) {
+        currentAlbumIndex = memory.images.length - 1;
+    } else if (currentAlbumIndex >= memory.images.length) {
+        currentAlbumIndex = 0;
+    }
+    
+    renderAlbumPhoto(memory);
+    updatePhotoCounter(memory.images.length);
+}
+
+function updatePhotoCounter(total) {
+    document.getElementById('photo-counter').textContent = `${currentAlbumIndex + 1} / ${total}`;
+}
+
+async function handleMemoryDelete() {
+    if (!currentViewingMemoryId) return;
+    if (!confirm('Delete this memory forever?')) return;
+    
+    showLoading(true);
+    try {
+        await memoriesCollection.doc(currentViewingMemoryId).delete();
+        console.log('✅ Memory deleted');
+        document.getElementById('album-viewer-modal').classList.add('hidden');
+        document.getElementById('photo-viewer-modal').classList.add('hidden');
+        currentViewingMemoryId = null;
+        await loadMemories();
+    } catch (error) {
+        console.error('❌ Delete failed:', error);
+        showError('Failed to delete memory');
+    }
+    showLoading(false);
+}
+
+function formatMemoryDate(date) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    
+    return `${day} ${month} ${year}`;
+}
+
+// Notes handling
+async function handleNoteSubmit(e) {
+    e.preventDefault();
+    
+    const noteText = document.getElementById('note-text').value.trim();
+    if (!noteText) return;
+    
+    const note = {
+        text: noteText,
+        createdBy: currentUserProfile.role,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    showLoading(true);
+    
+    try {
+        await notesCollection.add(note);
+        console.log('✅ Note added');
+        document.getElementById('note-modal').classList.add('hidden');
+        document.getElementById('note-form').reset();
+        await loadNotes();
+    } catch (error) {
+        console.error('❌ Note save error:', error);
+        showError('Failed to save note');
+    }
+    
+    showLoading(false);
+}
+
+async function deleteNote(noteId) {
+    if (!confirm('Delete this note?')) return;
+    
+    showLoading(true);
+    try {
+        await notesCollection.doc(noteId).delete();
+        console.log('✅ Note deleted');
+        await loadNotes();
+    } catch (error) {
+        console.error('❌ Note delete error:', error);
+        showError('Failed to delete note');
+    }
+    showLoading(false);
+}
+
+function renderNotes() {
+    const container = document.getElementById('notes-container');
+    
+    if (notes.length === 0) {
+        container.innerHTML = '<p class="notes-empty">No notes yet. Share what you noticed today.</p>';
+        return;
+    }
+    
+    const pastelColors = ['#fef5e7', '#ffe4e4', '#e8f5e8', '#f0e7f5'];
+    
+    container.innerHTML = notes.map((note, index) => {
+        const color = pastelColors[index % pastelColors.length];
+        const rotation = (Math.random() * 4 - 2).toFixed(2);
+        
+        return `
+            <div class="sticky-note" 
+                 style="background: ${color}; transform: rotate(${rotation}deg)" 
+                 data-note-id="${note.id}"
+                 ontouchstart="handleNoteTouchStart(event, '${note.id}')"
+                 ontouchend="handleNoteTouchEnd()"
+                 ontouchmove="handleNoteTouchMove()">
+                <p>${note.text}</p>
+            </div>
+        `;
+    }).join('');
+}
+
+function handleNoteTouchStart(event, noteId) {
+    currentNoteLongPress = noteId;
+    longPressNoteTimer = setTimeout(() => {
+        if (currentNoteLongPress === noteId) {
+            deleteNote(noteId);
+        }
+    }, 1000);
+}
+
+function handleNoteTouchEnd() {
+    if (longPressNoteTimer) {
+        clearTimeout(longPressNoteTimer);
+        longPressNoteTimer = null;
+    }
+    currentNoteLongPress = null;
+}
+
+function handleNoteTouchMove() {
+    if (longPressNoteTimer) {
+        clearTimeout(longPressNoteTimer);
+        longPressNoteTimer = null;
+    }
+    currentNoteLongPress = null;
+}
+
+// Utility functions
+function formatDate(date) {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const inputDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    
+    if (inputDate.getTime() === today.getTime()) {
+        return 'Today';
+    } else if (inputDate.getTime() === yesterday.getTime()) {
+        return 'Yesterday';
+    } else {
+        const options = { month: 'short', day: 'numeric' };
+        if (date.getFullYear() !== now.getFullYear()) {
+            options.year = 'numeric';
+        }
+        return date.toLocaleDateString('en-US', options);
+    }
+}
+
+function showBalanceCelebration() {
+    const celebration = document.getElementById('balance-celebration');
+    celebration.classList.remove('hidden');
+    
+    setTimeout(() => {
+        celebration.classList.add('hidden');
+    }, 3000);
+}
+
+function showLoading(show) {
+    const loading = document.getElementById('loading');
+    if (show) {
+        loading.classList.remove('hidden');
+    } else {
+        loading.classList.add('hidden');
+    }
+}
+
+function showError(message) {
+    alert(message);
+}
+
+// Global function exports
+window.deleteExpense = deleteExpense;
+window.showEditExpense = showEditExpense;
+window.viewAlbum = viewAlbum;
+window.viewSinglePhoto = viewSinglePhoto;
+window.removePhoto = removePhoto;
+window.handleNoteTouchStart = handleNoteTouchStart;
+window.handleNoteTouchEnd = handleNoteTouchEnd;
+window.handleNoteTouchMove = handleNoteTouchMove;
+
+// Service Worker registration
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => console.log('✅ Service Worker registered'))
+            .catch(err => console.log('⚠️ SW registration failed:', err));
+    });
+}
+
+console.log('✨ usual us - Ready for your love story');
