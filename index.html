@@ -2,77 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0a0a0a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Usual Us - Our Love Story 🤍</title>
+    <title>usual us</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" sizes="192x192" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23ffc6d9' width='192' height='192'/><text x='96' y='120' font-size='140' text-anchor='middle' fill='%23000'>❤️</text></svg>">
     <link rel="stylesheet" href="styles.css">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Homemade+Apple&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="hidden">
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen hidden">
         <div class="login-container">
-            <div class="app-title">Usual Us</div>
-            <div class="app-subtitle">Our little corner of the internet 🤍</div>
-
-            <!-- First Login Form -->
-            <form id="first-login-form" class="login-section">
+            <h1 class="login-title">usual us</h1>
+            <p class="login-subtitle">Our little corner of the internet</p>
+            
+            <!-- First Time Login -->
+            <form id="first-login-form" class="login-form">
                 <div class="form-group">
-                    <label for="user-id-input">User ID</label>
-                    <input type="text" id="user-id-input" placeholder="Enter your ID (imsusu / imgugu)" required>
+                    <label>User ID</label>
+                    <input type="text" id="user-id-input" placeholder="imsusu or imgugu" required>
                 </div>
                 <div class="form-group">
-                    <label for="pin-input">PIN</label>
-                    <input type="password" id="pin-input" placeholder="Enter your PIN" required>
+                    <label>PIN</label>
+                    <input type="password" id="pin-input" placeholder="4-digit PIN" maxlength="4" required>
                 </div>
                 <button type="submit" class="btn-login">Login</button>
             </form>
-
-            <!-- Returning Login Form -->
-            <form id="returning-login-form" class="login-section hidden">
-                <div class="welcome-back">Welcome back, <span id="returning-name"></span>!</div>
+            
+            <!-- Returning User Login -->
+            <form id="returning-login-form" class="login-form hidden">
+                <p class="returning-welcome">Welcome back, <span id="returning-name"></span> 💝</p>
                 <div class="form-group">
-                    <label for="returning-pin-input">PIN</label>
-                    <input type="password" id="returning-pin-input" placeholder="Enter your PIN" required>
+                    <label>PIN</label>
+                    <input type="password" id="returning-pin-input" placeholder="4-digit PIN" maxlength="4" required>
                 </div>
                 <button type="submit" class="btn-login">Login</button>
-                <button type="button" id="switch-user-btn" class="btn-switch">Switch User</button>
+                <button type="button" id="switch-user-btn" class="btn-switch-user">Switch User</button>
             </form>
         </div>
     </div>
 
-    <!-- MAIN APP -->
+    <!-- Main App -->
     <div id="app" class="hidden">
         <!-- Header -->
-        <div id="app-header">
-            <div id="greeting">Good afternoon, Susu 🤍</div>
-        </div>
+        <header id="app-header">
+            <h1 id="greeting">Good morning 🤍</h1>
+        </header>
 
         <!-- Main Content -->
-        <div id="main-content">
-            <!-- HOME TAB -->
-            <div id="home-tab" class="tab-content active">
-                <!-- Balance Card -->
-                <div class="balance-card">
-                    <div class="balance-label">Current Balance</div>
-                    <div class="balance-amount">₹<span id="balance-amount">0</span></div>
-                    <div class="balance-status" id="balance-status">Even steven!</div>
-                </div>
-
-                <!-- Who Pays Next -->
-                <div class="who-pays-next">
-                    <div class="who-pays-label">Who pays next?</div>
-                    <div class="who-pays-indicator" id="who-pays-indicator">🤝</div>
-                </div>
-
-                <!-- Budget Section (NEW - POSITIONED HERE) -->
-                <div class="budget-progress-card" id="budget-card" style="display: none;">
+        <main id="main-content">
+            <!-- Home Tab -->
+            <section id="home-tab" class="tab-content active">
+                <!-- Budget Progress Card -->
+                <div id="budget-progress-card" class="budget-progress-card hidden">
                     <div class="budget-header">
-                        <div class="budget-label">This Month's Budget</div>
-                        <button type="button" id="edit-budget-btn" class="btn-edit-budget">✏️</button>
+                        <span class="budget-label">Monthly Budget</span>
+                        <button id="edit-budget-btn" class="btn-edit-budget">⚙️</button>
                     </div>
                     <div class="budget-amount-display">
                         <span id="budget-spent">₹0</span>
@@ -82,366 +72,324 @@
                     <div class="budget-progress-bar">
                         <div id="budget-progress-fill" class="budget-progress-fill" style="width: 0%"></div>
                     </div>
-                    <div id="budget-warning" class="budget-warning" style="display: none;"></div>
+                    <div id="budget-warning" class="budget-warning hidden">⚠️ Over 80% of budget used!</div>
                 </div>
 
-                <!-- Settle Up Button -->
-                <button class="btn-settle" id="settle-btn">Settle Up 🤝</button>
+                <!-- Balance Card -->
+                <div class="balance-card">
+                    <div class="balance-label">Current Balance</div>
+                    <div id="balance-amount" class="balance-amount">₹0</div>
+                    <div id="balance-status" class="balance-status"></div>
+                </div>
+                
+                <!-- Who Pays Next -->
+                <div class="who-pays-next">
+                    <div class="who-pays-label">Who pays next?</div>
+                    <div id="who-pays-indicator" class="who-pays-indicator">🎲</div>
+                </div>
 
-                <!-- Recent Expenses Section -->
+                <!-- Settle Button -->
+                <button id="settle-btn" class="btn-settle">Settle Up</button>
+
+                <!-- Recent Expenses -->
                 <div class="recent-section">
                     <h2>Recent Expenses</h2>
-                    <div id="recent-expenses-list"></div>
+                    <div id="recent-expenses"></div>
                 </div>
-            </div>
+            </section>
 
-            <!-- STATS TAB -->
-            <div id="stats-tab" class="tab-content">
-                <div id="stats-container">
-                    <!-- This Month Card -->
-                    <div class="card-section">
-                        <h2>This Month</h2>
-                        <div class="stats-card">
-                            <div class="stat-item">
-                                <div class="stat-label">Total Spent</div>
-                                <div class="stat-value" id="stats-total-spent">₹0</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label" id="stats-my-name">Your Contribution</div>
-                                <div class="stat-value" id="stats-my-contribution">₹0</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label" id="stats-partner-name">Partner Contribution</div>
-                                <div class="stat-value" id="stats-partner-contribution">₹0</div>
-                            </div>
+            <!-- Add Expense Tab -->
+            <section id="add-tab" class="tab-content">
+                <form id="expense-form">
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <div class="amount-input-wrapper">
+                            <span class="currency">₹</span>
+                            <input type="number" id="amount" placeholder="0" step="0.01" required>
                         </div>
                     </div>
 
-                    <!-- By Category -->
-                    <div class="card-section">
-                        <h2>By Category</h2>
-                        <div id="stats-by-category" class="category-stats">
-                            <!-- Populated by JS -->
+                    <div class="form-group">
+                        <label>Paid by</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="paidBy" value="me" checked>
+                                <span id="my-name-label">Me</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="paidBy" value="partner">
+                                <span id="partner-name-label">Partner</span>
+                            </label>
                         </div>
                     </div>
 
-                    <!-- Yearly Overview (Optional) -->
-                    <div class="card-section">
-                        <h2>Overall Stats</h2>
-                        <div class="stats-card">
-                            <div class="stat-item">
-                                <div class="stat-label">Total Expenses (All Time)</div>
-                                <div class="stat-value" id="stats-all-time">₹0</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">Average Per Month</div>
-                                <div class="stat-value" id="stats-avg-monthly">₹0</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- HISTORY TAB -->
-            <div id="history-tab" class="tab-content">
-                <div id="expenses-list">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-
-            <!-- US TAB -->
-            <div id="us-tab" class="tab-content">
-                <div class="us-container">
-                    <div class="us-header">
-                        <h1 id="us-title">Us</h1>
-                        <p class="us-subtitle">Our little corner of the internet</p>
-                        <p class="days-counter" id="days-counter">Day 1 of us 💕</p>
-                    </div>
-
-                    <!-- Music Player (TOP-MIDDLE POSITIONED) -->
-                    <div id="music-player-panel" class="music-player-panel">
-                        <button id="close-music-player" class="btn-close-music">✕</button>
-                        <div class="music-player-header">
-                            <h3>Our Playlist 🎵</h3>
-                        </div>
-                        <select id="song-selector" class="song-selector">
-                            <option value="">Select a song...</option>
-                        </select>
-                        <audio id="music-player" crossorigin="anonymous"></audio>
-                        <div class="music-player-controls">
-                            <button id="play-pause-btn" class="music-btn">▶</button>
-                            <div class="seek-container">
-                                <span id="current-time">0:00</span>
-                                <input type="range" id="seek-bar" class="seek-bar" min="0" max="100" value="0">
-                                <span id="duration">0:00</span>
-                            </div>
+                    <div class="form-group">
+                        <label>Split Type</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="splitType" value="equal" checked>
+                                <span>50-50</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="splitType" value="custom">
+                                <span>Custom</span>
+                            </label>
                         </div>
                     </div>
 
-                    <!-- Polaroid Frame with Draggable Image -->
-                    <div class="polaroid-section">
-                        <div class="polaroid-frame" id="polaroid-frame">
-                            <div class="polaroid-image-container">
-                                <img id="polaroid-image" src="" alt="Our Memory" class="polaroid-image" draggable="true">
-                                <div class="drag-hint" id="drag-hint">📍 Drag to position</div>
-                            </div>
-                            <div class="polaroid-text">
-                                <p id="daily-quote" class="daily-quote">Still my favorite person</p>
-                            </div>
-                        </div>
-                        <button id="music-player-toggle" class="btn-music-toggle">🎵 Play Music</button>
-                        <button id="add-memory-btn" class="btn-add-memory">📸 Add Memory</button>
+                    <div id="custom-split" class="form-group hidden">
+                        <label>My Share (₹)</label>
+                        <input type="number" id="my-share" placeholder="0" step="0.01">
                     </div>
 
-                    <!-- Memories Gallery -->
-                    <div class="memories-section">
-                        <h2>Our Memories 📸</h2>
-                        <div id="memories-grid" class="memories-grid">
-                            <!-- Populated by JS -->
+                    <div class="form-group">
+                        <label>Category</label>
+                        <div class="category-grid">
+                            <label class="category-option">
+                                <input type="radio" name="category" value="food" checked>
+                                <span>🍕 Food</span>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="dates">
+                                <span>🎬 Dates</span>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="gmasti">
+                                <span>☺️ G-Masti</span>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="gifts">
+                                <span>🎁 Gifts</span>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="home">
+                                <span>🏠 Home</span>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="misc">
+                                <span>✨ Misc</span>
+                            </label>
                         </div>
                     </div>
 
-                    <!-- Notes -->
-                    <div class="notes-section">
-                        <div class="notes-header">
-                            <h2>Our Notes 💌</h2>
-                            <button id="add-note-btn" class="btn-add-note">+ Add Note</button>
-                        </div>
-                        <div id="notes-list" class="notes-list">
-                            <!-- Populated by JS -->
-                        </div>
+                    <div class="form-group">
+                        <label>Note (optional)</label>
+                        <input type="text" id="note" placeholder="Late night momos 🌙">
+                    </div>
+
+                    <div class="form-group budget-checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="count-towards-budget" checked>
+                            <span>Count towards monthly budget</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Add Expense</button>
+                </form>
+            </section>
+
+            <!-- History Tab -->
+            <section id="history-tab" class="tab-content">
+                <h2>Our Expenses</h2>
+                <div id="expenses-list"></div>
+            </section>
+
+            <!-- Stats Tab -->
+            <section id="stats-tab" class="tab-content">
+                <h2>This Month</h2>
+                
+                <div class="stats-card">
+                    <div class="stat-item">
+                        <div class="stat-label">Total Spent</div>
+                        <div id="total-spent" class="stat-value">₹0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label" id="my-contribution-label">My Contribution</div>
+                        <div id="my-contribution" class="stat-value">₹0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label" id="partner-contribution-label">Partner Contribution</div>
+                        <div id="partner-contribution" class="stat-value">₹0</div>
                     </div>
                 </div>
-            </div>
-        </div>
+
+                <h3>By Category</h3>
+                <div id="category-breakdown"></div>
+            </section>
+
+            <!-- Us Tab -->
+            <section id="us-tab" class="tab-content us-tab">
+                <!-- Music Player Toggle Button -->
+                <button id="music-player-toggle" class="music-player-toggle">🎵</button>
+                
+                <!-- Music Player Panel (NEW: Upper-center positioned) -->
+                <div id="music-player-panel" class="music-player-panel hidden">
+                    <div class="music-player-header">
+                        <span>Our Playlist</span>
+                        <button id="close-music-player" class="btn-close-music">×</button>
+                    </div>
+                    
+                    <select id="song-selector" class="song-selector">
+                        <option value="">Select a song...</option>
+                    </select>
+                    
+                    <div class="music-controls">
+                        <div class="control-row">
+                            <button id="play-pause-btn" class="btn-play-pause" disabled>▶</button>
+                            <div class="seek-bar-container">
+                                <input type="range" id="seek-bar" class="seek-bar" min="0" max="100" value="0" disabled>
+                                <div class="time-display">
+                                    <span id="current-time">0:00</span>
+                                    <span id="duration">0:00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- NEW: Recently Played Section -->
+                    <div id="recently-played-section" class="recently-played-section hidden">
+                        <p class="recently-played-title">Recently Played</p>
+                        <div id="recently-played-list" class="recently-played-list"></div>
+                    </div>
+                </div>
+
+                <!-- Us Header -->
+                <div class="us-header-section">
+                    <h1 class="us-title" id="us-title">Us</h1>
+                    <p class="us-subtitle">Our little corner of the internet</p>
+                    <p class="us-day-counter" id="us-day-counter">Day 1 of us</p>
+                    
+                    <!-- NEW: Last Seen Indicator -->
+                    <p id="partner-last-seen" class="partner-last-seen hidden"></p>
+                </div>
+
+                <!-- Divider -->
+                <div class="us-divider">
+                    <svg viewBox="0 0 200 20" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0 10 Q50 5, 100 10 T200 10" stroke="currentColor" fill="none" stroke-width="1" opacity="0.3"/>
+                    </svg>
+                </div>
+
+                <!-- Daily Quote Card -->
+                <div class="ritual-card">
+                    <p class="ritual-quote" id="ritual-quote"></p>
+                </div>
+                
+                <!-- NEW: Mood Tracker -->
+                <div class="mood-tracker">
+                    <p class="mood-tracker-title">How are you feeling today?</p>
+                    <div class="mood-options">
+                        <button class="mood-option" data-mood="happy">😊</button>
+                        <button class="mood-option" data-mood="love">😍</button>
+                        <button class="mood-option" data-mood="neutral">😐</button>
+                        <button class="mood-option" data-mood="sad">😔</button>
+                        <button class="mood-option" data-mood="sleepy">😴</button>
+                    </div>
+                    <p id="current-mood-display" class="current-mood-display hidden"></p>
+                </div>
+                
+                <!-- NEW: Memory Highlight Banner -->
+                <div id="memory-highlight" class="memory-highlight hidden"></div>
+                
+                <!-- NEW: Daily Reminder -->
+                <div id="daily-reminder" class="daily-reminder hidden"></div>
+
+                <!-- Add Memory Button -->
+                <div class="add-memory-section">
+                    <button id="add-memory-btn" class="btn-add-memory-minimal">+ Add Memory</button>
+                </div>
+
+                <!-- Memories Timeline -->
+                <div class="memories-section">
+                    <div id="memories-timeline" class="memories-timeline"></div>
+                </div>
+
+                <!-- Notes Section -->
+                <div class="notes-section">
+                    <h3 class="notes-title">Little things I noticed</h3>
+                    <div id="notes-container" class="notes-container"></div>
+                    <button id="add-note-btn" class="btn-add-note">+ Add a note</button>
+                </div>
+                
+                <!-- NEW: Secret Notes Section -->
+                <div class="secret-notes-section">
+                    <h3 class="secret-notes-title">Secret Notes 💝</h3>
+                    <div id="secret-notes-container" class="secret-notes-container"></div>
+                    <button id="add-secret-note-btn" class="btn-add-secret-note">+ Create Secret Note</button>
+                </div>
+
+                <!-- Late Night Message -->
+                <div id="late-night-message" class="late-night-message hidden">
+                    <p>Good night, us.</p>
+                </div>
+                
+                <!-- Easter Egg -->
+                <div id="easter-egg" class="easter-egg hidden">
+                    <p>You're my person 💝</p>
+                </div>
+            </section>
+        </main>
 
         <!-- Bottom Navigation -->
-        <div id="bottom-nav">
+        <nav id="bottom-nav">
             <button class="nav-item active" data-tab="home">
-                <div class="nav-icon">🏠</div>
-                <div class="nav-label">Home</div>
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Home</span>
             </button>
-            <button class="nav-item" data-tab="stats">
-                <div class="nav-icon">📊</div>
-                <div class="nav-label">Stats</div>
+            <button class="nav-item" data-tab="add">
+                <span class="nav-icon">➕</span>
+                <span class="nav-label">Add</span>
             </button>
             <button class="nav-item" data-tab="history">
-                <div class="nav-icon">📋</div>
-                <div class="nav-label">History</div>
+                <span class="nav-icon">📜</span>
+                <span class="nav-label">History</span>
+            </button>
+            <button class="nav-item" data-tab="stats">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Stats</span>
             </button>
             <button class="nav-item" data-tab="us">
-                <div class="nav-icon">💕</div>
-                <div class="nav-label">Us</div>
+                <span class="nav-icon">💕</span>
+                <span class="nav-label">Us</span>
             </button>
-        </div>
+        </nav>
     </div>
 
-    <!-- MODALS -->
-
-    <!-- Settle Modal -->
+    <!-- Modals -->
+    
+    <!-- Settlement Modal -->
     <div id="settle-modal" class="modal hidden">
         <div class="modal-content">
-            <div class="settle-content">
-                <div class="settle-emoji">🤝</div>
-                <h2>Settle Up?</h2>
-                <p id="settle-message">Balance will be reset to ₹0</p>
-                <p class="settle-hint">This records that debts are settled between you and your partner.</p>
+            <h2>Settle Up</h2>
+            <p id="settle-message" class="settle-message"></p>
+            <p id="settle-submessage" class="settle-submessage"></p>
+            <div class="form-group">
+                <label>Amount to Settle</label>
+                <input type="number" id="settle-amount" placeholder="0" step="0.01">
             </div>
-            <div class="settle-actions">
-                <button id="confirm-settle-btn" class="btn-primary">Confirm Settle</button>
+            <div class="modal-buttons">
+                <button id="confirm-settle-btn" class="btn-primary">Settle</button>
                 <button id="cancel-settle-btn" class="btn-secondary">Cancel</button>
             </div>
-        </div>
-    </div>
-
-    <!-- Balance Celebration -->
-    <div id="balance-celebration" class="modal hidden">
-        <div class="modal-content">
-            <div class="celebration-content">
-                <div class="celebration-emoji">✨</div>
-                <h2>Balance is Settled!</h2>
-                <p>You two are all square! 🎉</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add/Edit Expense Modal -->
-    <div id="expense-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add Expense</h3>
-                <button type="button" class="btn-close" id="close-expense-modal">✕</button>
-            </div>
-
-            <form id="expense-form">
-                <div class="form-group">
-                    <label>Amount</label>
-                    <div class="amount-input-wrapper">
-                        <span class="currency">₹</span>
-                        <input type="number" id="expense-amount" placeholder="0" step="0.01" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>What's this for?</label>
-                    <input type="text" id="expense-note" placeholder="e.g., Coffee, Dinner..." required>
-                </div>
-
-                <div class="form-group">
-                    <label>Category</label>
-                    <div class="category-grid">
-                        <label class="category-option">
-                            <input type="radio" name="category" value="food" required>
-                            <span>🍕 Food</span>
-                        </label>
-                        <label class="category-option">
-                            <input type="radio" name="category" value="dates">
-                            <span>🎬 Dates</span>
-                        </label>
-                        <label class="category-option">
-                            <input type="radio" name="category" value="gmasti">
-                            <span>☺️ Gmasti</span>
-                        </label>
-                        <label class="category-option">
-                            <input type="radio" name="category" value="gifts">
-                            <span>🎁 Gifts</span>
-                        </label>
-                        <label class="category-option">
-                            <input type="radio" name="category" value="home">
-                            <span>🏠 Home</span>
-                        </label>
-                        <label class="category-option">
-                            <input type="radio" name="category" value="misc">
-                            <span>✨ Misc</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Split Type</label>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="splitType" value="equal" checked>
-                            <span>50-50</span>
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="splitType" value="custom">
-                            <span>Custom</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div id="custom-split" class="form-group hidden">
-                    <label>Your Share (%)</label>
-                    <input type="number" id="custom-split-amount" min="0" max="100" value="50">
-                    <p class="form-hint">Partner will pay the remaining percentage</p>
-                </div>
-
-                <div class="form-group">
-                    <label>Who paid?</label>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="paidBy" value="me" required>
-                            <span id="paid-by-me-label">Me</span>
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="paidBy" value="partner">
-                            <span id="paid-by-partner-label">Partner</span>
-                        </label>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-primary">Add Expense</button>
-            </form>
         </div>
     </div>
 
     <!-- Edit Expense Modal -->
     <div id="edit-expense-modal" class="modal hidden">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>Edit Expense</h3>
-                <button type="button" class="btn-close" id="close-edit-modal">✕</button>
-            </div>
-
+            <button id="close-edit-modal" class="btn-close-modal">×</button>
+            <h2>Edit Expense</h2>
             <form id="edit-expense-form">
+                <input type="hidden" id="edit-expense-id">
                 <div class="form-group">
                     <label>Amount</label>
-                    <div class="amount-input-wrapper">
-                        <span class="currency">₹</span>
-                        <input type="number" id="edit-expense-amount" placeholder="0" step="0.01" required>
-                    </div>
+                    <input type="number" id="edit-amount" step="0.01" required>
                 </div>
-
                 <div class="form-group">
-                    <label>What's this for?</label>
-                    <input type="text" id="edit-expense-note" placeholder="e.g., Coffee, Dinner..." required>
+                    <label>Note</label>
+                    <input type="text" id="edit-note">
                 </div>
-
-                <div class="form-group">
-                    <label>Category</label>
-                    <div class="category-grid">
-                        <label class="category-option">
-                            <input type="radio" name="edit-category" value="food" required>
-                            <span>🍕 Food</span>
-                        </label>
-                        <label class="category-option">
-                            <input type="radio" name="edit-category" value="dates">
-                            <span>🎬 Dates</span>
-                        </label>
-                        <label class="category-option">
-                            <input type="radio" name="edit-category" value="gmasti">
-                            <span>☺️ Gmasti</span>
-                        </label>
-                        <label class="category-option">
-                            <input type="radio" name="edit-category" value="gifts">
-                            <span>🎁 Gifts</span>
-                        </label>
-                        <label class="category-option">
-                            <input type="radio" name="edit-category" value="home">
-                            <span>🏠 Home</span>
-                        </label>
-                        <label class="category-option">
-                            <input type="radio" name="edit-category" value="misc">
-                            <span>✨ Misc</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Split Type</label>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="edit-splitType" value="equal">
-                            <span>50-50</span>
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="edit-splitType" value="custom">
-                            <span>Custom</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div id="edit-custom-split" class="form-group hidden">
-                    <label>Your Share (%)</label>
-                    <input type="number" id="edit-custom-split-amount" min="0" max="100" value="50">
-                </div>
-
-                <div class="form-group">
-                    <label>Who paid?</label>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="edit-paidBy" value="me" required>
-                            <span>Me</span>
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="edit-paidBy" value="partner">
-                            <span>Partner</span>
-                        </label>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-primary">Update Expense</button>
+                <button type="submit" class="btn-primary">Save Changes</button>
             </form>
         </div>
     </div>
@@ -449,98 +397,139 @@
     <!-- Budget Modal -->
     <div id="budget-modal" class="modal hidden">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>Set Monthly Budget</h3>
-                <button type="button" class="btn-close" id="close-budget-modal">✕</button>
-            </div>
-
+            <button id="close-budget-modal" class="btn-close-modal">×</button>
+            <h2>Monthly Budget</h2>
             <form id="budget-form">
                 <div class="form-group">
-                    <label>Budget Limit</label>
-                    <div class="amount-input-wrapper">
-                        <span class="currency">₹</span>
-                        <input type="number" id="budget-amount-input" placeholder="10000" step="100" required>
-                    </div>
+                    <label>Budget Amount</label>
+                    <input type="number" id="budget-amount-input" placeholder="10000" step="100" required>
                 </div>
-                <button type="submit" class="btn-primary">Save Budget</button>
+                <button type="submit" class="btn-primary">Set Budget</button>
             </form>
         </div>
     </div>
 
     <!-- Memory Modal -->
     <div id="memory-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add Memory</h3>
-                <button type="button" class="btn-close" id="close-memory-modal">✕</button>
-            </div>
-
+        <div class="modal-content memory-modal-content">
+            <button id="close-memory-modal" class="btn-close-modal">×</button>
+            <h2>Add Memory</h2>
+            
+            <!-- Photo Selection -->
             <div id="photo-selection" class="photo-selection">
-                <button type="button" id="camera-btn" class="btn-secondary">📷 Take Photo</button>
-                <button type="button" id="gallery-btn" class="btn-secondary">🖼️ From Gallery</button>
-                <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;">
-                <input type="file" id="gallery-input" accept="image/*" multiple style="display: none;">
+                <button id="camera-btn" class="btn-photo-source">
+                    <span class="photo-icon">📷</span>
+                    <span>Camera</span>
+                </button>
+                <button id="gallery-btn" class="btn-photo-source">
+                    <span class="photo-icon">🖼️</span>
+                    <span>Gallery</span>
+                </button>
+                <input type="file" id="camera-input" accept="image/*" capture="environment" multiple hidden>
+                <input type="file" id="gallery-input" accept="image/*" multiple hidden>
             </div>
-
-            <div id="memory-preview" class="memory-preview hidden">
-                <div id="preview-images" class="preview-images"></div>
-                <button type="button" id="back-to-selection" class="btn-secondary">← Back</button>
-            </div>
-
+            
+            <!-- Memory Form -->
             <form id="memory-form" class="hidden">
+                <div id="photos-preview" class="photos-preview"></div>
+                
                 <div class="form-group">
-                    <label for="memory-date">Date</label>
+                    <label>Caption (optional)</label>
+                    <input type="text" id="memory-caption" placeholder="A perfect day together...">
+                </div>
+                
+                <div class="form-group">
+                    <label>Memory Date</label>
                     <input type="date" id="memory-date" required>
                 </div>
-
-                <div class="form-group">
-                    <label for="memory-description">Memory Description (Optional)</label>
-                    <input type="text" id="memory-description" placeholder="What was this about?">
-                </div>
-
-                <button type="submit" class="btn-primary">Save Memory</button>
+                
+                <button type="submit" class="btn-primary">Upload Memory</button>
             </form>
         </div>
+    </div>
+
+    <!-- Album Viewer Modal -->
+    <div id="album-viewer-modal" class="modal viewer-modal hidden">
+        <button id="close-album-viewer" class="btn-close-viewer">×</button>
+        <button id="delete-album-btn" class="btn-delete-viewer">🗑️</button>
+        
+        <div id="album-photos-container" class="album-photos-container"></div>
+        
+        <div class="album-navigation">
+            <button id="prev-photo" class="btn-nav-photo">←</button>
+            <span id="photo-counter" class="photo-counter">1 / 1</span>
+            <button id="next-photo" class="btn-nav-photo">→</button>
+        </div>
+        
+        <div id="album-viewer-info" class="viewer-info"></div>
+    </div>
+
+    <!-- Single Photo Viewer Modal -->
+    <div id="photo-viewer-modal" class="modal viewer-modal hidden">
+        <button id="close-photo-viewer" class="btn-close-viewer">×</button>
+        <button id="delete-photo-btn" class="btn-delete-viewer">🗑️</button>
+        
+        <div id="single-photo-container" class="single-photo-container"></div>
     </div>
 
     <!-- Note Modal -->
     <div id="note-modal" class="modal hidden">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add Note</h3>
-                <button type="button" class="btn-close" id="close-note-modal">✕</button>
-            </div>
-
+            <button id="close-note-modal" class="btn-close-modal">×</button>
+            <h2>Add a Note</h2>
             <form id="note-form">
                 <div class="form-group">
-                    <label for="note-text">Your Note</label>
-                    <textarea id="note-text" placeholder="What's on your mind?" rows="6" required></textarea>
+                    <label>What did you notice?</label>
+                    <textarea id="note-text" rows="4" placeholder="You smiled differently today..." required></textarea>
                 </div>
-
                 <button type="submit" class="btn-primary">Save Note</button>
             </form>
+        </div>
+    </div>
+    
+    <!-- NEW: Secret Note Modal -->
+    <div id="secret-note-modal" class="modal hidden">
+        <div class="modal-content">
+            <button id="close-secret-note-modal" class="btn-close-modal">×</button>
+            <h2>Create Secret Note 💝</h2>
+            <form id="secret-note-form">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="secret-note-title" placeholder="For our 6-month anniversary..." required>
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="secret-note-content" rows="4" placeholder="This will unlock on the date you choose..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Unlock Date</label>
+                    <input type="date" id="secret-note-unlock-date" required>
+                </div>
+                <button type="submit" class="btn-primary">Create Secret Note</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Balance Celebration -->
+    <div id="balance-celebration" class="balance-celebration hidden">
+        <div class="celebration-content">
+            <h2>🎉 All Settled! 🎉</h2>
+            <p>Balance is ₹0</p>
         </div>
     </div>
 
     <!-- Loading Spinner -->
     <div id="loading" class="loading hidden">
-        <div class="loading-spinner"></div>
+        <div class="spinner"></div>
     </div>
 
-    <!-- Toast Messages -->
-    <div id="toast" class="toast"></div>
+    <!-- Hidden Audio Player -->
+    <audio id="music-player" preload="metadata"></audio>
 
-    <!-- Easter Egg -->
-    <div id="easter-egg" class="easter-egg hidden">
-        <div class="easter-egg-content">
-            I love you more 💕
-        </div>
-    </div>
-
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="firebase.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
