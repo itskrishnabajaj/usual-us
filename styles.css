@@ -950,9 +950,7 @@ textarea {
     overflow: hidden;
     background: linear-gradient(170deg, #fdf2f0 0%, #fce4ec 30%, #f9dde5 55%, #fef5e7 80%, #fdf2f0 100%);
     min-height: 100vh;
-    /* Break out of #main-content max-width and padding */
-    width: 100vw;
-    margin-left: calc(-50vw + 50%);
+    /* Break out of #main-content padding */
     margin-left: -20px;
     width: calc(100% + 40px);
     /* Scoped color variables for light background */
@@ -2846,7 +2844,8 @@ textarea {
         font-size: 16px;
     }
     
-    .category-grid {
+    .category-grid,
+    .add-expense-form .category-grid {
         grid-template-columns: repeat(2, 1fr);
     }
     

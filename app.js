@@ -1837,11 +1837,7 @@ function renderMemoriesTimeline() {
         
         const stringHTML = showString ? '<div class="polaroid-string"></div>' : '';
         
-        // Get image position
-        const posX = memory.imagePosition ? memory.imagePosition.x : 50;
-        const posY = memory.imagePosition ? memory.imagePosition.y : 50;
-        const zoom = memory.imageZoom || 1;
-        const imgStyle = `object-fit: cover; object-position: ${posX}% ${posY}%${zoom !== 1 ? `; transform: scale(${zoom})` : ''}`;
+        const imgStyle = getImageStyle(memory);
         
         if (imageCount === 1) {
             return `
@@ -1983,10 +1979,7 @@ function viewSinglePhoto(memoryId) {
     const date = memory.memoryDate ? memory.memoryDate.toDate() : new Date();
     const formattedDate = formatMemoryDate(date);
     
-    const posX = memory.imagePosition ? memory.imagePosition.x : 50;
-    const posY = memory.imagePosition ? memory.imagePosition.y : 50;
-    const zoom = memory.imageZoom || 1;
-    const imgStyle = `object-fit: cover; object-position: ${posX}% ${posY}%${zoom !== 1 ? `; transform: scale(${zoom})` : ''}`;
+    const imgStyle = getImageStyle(memory);
     
     const container = document.getElementById('single-photo-container');
     container.innerHTML = `
@@ -2033,10 +2026,7 @@ function renderAlbumPhoto(memory) {
     const container = document.getElementById('album-photos-container');
     const currentImage = memory.images[currentAlbumIndex];
     
-    const posX = memory.imagePosition ? memory.imagePosition.x : 50;
-    const posY = memory.imagePosition ? memory.imagePosition.y : 50;
-    const zoom = memory.imageZoom || 1;
-    const imgStyle = `object-fit: cover; object-position: ${posX}% ${posY}%${zoom !== 1 ? `; transform: scale(${zoom})` : ''}`;
+    const imgStyle = getImageStyle(memory);
     
     container.innerHTML = `
         <div class="viewer-polaroid swipeable-polaroid">
@@ -2111,6 +2101,13 @@ async function handleMemoryDelete() {
 function formatMemoryDate(date) {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+function getImageStyle(memory) {
+    const posX = memory.imagePosition ? memory.imagePosition.x : 50;
+    const posY = memory.imagePosition ? memory.imagePosition.y : 50;
+    const zoom = memory.imageZoom || 1;
+    return `object-fit: cover; object-position: ${posX}% ${posY}%${zoom !== 1 ? `; transform: scale(${zoom})` : ''}`;
 }
 
 // Notes Handling
