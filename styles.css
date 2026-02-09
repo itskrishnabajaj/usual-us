@@ -702,6 +702,27 @@ textarea {
     gap: 10px;
 }
 
+.expense-budget-tag {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    display: inline-block;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.expense-budget-tag.in-budget {
+    background: rgba(74, 222, 128, 0.1);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+.expense-budget-tag.not-in-budget {
+    background: rgba(160, 160, 160, 0.1);
+    color: #707070;
+    border: 1px solid rgba(160, 160, 160, 0.2);
+}
+
 /* ============================================
    STATS
    ============================================ */

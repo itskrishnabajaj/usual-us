@@ -902,6 +902,7 @@ async function loadExpenses() {
         renderRecentExpenses();
         renderAllExpenses();
         updateBudgetProgress();
+        renderStats(); // Always refresh stats when expenses change
     } catch (error) {
         console.error('❌ Error loading expenses:', error);
     }
@@ -1246,19 +1247,15 @@ async function handleExpenseSubmit(e) {
     showLoading(true);
     
     try {
-        const docRef = await expensesCollection.add(expense);
-        console.log('✅ Expense added successfully:', docRef.id);
+        await expensesCollection.add(expense);
+        console.log('✅ Expense added successfully');
         
+        // Reset form IMMEDIATELY after successful save
         document.getElementById('expense-form').reset();
         document.getElementById('custom-split').classList.add('hidden');
         document.getElementById('count-towards-budget').checked = true;
         
-        try {
-            await loadExpenses();
-        } catch (reloadError) {
-            console.warn('⚠️ Reload failed but expense was saved:', reloadError);
-        }
-        
+        // Switch tab right away — user sees success
         switchTab('home');
         
     } catch (error) {
@@ -1267,6 +1264,13 @@ async function handleExpenseSubmit(e) {
     } finally {
         isSubmitting = false;
         showLoading(false);
+    }
+    
+    // Reload data separately — don't let this trigger the error alert
+    try {
+        await loadExpenses();
+    } catch (reloadError) {
+        console.warn('⚠️ Reload failed but expense was saved:', reloadError);
     }
 }
 
@@ -1529,6 +1533,9 @@ function renderAllExpenses() {
                     Your share: ₹${myShare.toFixed(2)} • 
                     ${partnerName}'s share: ₹${partnerShare.toFixed(2)}
                 </div>
+                <div class="expense-budget-tag ${expense.countTowardsBudget ? 'in-budget' : 'not-in-budget'}">
+                    ${expense.countTowardsBudget ? '📊 Counted in budget' : '── Not in budget'}
+                </div>
                 <div class="expense-actions">
                     <button class="btn-small edit" onclick="showEditExpense('${expense.id}')">Edit</button>
                     <button class="btn-small delete" onclick="deleteExpense('${expense.id}')">Delete</button>
@@ -1542,9 +1549,13 @@ function renderStats() {
     const now = new Date();
     const thisMonth = expenses.filter(expense => {
         if (!expense.createdAt) return false;
-        const expenseDate = expense.createdAt.toDate();
-        return expenseDate.getMonth() === now.getMonth() && 
-               expenseDate.getFullYear() === now.getFullYear();
+        try {
+            const expenseDate = expense.createdAt.toDate ? expense.createdAt.toDate() : new Date(expense.createdAt);
+            return expenseDate.getMonth() === now.getMonth() && 
+                   expenseDate.getFullYear() === now.getFullYear();
+        } catch (e) {
+            return false;
+        }
     });
     
     const totalSpent = thisMonth.reduce((sum, e) => sum + e.amount, 0);
