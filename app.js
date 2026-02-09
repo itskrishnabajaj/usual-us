@@ -856,20 +856,6 @@ function renderMilestones() {
         { days: 500, emoji: '🏆', title: '500 Days Together' },
     ];
     
-    // Add monthly anniversaries
-    for (let m = 1; m <= 24; m++) {
-        const annivDate = new Date(startDate);
-        annivDate.setMonth(annivDate.getMonth() + m);
-        const daysDiff = Math.floor((annivDate - startDate) / (1000 * 60 * 60 * 24));
-        milestones.push({
-            days: daysDiff,
-            emoji: m % 12 === 0 ? '💝' : '💕',
-            title: m % 12 === 0 ? `${Math.floor(m/12)} Year Anniversary` : `${m} Month Anniversary`
-        });
-    }
-    
-    milestones.sort((a, b) => a.days - b.days);
-    
     // Find next upcoming milestone and last achieved
     const upcoming = milestones.filter(m => m.days > days).slice(0, 1);
     const achieved = milestones.filter(m => m.days <= days).slice(-1);
