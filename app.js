@@ -513,12 +513,26 @@ function setupEventListeners() {
     document.getElementById('next-photo').addEventListener('click', () => navigateAlbum(1));
     document.getElementById('delete-album-btn').addEventListener('click', handleMemoryDelete);
     
+    // Adjust image from album viewer
+    document.getElementById('adjust-album-btn').addEventListener('click', () => {
+        if (currentViewingMemoryId) {
+            startImageAdjust(currentViewingMemoryId, currentAlbumIndex || 0);
+        }
+    });
+    
     // Single photo viewer
     document.getElementById('close-photo-viewer').addEventListener('click', () => {
         document.getElementById('photo-viewer-modal').classList.add('hidden');
     });
     
     document.getElementById('delete-photo-btn').addEventListener('click', handleMemoryDelete);
+    
+    // Adjust image from single photo viewer
+    document.getElementById('adjust-photo-btn').addEventListener('click', () => {
+        if (currentViewingMemoryId) {
+            startImageAdjust(currentViewingMemoryId, 0);
+        }
+    });
     
     // Notes
     document.getElementById('add-note-btn').addEventListener('click', () => {
@@ -1671,9 +1685,10 @@ function handlePhotoSelect(e) {
             preview.innerHTML = `
                 <img src="${e.target.result}" alt="Preview ${index + 1}">
                 <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
-                <div class="photo-preview-zoom">
-                    <button type="button" class="btn-zoom" onclick="zoomPreview(this, -0.2)">−</button>
-                    <button type="button" class="btn-zoom" onclick="zoomPreview(this, 0.2)">+</button>
+                <div class="photo-preview-zoom-slider">
+                    <span>−</span>
+                    <input type="range" min="1" max="3" step="0.1" value="1" oninput="zoomPreviewSlider(this)">
+                    <span>+</span>
                 </div>
             `;
             previewContainer.appendChild(preview);
@@ -1709,6 +1724,17 @@ window.zoomPreview = function(btn, delta) {
     currentZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, currentZoom + delta));
     item.dataset.zoom = currentZoom.toString();
     img.style.transform = `scale(${currentZoom})`;
+};
+
+window.zoomPreviewSlider = function(slider) {
+    const item = slider.closest('.photo-preview-item');
+    if (!item) return;
+    const img = item.querySelector('img');
+    if (!img) return;
+    
+    const zoom = parseFloat(slider.value) || 1;
+    item.dataset.zoom = zoom.toString();
+    img.style.transform = `scale(${zoom})`;
 };
 
 async function handleMemoryUpload(e) {
@@ -1811,9 +1837,7 @@ function renderMemoriesTimeline() {
         
         const stringHTML = showString ? '<div class="polaroid-string"></div>' : '';
         
-        // Get image position
-        const posX = memory.imagePosition ? memory.imagePosition.x : 50;
-        const posY = memory.imagePosition ? memory.imagePosition.y : 50;
+        const imgStyle = getImageStyle(memory);
         
         if (imageCount === 1) {
             return `
@@ -1824,13 +1848,12 @@ function renderMemoriesTimeline() {
                             <img src="${memory.images[0]}" 
                                  alt="${memory.caption || 'Memory'}" 
                                  loading="lazy"
-                                 style="object-fit: cover; object-position: ${posX}% ${posY}%">
+                                 style="${imgStyle}">
                         </div>
                         <div class="polaroid-caption-area">
                             <p class="polaroid-date">${formattedDate}</p>
                             ${memory.caption ? `<p class="polaroid-caption">${memory.caption}</p>` : ''}
                         </div>
-                        <button class="btn-adjust-image" onclick="event.stopPropagation(); startImageAdjust('${memory.id}', 0)">📐</button>
                     </div>
                 </div>
             `;
@@ -1846,7 +1869,7 @@ function renderMemoriesTimeline() {
                                 <img src="${memory.images[0]}" 
                                      alt="${memory.caption || 'Album'}" 
                                      loading="lazy"
-                                     style="object-fit: cover; object-position: ${posX}% ${posY}%">
+                                     style="${imgStyle}">
                             </div>
                             <div class="polaroid-caption-area">
                                 <p class="polaroid-date">${formattedDate}</p>
@@ -1867,6 +1890,7 @@ window.startImageAdjust = function(memoryId, imageIndex) {
     if (!memory) return;
     
     const currentPos = memory.imagePosition || { x: 50, y: 50 };
+    const currentZoom = memory.imageZoom || 1;
     
     const modal = document.createElement('div');
     modal.className = 'image-adjust-modal';
@@ -1874,7 +1898,7 @@ window.startImageAdjust = function(memoryId, imageIndex) {
         <div class="image-adjust-content">
             <h3>Adjust Image Position</h3>
             <div class="image-adjust-preview">
-                <img src="${memory.images[imageIndex]}" id="adjust-preview-img" style="object-fit: cover; object-position: ${currentPos.x}% ${currentPos.y}%">
+                <img src="${memory.images[imageIndex]}" id="adjust-preview-img" style="object-fit: cover; object-position: ${currentPos.x}% ${currentPos.y}%; transform: scale(${currentZoom});">
             </div>
             <div class="adjust-controls">
                 <label>
@@ -1884,6 +1908,10 @@ window.startImageAdjust = function(memoryId, imageIndex) {
                 <label>
                     <span>Vertical</span>
                     <input type="range" id="adjust-y" min="0" max="100" value="${currentPos.y}">
+                </label>
+                <label>
+                    <span>Zoom</span>
+                    <input type="range" id="adjust-zoom" min="1" max="2.5" step="0.05" value="${currentZoom}">
                 </label>
             </div>
             <div class="adjust-buttons">
@@ -1898,6 +1926,7 @@ window.startImageAdjust = function(memoryId, imageIndex) {
     const img = document.getElementById('adjust-preview-img');
     const xSlider = document.getElementById('adjust-x');
     const ySlider = document.getElementById('adjust-y');
+    const zoomSlider = document.getElementById('adjust-zoom');
     
     xSlider.addEventListener('input', (e) => {
         img.style.objectPosition = `${e.target.value}% ${ySlider.value}%`;
@@ -1906,17 +1935,23 @@ window.startImageAdjust = function(memoryId, imageIndex) {
     ySlider.addEventListener('input', (e) => {
         img.style.objectPosition = `${xSlider.value}% ${e.target.value}%`;
     });
+    
+    zoomSlider.addEventListener('input', (e) => {
+        img.style.transform = `scale(${e.target.value})`;
+    });
 };
 
 window.saveImagePosition = async function(memoryId) {
     const xValue = parseInt(document.getElementById('adjust-x').value);
     const yValue = parseInt(document.getElementById('adjust-y').value);
+    const zoomValue = parseFloat(document.getElementById('adjust-zoom').value);
     
     showLoading(true);
     
     try {
         await memoriesCollection.doc(memoryId).update({
-            imagePosition: { x: xValue, y: yValue }
+            imagePosition: { x: xValue, y: yValue },
+            imageZoom: zoomValue
         });
         
         console.log('✅ Image position saved');
@@ -1944,14 +1979,13 @@ function viewSinglePhoto(memoryId) {
     const date = memory.memoryDate ? memory.memoryDate.toDate() : new Date();
     const formattedDate = formatMemoryDate(date);
     
-    const posX = memory.imagePosition ? memory.imagePosition.x : 50;
-    const posY = memory.imagePosition ? memory.imagePosition.y : 50;
+    const imgStyle = getImageStyle(memory);
     
     const container = document.getElementById('single-photo-container');
     container.innerHTML = `
         <div class="viewer-polaroid">
             <div class="viewer-polaroid-photo">
-                <img src="${memory.images[0]}" alt="Memory" style="object-fit: cover; object-position: ${posX}% ${posY}%">
+                <img src="${memory.images[0]}" alt="Memory" style="${imgStyle}">
             </div>
             <div class="viewer-polaroid-caption">
                 <p class="viewer-date">${formattedDate}</p>
@@ -1992,13 +2026,12 @@ function renderAlbumPhoto(memory) {
     const container = document.getElementById('album-photos-container');
     const currentImage = memory.images[currentAlbumIndex];
     
-    const posX = memory.imagePosition ? memory.imagePosition.x : 50;
-    const posY = memory.imagePosition ? memory.imagePosition.y : 50;
+    const imgStyle = getImageStyle(memory);
     
     container.innerHTML = `
         <div class="viewer-polaroid swipeable-polaroid">
             <div class="viewer-polaroid-photo">
-                <img src="${currentImage}" alt="Photo ${currentAlbumIndex + 1}" style="object-fit: cover; object-position: ${posX}% ${posY}%">
+                <img src="${currentImage}" alt="Photo ${currentAlbumIndex + 1}" style="${imgStyle}">
             </div>
         </div>
     `;
@@ -2068,6 +2101,13 @@ async function handleMemoryDelete() {
 function formatMemoryDate(date) {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+function getImageStyle(memory) {
+    const posX = memory.imagePosition ? memory.imagePosition.x : 50;
+    const posY = memory.imagePosition ? memory.imagePosition.y : 50;
+    const zoom = memory.imageZoom || 1;
+    return `object-fit: cover; object-position: ${posX}% ${posY}%${zoom !== 1 ? `; transform: scale(${zoom})` : ''}`;
 }
 
 // Notes Handling
