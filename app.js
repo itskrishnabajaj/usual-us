@@ -1695,14 +1695,18 @@ function removePhoto(index) {
 }
 
 // Zoom in/out on photo preview when adding memories
+const ZOOM_MIN = 1;
+const ZOOM_MAX = 3;
+const ZOOM_STEP = 0.2;
+
 window.zoomPreview = function(btn, delta) {
     const item = btn.closest('.photo-preview-item');
     if (!item) return;
     const img = item.querySelector('img');
     if (!img) return;
     
-    let currentZoom = parseFloat(item.dataset.zoom) || 1;
-    currentZoom = Math.min(3, Math.max(1, currentZoom + delta));
+    let currentZoom = parseFloat(item.dataset.zoom) || ZOOM_MIN;
+    currentZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, currentZoom + delta));
     item.dataset.zoom = currentZoom.toString();
     img.style.transform = `scale(${currentZoom})`;
 };
