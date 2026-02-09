@@ -100,6 +100,7 @@ let isSubmitting = false;
 let recentlyPlayed = [];
 let currentMood = null;
 let isPullingToRefresh = false;
+let currentSongIdx = -1;
 
 // Helper functions
 function getPartnerRole() {
@@ -141,34 +142,22 @@ document.addEventListener('DOMContentLoaded', () => {
 // FIXED: Music Player Initialization
 function initializeMusicPlayer() {
     musicPlayer = document.getElementById('music-player');
-    const songSelector = document.getElementById('song-selector');
+    const songList = document.getElementById('song-list');
     
-    if (!musicPlayer || !songSelector) {
+    if (!musicPlayer || !songList) {
         console.error('❌ Music player elements not found');
         return;
     }
     
-    // Force clear existing options
-    songSelector.innerHTML = '';
-    
-    // Add default option
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.textContent = 'Select a song...';
-    defaultOption.disabled = true;
-    defaultOption.selected = true;
-    songSelector.appendChild(defaultOption);
-    
-    // Add all 15 songs
-    PLAYLIST.forEach((song, index) => {
-        const option = document.createElement('option');
-        option.value = index;
-        option.textContent = song.title;
-        songSelector.appendChild(option);
-    });
+    // Build visual song list
+    songList.innerHTML = PLAYLIST.map((song, index) => 
+        `<div class="song-item" data-index="${index}" onclick="selectSong(${index})">
+            <span class="song-item-number">${index + 1}</span>
+            <span class="song-item-title">${song.title}</span>
+        </div>`
+    ).join('');
     
     console.log('✅ Music player initialized with', PLAYLIST.length, 'songs');
-    console.log('📋 Dropdown options:', songSelector.options.length);
     
     // Load recently played
     const stored = localStorage.getItem('recentlyPlayed');
@@ -181,6 +170,28 @@ function initializeMusicPlayer() {
         }
     }
 }
+
+// Select and load a song from the list
+window.selectSong = function(index) {
+    if (index < 0 || index >= PLAYLIST.length) return;
+    
+    currentSongIdx = index;
+    
+    // Highlight selected
+    document.querySelectorAll('.song-item').forEach(el => el.classList.remove('active'));
+    const activeItem = document.querySelector(`.song-item[data-index="${index}"]`);
+    if (activeItem) activeItem.classList.add('active');
+    
+    const song = PLAYLIST[index];
+    console.log('🎵 Loading song:', song.title);
+    
+    musicPlayer.src = song.url;
+    musicPlayer.load();
+    
+    document.getElementById('play-pause-btn').disabled = false;
+    document.getElementById('seek-bar').disabled = false;
+    document.getElementById('play-pause-btn').textContent = '▶';
+};
 
 // NEW: Recently Played Songs
 function addToRecentlyPlayed(songIndex) {
@@ -218,9 +229,7 @@ function renderRecentlyPlayed() {
 }
 
 window.playRecentSong = function(index) {
-    const selector = document.getElementById('song-selector');
-    selector.value = index;
-    handleSongSelect({ target: { value: index } });
+    window.selectSong(index);
     togglePlayPause();
 };
 
@@ -544,7 +553,6 @@ function setupEventListeners() {
         document.getElementById('music-player-panel').classList.add('hidden');
     });
     
-    document.getElementById('song-selector').addEventListener('change', handleSongSelect);
     document.getElementById('play-pause-btn').addEventListener('click', togglePlayPause);
     document.getElementById('seek-bar').addEventListener('input', handleSeek);
     
@@ -819,40 +827,14 @@ function toggleMusicPlayer() {
     panel.classList.toggle('hidden');
 }
 
-function handleSongSelect(e) {
-    const index = parseInt(e.target.value);
-    
-    console.log('🎵 Song select event:', e.target.value);
-    
-    if (isNaN(index) || index < 0 || index >= PLAYLIST.length) {
-        console.warn('⚠️ Invalid song index:', e.target.value);
-        return;
-    }
-    
-    const song = PLAYLIST[index];
-    
-    console.log('🎵 Loading song:', song.title);
-    console.log('🔗 Song URL:', song.url);
-    
-    musicPlayer.src = song.url;
-    musicPlayer.load();
-    
-    document.getElementById('play-pause-btn').disabled = false;
-    document.getElementById('seek-bar').disabled = false;
-    document.getElementById('play-pause-btn').textContent = '▶';
-    
-    console.log('✅ Song loaded successfully');
-}
-
 function togglePlayPause() {
     if (musicPlayer.paused) {
         musicPlayer.play();
         document.getElementById('play-pause-btn').textContent = '⏸';
         
         // Add to recently played
-        const currentSongIndex = parseInt(document.getElementById('song-selector').value);
-        if (!isNaN(currentSongIndex)) {
-            addToRecentlyPlayed(currentSongIndex);
+        if (currentSongIdx >= 0) {
+            addToRecentlyPlayed(currentSongIdx);
         }
     } else {
         musicPlayer.pause();

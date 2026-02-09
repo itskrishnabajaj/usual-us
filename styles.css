@@ -802,6 +802,16 @@ textarea {
     padding-top: 10px;
     position: relative;
     overflow: hidden;
+    background: linear-gradient(170deg, #fdf2f0 0%, #fce4ec 30%, #f9dde5 55%, #fef5e7 80%, #fdf2f0 100%);
+    min-height: 100vh;
+    /* Scoped color variables for light background */
+    --us-text: #3a2e2e;
+    --us-text-secondary: #6b5b5b;
+    --us-text-muted: #8b7b7b;
+    --us-card-bg: rgba(255, 255, 255, 0.55);
+    --us-card-border: rgba(194, 24, 91, 0.15);
+    --us-accent: #c2185b;
+    color: var(--us-text);
 }
 
 /* Ambient floating particles */
@@ -813,12 +823,12 @@ textarea {
     right: 0;
     height: 100%;
     background-image: 
-        radial-gradient(2px 2px at 20% 30%, rgba(255, 198, 217, 0.15), transparent),
-        radial-gradient(2px 2px at 60% 70%, rgba(255, 198, 217, 0.1), transparent),
-        radial-gradient(1px 1px at 50% 50%, rgba(255, 198, 217, 0.12), transparent),
-        radial-gradient(1px 1px at 80% 10%, rgba(255, 198, 217, 0.08), transparent),
-        radial-gradient(2px 2px at 90% 60%, rgba(255, 198, 217, 0.1), transparent),
-        radial-gradient(1px 1px at 33% 80%, rgba(255, 198, 217, 0.12), transparent);
+        radial-gradient(2px 2px at 20% 30%, rgba(194, 24, 91, 0.08), transparent),
+        radial-gradient(2px 2px at 60% 70%, rgba(194, 24, 91, 0.06), transparent),
+        radial-gradient(1px 1px at 50% 50%, rgba(194, 24, 91, 0.07), transparent),
+        radial-gradient(1px 1px at 80% 10%, rgba(194, 24, 91, 0.05), transparent),
+        radial-gradient(2px 2px at 90% 60%, rgba(194, 24, 91, 0.06), transparent),
+        radial-gradient(1px 1px at 33% 80%, rgba(194, 24, 91, 0.07), transparent);
     background-size: 200% 200%;
     background-position: 50% 50%;
     animation: float 20s ease-in-out infinite;
@@ -903,28 +913,66 @@ textarea {
 }
 
 .song-selector {
-    width: 100%;
-    padding: 14px 16px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 16px;
-    color: rgba(255, 255, 255, 0.95);
-    font-size: 15px;
+    display: none;
+}
+
+.song-list {
+    max-height: 200px;
+    overflow-y: auto;
     margin-bottom: 20px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.song-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.song-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+.song-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
     cursor: pointer;
-    backdrop-filter: blur(8px);
     transition: all var(--transition-fast);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.song-selector:focus {
-    outline: none;
-    border-color: var(--accent);
-    background: rgba(255, 255, 255, 0.12);
+.song-item:last-child {
+    border-bottom: none;
 }
 
-.song-selector option {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
+.song-item:active,
+.song-item.active {
+    background: rgba(255, 198, 217, 0.15);
+}
+
+.song-item-number {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+    min-width: 20px;
+    text-align: center;
+}
+
+.song-item-title {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.85);
+    flex: 1;
+}
+
+.song-item.active .song-item-title {
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.song-item.active .song-item-number {
+    color: var(--accent);
 }
 
 .control-row {
@@ -1058,7 +1106,7 @@ textarea {
     font-weight: 600;
     font-style: italic;
     margin-bottom: 8px;
-    background: linear-gradient(90deg, var(--accent) 0%, var(--text-primary) 50%, var(--accent) 100%);
+    background: linear-gradient(90deg, #c2185b 0%, #e91e63 50%, #c2185b 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -1070,20 +1118,20 @@ textarea {
 
 .us-subtitle {
     font-size: 14px;
-    color: var(--text-secondary);
+    color: var(--us-text-secondary, var(--text-secondary));
     margin-bottom: 12px;
 }
 
 .us-day-counter {
     font-size: 13px;
-    color: var(--text-tertiary);
+    color: var(--us-text-muted, var(--text-tertiary));
     animation: breathe 4s ease-in-out infinite;
 }
 
 /* NEW: Last Seen Indicator */
 .partner-last-seen {
     font-size: 12px;
-    color: var(--text-tertiary);
+    color: var(--us-text-muted, var(--text-tertiary));
     margin-top: 8px;
     font-style: italic;
 }
@@ -1107,14 +1155,14 @@ textarea {
 
 /* Ritual Quote Card */
 .ritual-card {
-    background: linear-gradient(135deg, rgba(255, 198, 217, 0.12) 0%, rgba(255, 198, 217, 0.06) 100%);
-    border: 1px solid rgba(255, 198, 217, 0.3);
+    background: var(--us-card-bg, linear-gradient(135deg, rgba(255, 198, 217, 0.12) 0%, rgba(255, 198, 217, 0.06) 100%));
+    border: 1px solid var(--us-card-border, rgba(255, 198, 217, 0.3));
     border-radius: 24px;
     padding: 36px 28px;
     margin-bottom: 24px;
     text-align: center;
     backdrop-filter: blur(10px);
-    box-shadow: 0 12px 40px rgba(255, 198, 217, 0.2);
+    box-shadow: 0 8px 32px rgba(194, 24, 91, 0.08);
     position: relative;
     animation: breathe 6s ease-in-out infinite;
 }
@@ -1125,7 +1173,7 @@ textarea {
     top: 10px;
     left: 15px;
     font-size: 72px;
-    color: rgba(255, 198, 217, 0.2);
+    color: rgba(194, 24, 91, 0.15);
     font-family: 'Playfair Display', serif;
     line-height: 1;
 }
@@ -1136,7 +1184,7 @@ textarea {
     bottom: -10px;
     right: 15px;
     font-size: 72px;
-    color: rgba(255, 198, 217, 0.2);
+    color: rgba(194, 24, 91, 0.15);
     font-family: 'Playfair Display', serif;
     line-height: 1;
 }
@@ -1146,23 +1194,24 @@ textarea {
     font-size: 20px;
     font-style: italic;
     line-height: 1.8;
-    color: var(--text-primary);
+    color: var(--us-text, var(--text-primary));
     font-weight: 400;
 }
 
 /* NEW: Mood Tracker */
 .mood-tracker {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    background: var(--us-card-bg, var(--bg-secondary));
+    border: 1px solid var(--us-card-border, var(--border-color));
     border-radius: 16px;
     padding: 24px;
     margin-bottom: 24px;
     text-align: center;
+    backdrop-filter: blur(10px);
 }
 
 .mood-tracker-title {
     font-size: 15px;
-    color: var(--text-secondary);
+    color: var(--us-text-secondary, var(--text-secondary));
     margin-bottom: 20px;
 }
 
@@ -1176,8 +1225,8 @@ textarea {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: var(--bg-tertiary);
-    border: 2px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.7);
+    border: 2px solid var(--us-card-border, var(--border-color));
     font-size: 28px;
     cursor: pointer;
     transition: all var(--transition-normal);
@@ -1190,24 +1239,25 @@ textarea {
 }
 
 .mood-option.selected {
-    background: rgba(255, 198, 217, 0.15);
-    border-color: var(--accent);
+    background: rgba(194, 24, 91, 0.1);
+    border-color: var(--us-accent, var(--accent));
     animation: glow 2s ease-in-out infinite;
 }
 
 .current-mood-display {
     margin-top: 12px;
     font-size: 13px;
-    color: var(--accent);
+    color: var(--us-accent, var(--accent));
 }
 
 /* NEW: Memory Highlight */
 .memory-highlight {
-    background: linear-gradient(135deg, rgba(255, 198, 217, 0.1) 0%, rgba(255, 198, 217, 0.05) 100%);
-    border: 1px solid rgba(255, 198, 217, 0.3);
+    background: var(--us-card-bg, linear-gradient(135deg, rgba(255, 198, 217, 0.1) 0%, rgba(255, 198, 217, 0.05) 100%));
+    border: 1px solid var(--us-card-border, rgba(255, 198, 217, 0.3));
     border-radius: 16px;
     padding: 16px;
     margin-bottom: 20px;
+    backdrop-filter: blur(10px);
 }
 
 .highlight-banner {
@@ -1216,7 +1266,7 @@ textarea {
 
 .highlight-text {
     font-size: 14px;
-    color: var(--accent);
+    color: var(--us-accent, var(--accent));
     margin-bottom: 12px;
     font-weight: 500;
 }
@@ -1237,12 +1287,13 @@ textarea {
 .daily-reminder {
     text-align: center;
     padding: 12px;
-    background: rgba(251, 191, 36, 0.1);
+    background: rgba(255, 255, 255, 0.5);
     border: 1px solid rgba(251, 191, 36, 0.3);
     border-radius: 12px;
     margin-bottom: 20px;
     font-size: 14px;
-    color: var(--warning);
+    color: #b8860b;
+    backdrop-filter: blur(10px);
 }
 
 /* Add Memory Button */
@@ -1253,14 +1304,15 @@ textarea {
 
 .btn-add-memory-minimal {
     padding: 14px 32px;
-    background: rgba(255, 198, 217, 0.1);
-    border: 1px solid rgba(255, 198, 217, 0.3);
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--us-card-border, rgba(255, 198, 217, 0.3));
     border-radius: 24px;
-    color: var(--accent);
+    color: var(--us-accent, var(--accent));
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-fast);
+    backdrop-filter: blur(10px);
 }
 
 .btn-add-memory-minimal:active {
@@ -1322,24 +1374,24 @@ textarea {
     padding-bottom: 60px;
     border-radius: 4px;
     box-shadow: 
-        0 12px 48px rgba(0, 0, 0, 0.5),
-        0 6px 20px rgba(0, 0, 0, 0.35);
+        0 12px 48px rgba(0, 0, 0, 0.15),
+        0 6px 20px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     transition: all var(--transition-normal);
-    max-width: 280px;
+    width: 260px;
     position: relative;
 }
 
 .polaroid:active {
     transform: scale(0.97) translateZ(0) !important;
     box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 4px 16px rgba(0, 0, 0, 0.3);
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .polaroid-photo {
     width: 100%;
-    height: 280px;
+    aspect-ratio: 1;
     background: #f0f0f0;
     border-radius: 2px;
     overflow: hidden;
@@ -1397,7 +1449,7 @@ textarea {
 /* Photo Stack (Albums) */
 .photo-stack {
     position: relative;
-    max-width: 280px;
+    width: 260px;
     cursor: pointer;
 }
 
@@ -1452,12 +1504,12 @@ textarea {
 .empty-memories {
     text-align: center;
     padding: 60px 20px;
-    color: var(--text-secondary);
+    color: var(--us-text-muted, var(--text-secondary));
 }
 
 .empty-memories-sub {
     font-size: 14px;
-    color: var(--text-tertiary);
+    color: var(--us-text-muted, var(--text-tertiary));
     margin-top: 8px;
 }
 
@@ -1472,28 +1524,31 @@ textarea {
 
 .notes-title {
     font-size: 16px;
-    color: var(--text-secondary);
+    color: var(--us-text-secondary, var(--text-secondary));
     margin-bottom: 20px;
     text-align: center;
 }
 
 .notes-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 16px;
     margin-bottom: 20px;
 }
 
 .sticky-note {
+    width: 150px;
     padding: 16px;
     border-radius: 4px;
     box-shadow: 
-        0 6px 16px rgba(0, 0, 0, 0.25),
-        0 2px 8px rgba(0, 0, 0, 0.2);
+        0 6px 16px rgba(0, 0, 0, 0.1),
+        0 2px 8px rgba(0, 0, 0, 0.06);
     min-height: 120px;
     cursor: pointer;
     transition: all var(--transition-fast);
     position: relative;
+    flex-shrink: 0;
 }
 
 .sticky-note::before {
@@ -1520,12 +1575,14 @@ textarea {
     font-size: 13px;
     line-height: 1.6;
     color: #333;
+    text-align: center;
+    word-break: break-word;
 }
 
 .notes-empty {
     text-align: center;
     padding: 40px 20px;
-    color: var(--text-tertiary);
+    color: var(--us-text-muted, var(--text-tertiary));
     font-size: 14px;
 }
 
@@ -1533,10 +1590,10 @@ textarea {
     display: block;
     margin: 0 auto;
     padding: 12px 24px;
-    background: rgba(255, 198, 217, 0.1);
-    border: 1px solid rgba(255, 198, 217, 0.3);
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--us-card-border, rgba(255, 198, 217, 0.3));
     border-radius: 20px;
-    color: var(--accent);
+    color: var(--us-accent, var(--accent));
     font-size: 14px;
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -1553,7 +1610,7 @@ textarea {
 
 .secret-notes-title {
     font-size: 16px;
-    color: var(--text-secondary);
+    color: var(--us-text-secondary, var(--text-secondary));
     margin-bottom: 20px;
     text-align: center;
 }
@@ -1566,11 +1623,12 @@ textarea {
 }
 
 .secret-note {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    background: var(--us-card-bg, var(--bg-secondary));
+    border: 1px solid var(--us-card-border, var(--border-color));
     border-radius: 16px;
     padding: 20px;
     text-align: center;
+    backdrop-filter: blur(10px);
 }
 
 .secret-note.locked {
@@ -1578,8 +1636,8 @@ textarea {
 }
 
 .secret-note.unlocked {
-    background: linear-gradient(135deg, rgba(255, 198, 217, 0.1) 0%, rgba(255, 198, 217, 0.05) 100%);
-    border-color: rgba(255, 198, 217, 0.3);
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(194, 24, 91, 0.25);
 }
 
 .secret-note-icon {
@@ -1591,33 +1649,34 @@ textarea {
     font-size: 15px;
     font-weight: 500;
     margin-bottom: 8px;
+    color: var(--us-text, inherit);
 }
 
 .secret-note-content {
     font-size: 14px;
     line-height: 1.8;
-    color: var(--text-primary);
+    color: var(--us-text, var(--text-primary));
     margin-bottom: 8px;
 }
 
 .secret-note-countdown {
     font-size: 12px;
-    color: var(--text-tertiary);
+    color: var(--us-text-muted, var(--text-tertiary));
 }
 
 .secret-note-date {
     font-size: 12px;
-    color: var(--accent);
+    color: var(--us-accent, var(--accent));
 }
 
 .btn-add-secret-note {
     display: block;
     margin: 0 auto;
     padding: 12px 24px;
-    background: rgba(255, 198, 217, 0.1);
-    border: 1px solid rgba(255, 198, 217, 0.3);
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--us-card-border, rgba(255, 198, 217, 0.3));
     border-radius: 20px;
-    color: var(--accent);
+    color: var(--us-accent, var(--accent));
     font-size: 14px;
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -1630,13 +1689,20 @@ textarea {
 .empty-secret-notes {
     text-align: center;
     padding: 40px 20px;
-    color: var(--text-tertiary);
+    color: var(--us-text-muted, var(--text-tertiary));
     font-size: 14px;
 }
 
 /* Late Night Mode */
 .us-tab.late-night {
     background: linear-gradient(180deg, #0a0a0a 0%, #0f0f1e 50%, #1a1a2e 100%);
+    --us-text: #ffffff;
+    --us-text-secondary: #a0a0a0;
+    --us-text-muted: #707070;
+    --us-card-bg: rgba(26, 26, 26, 0.8);
+    --us-card-border: rgba(255, 255, 255, 0.1);
+    --us-accent: #ffc6d9;
+    color: #ffffff;
 }
 
 .us-tab.late-night .ritual-card {
@@ -1652,6 +1718,15 @@ textarea {
     background-clip: text;
 }
 
+.us-tab.late-night .mood-option {
+    background: var(--bg-tertiary);
+}
+
+.us-tab.late-night .ritual-card::before,
+.us-tab.late-night .ritual-card::after {
+    color: rgba(139, 92, 246, 0.2);
+}
+
 .late-night-message {
     text-align: center;
     padding: 20px;
@@ -1659,7 +1734,7 @@ textarea {
     font-family: 'Playfair Display', serif;
     font-size: 18px;
     font-style: italic;
-    color: var(--text-secondary);
+    color: var(--us-text-secondary, var(--text-secondary));
     animation: fadeInUp 1s ease-out;
 }
 
@@ -2399,15 +2474,19 @@ textarea {
     }
     
     .polaroid {
-        max-width: 240px;
+        width: 220px;
     }
     
-    .polaroid-photo {
-        height: 240px;
+    .photo-stack {
+        width: 220px;
     }
     
     .notes-container {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+    }
+    
+    .sticky-note {
+        width: 130px;
     }
 }
 
@@ -2462,11 +2541,9 @@ textarea {
 @keyframes breathe {
     0%, 100% {
         opacity: 1;
-        transform: scale(1);
     }
     50% {
         opacity: 0.7;
-        transform: scale(1.02);
     }
 }
 
@@ -2481,11 +2558,11 @@ textarea {
 
 @keyframes glow {
     0%, 100% {
-        box-shadow: 0 0 20px rgba(255, 198, 217, 0.4);
+        box-shadow: 0 0 20px rgba(194, 24, 91, 0.3);
         transform: scale(1.1);
     }
     50% {
-        box-shadow: 0 0 35px rgba(255, 198, 217, 0.7);
+        box-shadow: 0 0 35px rgba(194, 24, 91, 0.5);
         transform: scale(1.15);
     }
 }
