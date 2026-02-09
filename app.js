@@ -847,6 +847,7 @@ function renderMilestones() {
     
     const milestones = [
         { days: 50, emoji: '🌟', title: '50 Days Together' },
+        { days: 90, emoji: '💕', title: '3 Months Together!' },
         { days: 100, emoji: '💯', title: '100 Days Together' },
         { days: 150, emoji: '🌸', title: '150 Days Together' },
         { days: 200, emoji: '🎉', title: '200 Days Together' },
