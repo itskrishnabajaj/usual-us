@@ -58,6 +58,19 @@
         <main id="main-content">
             <!-- Home Tab -->
             <section id="home-tab" class="tab-content active">
+                <!-- Balance Card -->
+                <div class="balance-card">
+                    <div class="balance-label">Current Balance</div>
+                    <div id="balance-amount" class="balance-amount">₹0</div>
+                    <div id="balance-status" class="balance-status"></div>
+                </div>
+                
+                <!-- Who Pays Next -->
+                <div class="who-pays-next">
+                    <div class="who-pays-label">Who pays next?</div>
+                    <div id="who-pays-indicator" class="who-pays-indicator">🎲</div>
+                </div>
+
                 <!-- Budget Progress Card -->
                 <div id="budget-progress-card" class="budget-progress-card hidden">
                     <div class="budget-header">
@@ -73,19 +86,6 @@
                         <div id="budget-progress-fill" class="budget-progress-fill" style="width: 0%"></div>
                     </div>
                     <div id="budget-warning" class="budget-warning hidden">⚠️ Over 80% of budget used!</div>
-                </div>
-
-                <!-- Balance Card -->
-                <div class="balance-card">
-                    <div class="balance-label">Current Balance</div>
-                    <div id="balance-amount" class="balance-amount">₹0</div>
-                    <div id="balance-status" class="balance-status"></div>
-                </div>
-                
-                <!-- Who Pays Next -->
-                <div class="who-pays-next">
-                    <div class="who-pays-label">Who pays next?</div>
-                    <div id="who-pays-indicator" class="who-pays-indicator">🎲</div>
                 </div>
 
                 <!-- Settle Button -->
@@ -220,7 +220,7 @@
             <!-- Us Tab -->
             <section id="us-tab" class="tab-content us-tab">
                 <!-- Music Player Toggle Button -->
-                <button id="music-player-toggle" class="music-player-toggle">🎵</button>
+                <button id="music-player-toggle" class="music-player-toggle hidden">🎵</button>
                 
                 <!-- Music Player Panel (NEW: Upper-center positioned) -->
                 <div id="music-player-panel" class="music-player-panel hidden">
@@ -230,7 +230,6 @@
                     </div>
                     
                     <select id="song-selector" class="song-selector">
-                        <option value="">Select a song...</option>
                     </select>
                     
                     <div class="music-controls">
@@ -266,7 +265,14 @@
                 <!-- Divider -->
                 <div class="us-divider">
                     <svg viewBox="0 0 200 20" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0 10 Q50 5, 100 10 T200 10" stroke="currentColor" fill="none" stroke-width="1" opacity="0.3"/>
+                        <defs>
+                            <linearGradient id="pink-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#ffc6d9;stop-opacity:0.3" />
+                                <stop offset="50%" style="stop-color:#ffc6d9;stop-opacity:0.7" />
+                                <stop offset="100%" style="stop-color:#ffc6d9;stop-opacity:0.3" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M0 10 Q50 5, 100 10 T200 10" stroke="url(#pink-gradient)" fill="none" stroke-width="1"/>
                     </svg>
                 </div>
 
