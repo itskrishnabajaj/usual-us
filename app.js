@@ -251,6 +251,22 @@ window.playRecentSong = function(index) {
     togglePlayPause();
 };
 
+// Toggle recently played list visibility
+function toggleRecentlyPlayed() {
+    const list = document.getElementById('recently-played-list');
+    const arrow = document.getElementById('recently-played-arrow');
+    if (!list || !arrow) return;
+    
+    const isExpanded = list.classList.contains('expanded');
+    if (isExpanded) {
+        list.classList.remove('expanded');
+        arrow.classList.remove('expanded');
+    } else {
+        list.classList.add('expanded');
+        arrow.classList.add('expanded');
+    }
+}
+
 // Authentication
 function initializeAuth() {
     const savedUserId = localStorage.getItem('usual_us_user_id');
@@ -569,10 +585,18 @@ function setupEventListeners() {
     document.getElementById('music-player-toggle').addEventListener('click', toggleMusicPlayer);
     document.getElementById('close-music-player').addEventListener('click', () => {
         document.getElementById('music-player-panel').classList.add('hidden');
+        const backdrop = document.querySelector('.music-panel-backdrop');
+        if (backdrop) backdrop.remove();
     });
     
     document.getElementById('play-pause-btn').addEventListener('click', togglePlayPause);
     document.getElementById('seek-bar').addEventListener('input', handleSeek);
+    
+    // Recently played toggle
+    const recentToggleBtn = document.getElementById('recently-played-toggle-btn');
+    if (recentToggleBtn) {
+        recentToggleBtn.addEventListener('click', toggleRecentlyPlayed);
+    }
     
     // NEW: Pull to Refresh
     setupPullToRefresh();
@@ -846,7 +870,24 @@ function renderMoodIndicator() {
 // Music Player Functions
 function toggleMusicPlayer() {
     const panel = document.getElementById('music-player-panel');
-    panel.classList.toggle('hidden');
+    const isHidden = panel.classList.contains('hidden');
+    
+    if (isHidden) {
+        // Show backdrop and panel
+        let backdrop = document.querySelector('.music-panel-backdrop');
+        if (!backdrop) {
+            backdrop = document.createElement('div');
+            backdrop.className = 'music-panel-backdrop';
+            backdrop.addEventListener('click', toggleMusicPlayer);
+            document.body.appendChild(backdrop);
+        }
+        panel.classList.remove('hidden');
+    } else {
+        // Hide backdrop and panel
+        const backdrop = document.querySelector('.music-panel-backdrop');
+        if (backdrop) backdrop.remove();
+        panel.classList.add('hidden');
+    }
 }
 
 function togglePlayPause() {
@@ -1626,9 +1667,14 @@ function handlePhotoSelect(e) {
         reader.onload = (e) => {
             const preview = document.createElement('div');
             preview.className = 'photo-preview-item';
+            preview.dataset.zoom = '1';
             preview.innerHTML = `
                 <img src="${e.target.result}" alt="Preview ${index + 1}">
                 <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
+                <div class="photo-preview-zoom">
+                    <button type="button" class="btn-zoom" onclick="zoomPreview(this, -0.2)">−</button>
+                    <button type="button" class="btn-zoom" onclick="zoomPreview(this, 0.2)">+</button>
+                </div>
             `;
             previewContainer.appendChild(preview);
         };
@@ -1647,6 +1693,23 @@ function removePhoto(index) {
     const previewContainer = document.getElementById('photos-preview');
     previewContainer.children[index].remove();
 }
+
+// Zoom in/out on photo preview when adding memories
+const ZOOM_MIN = 1;
+const ZOOM_MAX = 3;
+const ZOOM_STEP = 0.2;
+
+window.zoomPreview = function(btn, delta) {
+    const item = btn.closest('.photo-preview-item');
+    if (!item) return;
+    const img = item.querySelector('img');
+    if (!img) return;
+    
+    let currentZoom = parseFloat(item.dataset.zoom) || ZOOM_MIN;
+    currentZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, currentZoom + delta));
+    item.dataset.zoom = currentZoom.toString();
+    img.style.transform = `scale(${currentZoom})`;
+};
 
 async function handleMemoryUpload(e) {
     e.preventDefault();

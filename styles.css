@@ -163,8 +163,8 @@ body {
 }
 
 #app-header.us-active {
-    background: rgba(253, 242, 240, 0.9);
-    border-bottom-color: rgba(194, 24, 91, 0.1);
+    background: #fdf2f0;
+    border-bottom-color: transparent;
     color: #3a2e2e;
 }
 
@@ -808,10 +808,15 @@ textarea {
 .us-tab {
     padding-top: 10px;
     padding-bottom: 80px;
+    padding-left: 20px;
+    padding-right: 20px;
     position: relative;
     overflow: hidden;
     background: linear-gradient(170deg, #fdf2f0 0%, #fce4ec 30%, #f9dde5 55%, #fef5e7 80%, #fdf2f0 100%);
     min-height: 100vh;
+    /* Break out of #main-content max-width */
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
     /* Scoped color variables for light background */
     --us-text: #3a2e2e;
     --us-text-secondary: #6b5b5b;
@@ -871,7 +876,7 @@ textarea {
 /* NEW: Music Player Panel - Upper Center Positioned */
 .music-player-panel {
     position: fixed;
-    top: 25%;
+    top: 15%;
     left: 50%;
     transform: translate(-50%, 0);
     width: 90%;
@@ -888,6 +893,19 @@ textarea {
         inset 0 1px 0 rgba(255, 255, 255, 0.1),
         inset 0 -1px 0 rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Music panel backdrop overlay */
+.music-panel-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 899;
+    animation: fadeIn 0.2s ease-out;
 }
 
 .music-player-header {
@@ -1058,23 +1076,52 @@ textarea {
 
 /* NEW: Recently Played Section */
 .recently-played-section {
-    margin-top: 20px;
-    padding-top: 20px;
+    margin-top: 16px;
+    padding-top: 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.recently-played-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    padding: 4px 0;
 }
 
 .recently-played-title {
     font-size: 13px;
     color: rgba(255, 255, 255, 0.6);
-    margin-bottom: 12px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    margin-bottom: 0;
+}
+
+.recently-played-toggle {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.4);
+    transition: transform var(--transition-fast);
+    line-height: 1;
+}
+
+.recently-played-toggle.expanded {
+    transform: rotate(180deg);
 }
 
 .recently-played-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--transition-normal), margin var(--transition-normal);
+    margin-top: 0;
+}
+
+.recently-played-list.expanded {
+    max-height: 300px;
+    margin-top: 10px;
 }
 
 .recent-song {
@@ -1105,7 +1152,35 @@ textarea {
 /* Us Header */
 .us-header-section {
     text-align: center;
-    padding: 20px 0 30px;
+    padding: 28px 0 30px;
+    position: relative;
+}
+
+/* Decorative sparkles around header */
+.us-header-section::before,
+.us-header-section::after {
+    content: '✦';
+    position: absolute;
+    font-size: 10px;
+    color: rgba(194, 24, 91, 0.2);
+    animation: twinkle 3s ease-in-out infinite;
+}
+
+.us-header-section::before {
+    top: 24px;
+    left: 15%;
+    animation-delay: 0s;
+}
+
+.us-header-section::after {
+    top: 30px;
+    right: 15%;
+    animation-delay: 1.5s;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 0.7; transform: scale(1.2); }
 }
 
 .us-title {
@@ -1138,10 +1213,35 @@ textarea {
 
 /* NEW: Last Seen Indicator */
 .partner-last-seen {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     font-size: 12px;
     color: var(--us-text-muted, var(--text-tertiary));
-    margin-top: 8px;
-    font-style: italic;
+    margin-top: 12px;
+    font-style: normal;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(194, 24, 91, 0.12);
+    letter-spacing: 0.2px;
+}
+
+.partner-last-seen::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+    animation: lastSeenPulse 2s ease-in-out infinite;
+}
+
+@keyframes lastSeenPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
 }
 
 .us-divider {
@@ -1165,9 +1265,10 @@ textarea {
 .ritual-card {
     background: var(--us-card-bg, linear-gradient(135deg, rgba(255, 198, 217, 0.12) 0%, rgba(255, 198, 217, 0.06) 100%));
     border: 1px solid var(--us-card-border, rgba(255, 198, 217, 0.3));
-    border-radius: 24px;
-    padding: 36px 28px;
-    margin-bottom: 24px;
+    border-radius: 20px;
+    padding: 32px 24px;
+    margin: 0 auto 24px;
+    max-width: 400px;
     text-align: center;
     backdrop-filter: blur(10px);
     box-shadow: 0 8px 32px rgba(194, 24, 91, 0.08);
@@ -1212,7 +1313,8 @@ textarea {
     border: 1px solid var(--us-card-border, var(--border-color));
     border-radius: 16px;
     padding: 24px;
-    margin-bottom: 24px;
+    margin: 0 auto 24px;
+    max-width: 400px;
     text-align: center;
     backdrop-filter: blur(10px);
 }
@@ -1264,7 +1366,8 @@ textarea {
     border: 1px solid var(--us-card-border, rgba(255, 198, 217, 0.3));
     border-radius: 16px;
     padding: 16px;
-    margin-bottom: 20px;
+    margin: 0 auto 20px;
+    max-width: 400px;
     backdrop-filter: blur(10px);
 }
 
@@ -1298,7 +1401,8 @@ textarea {
     background: rgba(255, 255, 255, 0.5);
     border: 1px solid rgba(251, 191, 36, 0.3);
     border-radius: 12px;
-    margin-bottom: 20px;
+    margin: 0 auto 20px;
+    max-width: 400px;
     font-size: 14px;
     color: #b8860b;
     backdrop-filter: blur(10px);
@@ -1346,34 +1450,44 @@ textarea {
     align-items: center;
 }
 
-/* Timeline String */
+/* Timeline String - Elegant beaded chain */
 .polaroid-string {
     width: 2px;
-    height: 40px;
-    background: linear-gradient(180deg, var(--us-accent, var(--accent)) 0%, transparent 100%);
+    height: 48px;
     margin: 0 auto 10px;
-    opacity: 0.5;
     position: relative;
-}
-
-.polaroid-string::before,
-.polaroid-string::after {
-    content: '';
-    position: absolute;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--us-accent, var(--accent));
-    left: 50%;
-    transform: translateX(-50%);
+    background: none;
+    opacity: 1;
 }
 
 .polaroid-string::before {
-    top: 10px;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(180deg, 
+        transparent 0%, 
+        rgba(194, 24, 91, 0.2) 10%, 
+        rgba(194, 24, 91, 0.3) 50%, 
+        rgba(194, 24, 91, 0.2) 90%, 
+        transparent 100%);
 }
 
 .polaroid-string::after {
-    bottom: 10px;
+    content: '♡';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    color: var(--us-accent, var(--accent));
+    opacity: 0.6;
+    background: #fdf2f0;
+    padding: 2px;
+    line-height: 1;
 }
 
 .polaroid {
@@ -1528,31 +1642,37 @@ textarea {
 .notes-section {
     margin-top: 40px;
     margin-bottom: 40px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .notes-title {
-    font-size: 16px;
+    font-size: 15px;
     color: var(--us-text-secondary, var(--text-secondary));
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     text-align: center;
+    font-weight: 400;
+    letter-spacing: 0.3px;
 }
 
 .notes-container {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 16px;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
     margin-bottom: 20px;
 }
 
 .sticky-note {
-    width: 150px;
-    padding: 16px;
-    border-radius: 4px;
+    width: 100%;
+    max-width: 340px;
+    padding: 14px 20px;
+    border-radius: 10px;
     box-shadow: 
-        0 6px 16px rgba(0, 0, 0, 0.1),
-        0 2px 8px rgba(0, 0, 0, 0.06);
-    min-height: 120px;
+        0 4px 12px rgba(0, 0, 0, 0.06),
+        0 1px 4px rgba(0, 0, 0, 0.04);
+    min-height: auto;
     cursor: pointer;
     transition: all var(--transition-fast);
     position: relative;
@@ -1562,14 +1682,12 @@ textarea {
 .sticky-note::before {
     content: '';
     position: absolute;
-    top: -4px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 8px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-    opacity: 0.6;
+    top: 0;
+    left: 20px;
+    width: 40px;
+    height: 3px;
+    background: rgba(194, 24, 91, 0.15);
+    border-radius: 0 0 3px 3px;
 }
 
 .sticky-note:active {
@@ -1583,7 +1701,7 @@ textarea {
     font-size: 13px;
     line-height: 1.6;
     color: #333;
-    text-align: center;
+    text-align: left;
     word-break: break-word;
 }
 
@@ -1613,7 +1731,8 @@ textarea {
 
 /* NEW: Secret Notes */
 .secret-notes-section {
-    margin: 40px 0;
+    margin: 40px auto;
+    max-width: 400px;
 }
 
 .secret-notes-title {
@@ -1711,6 +1830,10 @@ textarea {
     --us-card-border: rgba(255, 255, 255, 0.1);
     --us-accent: #ffc6d9;
     color: #ffffff;
+}
+
+.us-tab.late-night .polaroid-string::after {
+    background: #0f0f1e;
 }
 
 .us-tab.late-night .ritual-card {
@@ -1916,6 +2039,37 @@ textarea {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform var(--transition-fast);
+}
+
+.photo-preview-zoom {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    display: flex;
+    gap: 2px;
+    z-index: 5;
+}
+
+.btn-zoom {
+    width: 22px;
+    height: 22px;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(6px);
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+}
+
+.btn-zoom:active {
+    transform: scale(0.9);
 }
 
 .btn-remove-photo {
@@ -2384,8 +2538,8 @@ textarea {
 }
 
 #bottom-nav.us-active {
-    background: rgba(253, 242, 240, 0.92);
-    border-top-color: rgba(194, 24, 91, 0.1);
+    background: #fdf2f0;
+    border-top-color: rgba(194, 24, 91, 0.08);
 }
 
 #bottom-nav.us-active .nav-item {
@@ -2508,11 +2662,11 @@ textarea {
     }
     
     .notes-container {
-        gap: 12px;
+        gap: 10px;
     }
     
     .sticky-note {
-        width: 130px;
+        max-width: 100%;
     }
 }
 
