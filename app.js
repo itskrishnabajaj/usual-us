@@ -763,6 +763,201 @@ async function initializeUsTab() {
     
     // NEW: Load mood
     loadTodaysMood();
+    
+    // Stars, floating hearts, milestones
+    createUsTabStars();
+    createFloatingHearts();
+    renderMilestones();
+}
+
+function createUsTabStars() {
+    const usHeader = document.querySelector('.us-header-section');
+    if (!usHeader) return;
+    
+    // Remove existing dynamic stars
+    usHeader.querySelectorAll('.dynamic-star').forEach(s => s.remove());
+    
+    const starPositions = [
+        { top: '10%', left: '8%', delay: '0s', size: '8px' },
+        { top: '15%', right: '10%', delay: '0.5s', size: '6px' },
+        { top: '5%', left: '25%', delay: '1s', size: '5px' },
+        { top: '20%', right: '25%', delay: '1.5s', size: '7px' },
+        { top: '8%', left: '45%', delay: '2s', size: '4px' },
+        { top: '25%', left: '5%', delay: '0.3s', size: '6px' },
+        { top: '12%', right: '5%', delay: '0.8s', size: '5px' },
+        { top: '30%', left: '18%', delay: '1.2s', size: '7px' },
+        { top: '28%', right: '18%', delay: '1.8s', size: '5px' },
+        { top: '3%', left: '60%', delay: '2.2s', size: '4px' },
+        { top: '18%', right: '40%', delay: '0.7s', size: '6px' },
+        { top: '35%', left: '35%', delay: '1.4s', size: '5px' },
+        { top: '7%', right: '35%', delay: '2.5s', size: '4px' },
+        { top: '22%', left: '70%', delay: '0.2s', size: '6px' },
+        { top: '32%', right: '8%', delay: '1.7s', size: '5px' },
+    ];
+    
+    starPositions.forEach(pos => {
+        const star = document.createElement('span');
+        star.className = 'dynamic-star';
+        star.textContent = '✦';
+        star.style.position = 'absolute';
+        star.style.fontSize = pos.size;
+        star.style.color = 'rgba(194, 24, 91, 0.25)';
+        star.style.animation = `twinkle 3s ease-in-out ${pos.delay} infinite`;
+        star.style.pointerEvents = 'none';
+        if (pos.top) star.style.top = pos.top;
+        if (pos.left) star.style.left = pos.left;
+        if (pos.right) star.style.right = pos.right;
+        usHeader.appendChild(star);
+    });
+}
+
+function createFloatingHearts() {
+    const usTab = document.getElementById('us-tab');
+    if (!usTab) return;
+    
+    // Remove existing floating hearts
+    usTab.querySelectorAll('.floating-heart-particle').forEach(h => h.remove());
+    
+    const hearts = ['💕', '💗', '✨', '💖', '🤍'];
+    
+    for (let i = 0; i < 8; i++) {
+        const heart = document.createElement('span');
+        heart.className = 'floating-heart-particle';
+        heart.textContent = hearts[i % hearts.length];
+        heart.style.cssText = `
+            position: absolute;
+            font-size: ${8 + Math.random() * 10}px;
+            left: ${Math.random() * 100}%;
+            top: ${Math.random() * 100}%;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 0;
+            animation: floatingHeartParticle ${8 + Math.random() * 12}s ease-in-out ${Math.random() * 5}s infinite;
+        `;
+        usTab.appendChild(heart);
+    }
+}
+
+// Check if a date falls on a quarterly anniversary of the relationship
+function isQuarterlyAnniversary(date) {
+    const d = date instanceof Date ? date : new Date(date);
+    const start = new Date(RELATIONSHIP_START);
+    if (d < start) return false;
+    // A quarterly anniversary is when the day-of-month matches and the month difference is a multiple of 3
+    const monthDiff = (d.getFullYear() - start.getFullYear()) * 12 + (d.getMonth() - start.getMonth());
+    return monthDiff > 0 && monthDiff % 3 === 0 && d.getDate() === start.getDate();
+}
+
+// Get the next quarterly anniversary date from today
+function getNextQuarterlyAnniversary() {
+    const start = new Date(RELATIONSHIP_START);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    // Walk through quarterly anniversaries until we find one >= today
+    for (let q = 1; q <= 100; q++) {
+        const anniv = new Date(start);
+        anniv.setMonth(anniv.getMonth() + q * 3);
+        anniv.setHours(0, 0, 0, 0);
+        if (anniv >= today) {
+            return { date: anniv, quarter: q };
+        }
+    }
+    return null;
+}
+
+// Get the quarterly label (e.g. "3 Months", "6 Months", "1 Year")
+function quarterlyLabel(quarter) {
+    const months = quarter * 3;
+    if (months % 12 === 0) return `${months / 12} Year${months / 12 > 1 ? 's' : ''}`;
+    return `${months} Months`;
+}
+
+function renderMilestones() {
+    const container = document.getElementById('milestones-section');
+    if (!container) return;
+    
+    const days = getDaysTogether();
+    const startDate = new Date(RELATIONSHIP_START);
+    
+    const milestones = [
+        { days: 50, emoji: '🌟', title: '50 Days Together' },
+        { days: 100, emoji: '💯', title: '100 Days Together' },
+        { days: 150, emoji: '🌸', title: '150 Days Together' },
+        { days: 200, emoji: '🎉', title: '200 Days Together' },
+        { days: 250, emoji: '💎', title: '250 Days Together' },
+        { days: 300, emoji: '🌈', title: '300 Days Together' },
+        { days: 365, emoji: '🎂', title: '1 Year Together!' },
+        { days: 500, emoji: '🏆', title: '500 Days Together' },
+    ];
+    
+    // Find next upcoming milestone and last achieved
+    const upcoming = milestones.filter(m => m.days > days).slice(0, 1);
+    const achieved = milestones.filter(m => m.days <= days).slice(-1);
+    const toShow = [...achieved, ...upcoming];
+    
+    // Quarterly anniversary card
+    const nextQ = getNextQuarterlyAnniversary();
+    let quarterlyHTML = '';
+    if (nextQ) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const qDaysLeft = Math.ceil((nextQ.date - today) / (1000 * 60 * 60 * 24));
+        const qDateStr = nextQ.date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        const label = quarterlyLabel(nextQ.quarter);
+        const isToday = qDaysLeft === 0;
+        const prompts = [
+            "Plan something unforgettable today ✨",
+            "Make today a memory you'll never forget 💫",
+            "Today deserves something special, just like us 💖",
+            "Go create a beautiful moment together 🌹",
+            "Celebrate this day — it's ours 💕",
+        ];
+        const prompt = prompts[nextQ.quarter % prompts.length];
+
+        if (isToday) {
+            quarterlyHTML = `
+            <div class="milestone-card quarterly-anniversary today">
+                <div class="milestone-emoji">💝</div>
+                <div class="milestone-info">
+                    <div class="milestone-title">Happy ${label} Anniversary!</div>
+                    <div class="milestone-date">${qDateStr}</div>
+                    <div class="milestone-prompt">${prompt}</div>
+                </div>
+                <div class="milestone-badge anniversary-badge">🎉 Today!</div>
+            </div>`;
+        } else {
+            quarterlyHTML = `
+            <div class="milestone-card quarterly-anniversary upcoming">
+                <div class="milestone-emoji">💕</div>
+                <div class="milestone-info">
+                    <div class="milestone-title">${label} Anniversary</div>
+                    <div class="milestone-date">${qDateStr}</div>
+                    ${qDaysLeft <= 7 ? `<div class="milestone-prompt">Start planning something special! 🌟</div>` : ''}
+                </div>
+                <div class="milestone-badge">${qDaysLeft} days to go</div>
+            </div>`;
+        }
+    }
+    
+    let milestonesHTML = toShow.map(m => {
+        const milestoneDate = new Date(startDate);
+        milestoneDate.setDate(milestoneDate.getDate() + m.days);
+        const dateStr = milestoneDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        const isUpcoming = m.days > days;
+        const daysLeft = m.days - days;
+        
+        return `
+        <div class="milestone-card ${isUpcoming ? 'upcoming' : ''}">
+            <div class="milestone-emoji">${m.emoji}</div>
+            <div class="milestone-info">
+                <div class="milestone-title">${m.title}</div>
+                <div class="milestone-date">${dateStr}</div>
+            </div>
+            <div class="milestone-badge">${isUpcoming ? `${daysLeft} days to go` : '✓ achieved'}</div>
+        </div>`;
+    }).join('');
+    
+    container.innerHTML = quarterlyHTML + milestonesHTML;
 }
 
 // NEW: Memory Highlights - "On This Day"
@@ -859,13 +1054,28 @@ async function loadTodaysMood() {
             .doc(today)
             .get();
         
-        if (doc.exists && doc.data()[currentUserProfile.role]) {
-            currentMood = doc.data()[currentUserProfile.role];
-            renderMoodIndicator();
+        if (doc.exists) {
+            const data = doc.data();
+            // Load own mood
+            if (data[currentUserProfile.role]) {
+                currentMood = data[currentUserProfile.role];
+                renderMoodIndicator();
+                
+                const moodOption = document.querySelector(`[data-mood="${currentMood}"]`);
+                if (moodOption) {
+                    moodOption.classList.add('selected');
+                }
+            }
             
-            const moodOption = document.querySelector(`[data-mood="${currentMood}"]`);
-            if (moodOption) {
-                moodOption.classList.add('selected');
+            // Load partner mood
+            const partnerRole = currentUserProfile.role === 'krishna' ? 'rashi' : 'krishna';
+            const partnerName = currentUserProfile.role === 'krishna' ? 'Gugu' : 'Susu';
+            if (data[partnerRole]) {
+                const partnerMoodDisplay = document.getElementById('partner-mood-display');
+                if (partnerMoodDisplay) {
+                    partnerMoodDisplay.innerHTML = `${partnerName} is feeling ${moodEmojis[data[partnerRole]]} today`;
+                    partnerMoodDisplay.classList.remove('hidden');
+                }
             }
         }
     } catch (error) {
@@ -1643,22 +1853,74 @@ function renderStats() {
     });
     
     const breakdownContainer = document.getElementById('category-breakdown');
+    const pieChartContainer = document.getElementById('pie-chart-container');
     const sortedCategories = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
     
     if (sortedCategories.length === 0) {
         breakdownContainer.innerHTML = '<div class="empty-state"><p>No expenses this month</p></div>';
+        if (pieChartContainer) pieChartContainer.innerHTML = '';
         return;
     }
     
-    breakdownContainer.innerHTML = sortedCategories.map(([category, amount]) => `
+    // Render pie chart
+    if (pieChartContainer && totalSpent > 0) {
+        const pieColors = ['#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#00bcd4', '#ff9800'];
+        let cumulativePercent = 0;
+        
+        const slices = sortedCategories.map(([category, amount], index) => {
+            const percent = amount / totalSpent;
+            const startAngle = cumulativePercent * 2 * Math.PI;
+            cumulativePercent += percent;
+            const endAngle = cumulativePercent * 2 * Math.PI;
+            const color = pieColors[index % pieColors.length];
+            
+            const x1 = 100 + 90 * Math.cos(startAngle);
+            const y1 = 100 + 90 * Math.sin(startAngle);
+            const x2 = 100 + 90 * Math.cos(endAngle);
+            const y2 = 100 + 90 * Math.sin(endAngle);
+            const largeArc = percent > 0.5 ? 1 : 0;
+            
+            if (sortedCategories.length === 1) {
+                return `<circle cx="100" cy="100" r="90" fill="${color}" opacity="0.85"/>`;
+            }
+            
+            return `<path d="M100,100 L${x1},${y1} A90,90 0 ${largeArc},1 ${x2},${y2} Z" fill="${color}" opacity="0.85" class="pie-slice"/>`;
+        }).join('');
+        
+        const legendItems = sortedCategories.map(([category, amount], index) => {
+            const color = pieColors[index % pieColors.length];
+            const percent = ((amount / totalSpent) * 100).toFixed(0);
+            return `<div class="legend-item">
+                <div class="legend-color" style="background:${color}"></div>
+                <span>${categoryEmojis[category] || '📦'} ${category} ${percent}%</span>
+            </div>`;
+        }).join('');
+        
+        pieChartContainer.innerHTML = `
+            <svg class="pie-chart-svg" viewBox="0 0 200 200">
+                ${slices}
+                <circle cx="100" cy="100" r="50" class="pie-chart-center"/>
+                <text x="100" y="95" text-anchor="middle" fill="var(--text-primary)" font-size="16" font-weight="700" transform="rotate(90, 100, 100)">₹${totalSpent.toFixed(0)}</text>
+                <text x="100" y="112" text-anchor="middle" fill="var(--text-secondary)" font-size="10" transform="rotate(90, 100, 100)">total</text>
+            </svg>
+            <div class="pie-chart-legend">${legendItems}</div>
+        `;
+    }
+    
+    breakdownContainer.innerHTML = sortedCategories.map(([category, amount]) => {
+        const percent = ((amount / totalSpent) * 100).toFixed(0);
+        return `
         <div class="category-stat">
             <div class="category-info">
                 <div class="category-emoji">${categoryEmojis[category]}</div>
                 <div class="category-name">${category}</div>
             </div>
-            <div class="category-amount">₹${amount.toFixed(2)}</div>
+            <div class="category-amount-group">
+                <div class="category-amount">₹${amount.toFixed(2)}</div>
+                <div class="category-percent">${percent}%</div>
+            </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 // Continuing with memory functions in the final section...
@@ -1824,6 +2086,9 @@ function renderMemoriesTimeline() {
         const formattedDate = formatMemoryDate(date);
         const imageCount = memory.images.length;
         const tilt = getRandomTilt();
+        const isAnniversaryMemory = isQuarterlyAnniversary(date);
+        const anniversaryClass = isAnniversaryMemory ? ' anniversary-polaroid' : '';
+        const anniversaryBadge = isAnniversaryMemory ? '<div class="anniversary-memory-badge">💝 Anniversary</div>' : '';
         
         // Timeline string logic - show string between consecutive dates
         let showString = false;
@@ -1843,7 +2108,7 @@ function renderMemoriesTimeline() {
             return `
                 <div class="polaroid-wrapper">
                     ${stringHTML}
-                    <div class="polaroid" style="transform: rotate(${tilt}deg)" onclick="viewSinglePhoto('${memory.id}')">
+                    <div class="polaroid${anniversaryClass}" style="transform: rotate(${tilt}deg)" onclick="viewSinglePhoto('${memory.id}')">
                         <div class="polaroid-photo">
                             <img src="${memory.images[0]}" 
                                  alt="${memory.caption || 'Memory'}" 
@@ -1854,6 +2119,7 @@ function renderMemoriesTimeline() {
                             <p class="polaroid-date">${formattedDate}</p>
                             ${memory.caption ? `<p class="polaroid-caption">${memory.caption}</p>` : ''}
                         </div>
+                        ${anniversaryBadge}
                     </div>
                 </div>
             `;
@@ -1864,7 +2130,7 @@ function renderMemoriesTimeline() {
                     <div class="photo-stack" style="transform: rotate(${tilt}deg)" onclick="viewAlbum('${memory.id}')">
                         <div class="stack-card stack-back-2"></div>
                         <div class="stack-card stack-back-1"></div>
-                        <div class="polaroid">
+                        <div class="polaroid${anniversaryClass}">
                             <div class="polaroid-photo">
                                 <img src="${memory.images[0]}" 
                                      alt="${memory.caption || 'Album'}" 
@@ -1876,6 +2142,7 @@ function renderMemoriesTimeline() {
                                 ${memory.caption ? `<p class="polaroid-caption">${memory.caption}</p>` : ''}
                             </div>
                             <div class="album-count-badge">${imageCount} photos</div>
+                            ${anniversaryBadge}
                         </div>
                     </div>
                 </div>

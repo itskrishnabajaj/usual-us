@@ -60,32 +60,61 @@ body {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0a10 40%, #0a0a1a 70%, #0a0a0a 100%);
     overflow: hidden;
+    position: relative;
+}
+
+.login-screen::before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(194, 24, 91, 0.08) 0%, transparent 70%);
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: breathe 6s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.login-screen::after {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255, 198, 217, 0.05) 0%, transparent 70%);
+    bottom: 25%;
+    right: 20%;
+    animation: breathe 8s ease-in-out 2s infinite;
+    pointer-events: none;
 }
 
 .login-container {
     width: 100%;
     max-width: 400px;
     padding: 40px 30px;
-    background: rgba(26, 26, 26, 0.8);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-lg);
+    background: rgba(26, 26, 26, 0.6);
+    backdrop-filter: blur(24px);
+    border-radius: 28px;
+    border: 1px solid rgba(255, 198, 217, 0.1);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 80px rgba(194, 24, 91, 0.05);
+    animation: scaleIn 0.6s ease-out;
 }
 
 .login-title {
     font-family: 'Playfair Display', serif;
-    font-size: 42px;
+    font-size: 46px;
     font-weight: 600;
     font-style: italic;
     text-align: center;
     margin-bottom: 8px;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--text-primary) 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, #ffffff 50%, var(--accent) 100%);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: shimmerText 4s ease-in-out infinite;
 }
 
 .login-subtitle {
@@ -93,6 +122,8 @@ body {
     color: var(--text-secondary);
     font-size: 14px;
     margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out 0.3s forwards;
 }
 
 .login-form {
@@ -942,7 +973,8 @@ textarea {
    ============================================ */
 
 .us-tab {
-    padding-top: 10px;
+    margin-top: -1px;
+    padding-top: 0;
     padding-bottom: 80px;
     padding-left: 20px;
     padding-right: 20px;
@@ -1295,6 +1327,7 @@ textarea {
 .us-header-section {
     text-align: center;
     padding: 28px 0 30px;
+    padding-top: 20px;
     position: relative;
 }
 
@@ -2297,6 +2330,7 @@ textarea {
     border-radius: 12px;
     overflow: hidden;
     margin-bottom: 20px;
+    touch-action: none;
 }
 
 .image-adjust-preview img {
@@ -2316,6 +2350,8 @@ textarea {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    position: relative;
+    z-index: 10001;
 }
 
 .adjust-controls span {
@@ -2332,15 +2368,19 @@ textarea {
     outline: none;
     border: none;
     padding: 0;
+    touch-action: pan-x;
+    -webkit-touch-callout: none;
 }
 
 .adjust-controls input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     background: var(--accent);
     border-radius: 50%;
     cursor: pointer;
+    position: relative;
+    z-index: 10002;
 }
 
 .adjust-controls input[type="range"]::-moz-range-thumb {
@@ -2733,8 +2773,9 @@ textarea {
 }
 
 #bottom-nav.us-active {
-    background: #fdf2f0;
-    border-top-color: rgba(194, 24, 91, 0.08);
+    background: rgba(253, 242, 240, 0.95);
+    backdrop-filter: blur(30px);
+    border-top-color: transparent;
 }
 
 #bottom-nav.us-active .nav-item {
@@ -2975,6 +3016,288 @@ body {
     .btn-delete-viewer {
         display: none !important;
     }
+}
+
+/* ============================================
+   NEW FEATURES & ANIMATIONS
+   ============================================ */
+
+/* Pie Chart */
+.pie-chart-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px auto 24px;
+    max-width: 400px;
+}
+
+.pie-chart-svg {
+    width: 200px;
+    height: 200px;
+    transform: rotate(-90deg);
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+}
+
+.pie-chart-center {
+    fill: var(--bg-primary);
+}
+
+.pie-chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+.category-amount-group {
+    text-align: right;
+}
+
+.category-percent {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+}
+
+/* Partner Mood Display */
+.partner-mood-display {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--us-text-muted, var(--text-tertiary));
+    font-style: italic;
+}
+
+/* Relationship Milestones */
+.milestones-section {
+    margin: 0 auto 24px;
+    max-width: 400px;
+}
+
+.milestone-card {
+    background: var(--us-card-bg, var(--bg-secondary));
+    border: 1px solid var(--us-card-border, var(--border-color));
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    backdrop-filter: blur(10px);
+    animation: fadeInUp 0.5s ease-out both;
+}
+
+.milestone-card.upcoming {
+    border-color: rgba(194, 24, 91, 0.3);
+    background: linear-gradient(135deg, var(--us-card-bg, rgba(255,255,255,0.55)), rgba(194, 24, 91, 0.05));
+}
+
+.milestone-emoji {
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.milestone-info {
+    flex: 1;
+}
+
+.milestone-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--us-text, var(--text-primary));
+    margin-bottom: 2px;
+}
+
+.milestone-date {
+    font-size: 12px;
+    color: var(--us-text-muted, var(--text-tertiary));
+}
+
+.milestone-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: rgba(194, 24, 91, 0.1);
+    color: var(--us-accent, var(--accent));
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Quarterly Anniversary Milestone */
+.milestone-card.quarterly-anniversary {
+    border-color: rgba(194, 24, 91, 0.35);
+    background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(194, 24, 91, 0.08));
+}
+
+.milestone-card.quarterly-anniversary.today {
+    border-color: rgba(194, 24, 91, 0.5);
+    background: linear-gradient(135deg, rgba(255,240,245,0.8), rgba(194, 24, 91, 0.12));
+    animation: fadeInUp 0.5s ease-out both, glow 2.5s ease-in-out infinite;
+}
+
+.milestone-prompt {
+    font-size: 12px;
+    color: var(--us-accent, var(--accent));
+    margin-top: 4px;
+    font-style: italic;
+}
+
+.anniversary-badge {
+    background: rgba(194, 24, 91, 0.18);
+    font-weight: 600;
+}
+
+/* Anniversary Polaroid — special golden frame */
+.polaroid.anniversary-polaroid {
+    border: 2px solid rgba(212, 175, 55, 0.5);
+    box-shadow:
+        0 12px 48px rgba(0, 0, 0, 0.15),
+        0 6px 20px rgba(0, 0, 0, 0.1),
+        0 0 18px rgba(212, 175, 55, 0.15);
+}
+
+.anniversary-memory-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(212, 175, 55, 0.85);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 10px;
+    z-index: 5;
+    backdrop-filter: blur(4px);
+}
+
+/* Floating Heart Particles */
+@keyframes floatingHeartParticle {
+    0% { opacity: 0; transform: translateY(0) scale(0.5); }
+    15% { opacity: 0.4; }
+    50% { opacity: 0.2; transform: translateY(-40px) scale(1) rotate(10deg); }
+    85% { opacity: 0.3; }
+    100% { opacity: 0; transform: translateY(-80px) scale(0.5) rotate(-10deg); }
+}
+
+/* Enhanced animations */
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.15); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.1); }
+}
+
+@keyframes gentleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+@keyframes shimmerText {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+/* US tab entrance animations */
+.us-tab .mood-tracker {
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.us-tab .ritual-card {
+    animation: fadeInUp 0.5s ease-out 0.1s both;
+}
+
+.us-tab .add-memory-section {
+    animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+.us-tab .notes-section {
+    animation: fadeInUp 0.7s ease-out 0.4s both;
+}
+
+.us-tab .secret-notes-section {
+    animation: fadeInUp 0.7s ease-out 0.5s both;
+}
+
+.us-tab .us-day-counter {
+    animation: gentleFloat 4s ease-in-out infinite;
+}
+
+/* Heartbeat on Us nav icon */
+.nav-item[data-tab="us"].active .nav-icon {
+    animation: heartbeat 2s ease-in-out infinite;
+}
+
+/* Balance card shimmer */
+.balance-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.balance-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+    animation: shimmerCard 4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes shimmerCard {
+    0% { left: -100%; }
+    50%, 100% { left: 200%; }
+}
+
+/* Category stat stagger animation */
+.category-stat {
+    animation: slideInLeft 0.4s ease-out both;
+}
+
+.category-stat:nth-child(1) { animation-delay: 0s; }
+.category-stat:nth-child(2) { animation-delay: 0.08s; }
+.category-stat:nth-child(3) { animation-delay: 0.16s; }
+.category-stat:nth-child(4) { animation-delay: 0.24s; }
+.category-stat:nth-child(5) { animation-delay: 0.32s; }
+.category-stat:nth-child(6) { animation-delay: 0.4s; }
+
+/* Expense item animations */
+.expense-item {
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.expense-item:active {
+    transform: scale(0.98);
 }
 
 /* ============================================
