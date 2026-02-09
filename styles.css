@@ -801,6 +801,29 @@ textarea {
 .us-tab {
     padding-top: 10px;
     position: relative;
+    overflow: hidden;
+}
+
+/* Ambient floating particles */
+.us-tab::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background-image: 
+        radial-gradient(2px 2px at 20% 30%, rgba(255, 198, 217, 0.15), transparent),
+        radial-gradient(2px 2px at 60% 70%, rgba(255, 198, 217, 0.1), transparent),
+        radial-gradient(1px 1px at 50% 50%, rgba(255, 198, 217, 0.12), transparent),
+        radial-gradient(1px 1px at 80% 10%, rgba(255, 198, 217, 0.08), transparent),
+        radial-gradient(2px 2px at 90% 60%, rgba(255, 198, 217, 0.1), transparent),
+        radial-gradient(1px 1px at 33% 80%, rgba(255, 198, 217, 0.12), transparent);
+    background-size: 200% 200%;
+    background-position: 50% 50%;
+    animation: float 20s ease-in-out infinite;
+    pointer-events: none;
+    opacity: 0.6;
 }
 
 /* NEW: Music Player Toggle */
@@ -819,10 +842,12 @@ textarea {
     z-index: 90;
     box-shadow: 0 8px 24px rgba(255, 198, 217, 0.3);
     transition: all var(--transition-fast);
+    animation: pulse 2s ease-in-out infinite;
 }
 
 .music-player-toggle:active {
     transform: scale(0.95);
+    animation: none;
 }
 
 /* NEW: Music Player Panel - Upper Center Positioned */
@@ -1033,12 +1058,14 @@ textarea {
     font-weight: 600;
     font-style: italic;
     margin-bottom: 8px;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--text-primary) 100%);
+    background: linear-gradient(90deg, var(--accent) 0%, var(--text-primary) 50%, var(--accent) 100%);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     cursor: pointer;
     user-select: none;
+    animation: shimmer 3s linear infinite;
 }
 
 .us-subtitle {
@@ -1050,6 +1077,7 @@ textarea {
 .us-day-counter {
     font-size: 13px;
     color: var(--text-tertiary);
+    animation: breathe 4s ease-in-out infinite;
 }
 
 /* NEW: Last Seen Indicator */
@@ -1071,24 +1099,55 @@ textarea {
     height: 20px;
 }
 
+.us-divider svg path {
+    stroke: url(#pink-gradient);
+    stroke-width: 0.5;
+    opacity: 0.5;
+}
+
 /* Ritual Quote Card */
 .ritual-card {
-    background: linear-gradient(135deg, rgba(255, 198, 217, 0.08) 0%, rgba(255, 198, 217, 0.04) 100%);
-    border: 1px solid rgba(255, 198, 217, 0.2);
-    border-radius: 20px;
-    padding: 28px 24px;
+    background: linear-gradient(135deg, rgba(255, 198, 217, 0.12) 0%, rgba(255, 198, 217, 0.06) 100%);
+    border: 1px solid rgba(255, 198, 217, 0.3);
+    border-radius: 24px;
+    padding: 36px 28px;
     margin-bottom: 24px;
     text-align: center;
     backdrop-filter: blur(10px);
-    box-shadow: 0 8px 32px rgba(255, 198, 217, 0.15);
+    box-shadow: 0 12px 40px rgba(255, 198, 217, 0.2);
+    position: relative;
+    animation: breathe 6s ease-in-out infinite;
+}
+
+.ritual-card::before {
+    content: '"';
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    font-size: 72px;
+    color: rgba(255, 198, 217, 0.2);
+    font-family: 'Playfair Display', serif;
+    line-height: 1;
+}
+
+.ritual-card::after {
+    content: '"';
+    position: absolute;
+    bottom: -10px;
+    right: 15px;
+    font-size: 72px;
+    color: rgba(255, 198, 217, 0.2);
+    font-family: 'Playfair Display', serif;
+    line-height: 1;
 }
 
 .ritual-quote {
     font-family: 'Playfair Display', serif;
-    font-size: 18px;
+    font-size: 20px;
     font-style: italic;
     line-height: 1.8;
     color: var(--text-primary);
+    font-weight: 400;
 }
 
 /* NEW: Mood Tracker */
@@ -1096,32 +1155,34 @@ textarea {
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: 16px;
-    padding: 20px;
+    padding: 24px;
     margin-bottom: 24px;
     text-align: center;
 }
 
 .mood-tracker-title {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-secondary);
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .mood-options {
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 16px;
 }
 
 .mood-option {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     background: var(--bg-tertiary);
     border: 2px solid var(--border-color);
-    font-size: 24px;
+    font-size: 28px;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all var(--transition-normal);
+    min-width: 48px;
+    min-height: 48px;
 }
 
 .mood-option:active {
@@ -1131,7 +1192,7 @@ textarea {
 .mood-option.selected {
     background: rgba(255, 198, 217, 0.15);
     border-color: var(--accent);
-    transform: scale(1.1);
+    animation: glow 2s ease-in-out infinite;
 }
 
 .current-mood-display {
@@ -1231,7 +1292,28 @@ textarea {
     height: 40px;
     background: linear-gradient(180deg, var(--accent) 0%, transparent 100%);
     margin: 0 auto 10px;
-    opacity: 0.3;
+    opacity: 0.4;
+    position: relative;
+}
+
+.polaroid-string::before,
+.polaroid-string::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.polaroid-string::before {
+    top: 10px;
+}
+
+.polaroid-string::after {
+    bottom: 10px;
 }
 
 .polaroid {
@@ -1240,8 +1322,8 @@ textarea {
     padding-bottom: 60px;
     border-radius: 4px;
     box-shadow: 
-        0 10px 40px rgba(0, 0, 0, 0.4),
-        0 4px 16px rgba(0, 0, 0, 0.3);
+        0 12px 48px rgba(0, 0, 0, 0.5),
+        0 6px 20px rgba(0, 0, 0, 0.35);
     cursor: pointer;
     transition: all var(--transition-normal);
     max-width: 280px;
@@ -1250,7 +1332,9 @@ textarea {
 
 .polaroid:active {
     transform: scale(0.97) translateZ(0) !important;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .polaroid-photo {
@@ -1403,15 +1487,33 @@ textarea {
 .sticky-note {
     padding: 16px;
     border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 
+        0 6px 16px rgba(0, 0, 0, 0.25),
+        0 2px 8px rgba(0, 0, 0, 0.2);
     min-height: 120px;
     cursor: pointer;
     transition: all var(--transition-fast);
     position: relative;
 }
 
+.sticky-note::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    opacity: 0.6;
+}
+
 .sticky-note:active {
     transform: scale(0.98) translateZ(0) !important;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.2),
+        0 1px 6px rgba(0, 0, 0, 0.15);
 }
 
 .sticky-note p {
@@ -1534,7 +1636,20 @@ textarea {
 
 /* Late Night Mode */
 .us-tab.late-night {
-    background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%);
+    background: linear-gradient(180deg, #0a0a0a 0%, #0f0f1e 50%, #1a1a2e 100%);
+}
+
+.us-tab.late-night .ritual-card {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%);
+    border-color: rgba(139, 92, 246, 0.2);
+}
+
+.us-tab.late-night .us-title {
+    background: linear-gradient(90deg, #a78bfa 0%, #60a5fa 50%, #a78bfa 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .late-night-message {
@@ -1545,6 +1660,7 @@ textarea {
     font-size: 18px;
     font-style: italic;
     color: var(--text-secondary);
+    animation: fadeInUp 1s ease-out;
 }
 
 /* Easter Egg */
@@ -2144,8 +2260,9 @@ textarea {
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(10, 10, 10, 0.95);
-    backdrop-filter: blur(20px);
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
     border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: space-around;
@@ -2300,6 +2417,58 @@ textarea {
     }
     50% {
         transform: scale(1.05);
+    }
+}
+
+/* Premium US Tab Animations */
+@keyframes shimmer {
+    0% {
+        background-position: -100% center;
+    }
+    100% {
+        background-position: 200% center;
+    }
+}
+
+@keyframes breathe {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.02);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(255, 198, 217, 0.4);
+        transform: scale(1.1);
+    }
+    50% {
+        box-shadow: 0 0 35px rgba(255, 198, 217, 0.7);
+        transform: scale(1.15);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
