@@ -838,6 +838,40 @@ function createFloatingHearts() {
     }
 }
 
+// Check if a date falls on a quarterly anniversary of the relationship
+function isQuarterlyAnniversary(date) {
+    const d = date instanceof Date ? date : new Date(date);
+    const start = new Date(RELATIONSHIP_START);
+    if (d < start) return false;
+    // A quarterly anniversary is when the day-of-month matches and the month difference is a multiple of 3
+    const monthDiff = (d.getFullYear() - start.getFullYear()) * 12 + (d.getMonth() - start.getMonth());
+    return monthDiff > 0 && monthDiff % 3 === 0 && d.getDate() === start.getDate();
+}
+
+// Get the next quarterly anniversary date from today
+function getNextQuarterlyAnniversary() {
+    const start = new Date(RELATIONSHIP_START);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    // Walk through quarterly anniversaries until we find one >= today
+    for (let q = 1; q <= 100; q++) {
+        const anniv = new Date(start);
+        anniv.setMonth(anniv.getMonth() + q * 3);
+        anniv.setHours(0, 0, 0, 0);
+        if (anniv >= today) {
+            return { date: anniv, quarter: q };
+        }
+    }
+    return null;
+}
+
+// Get the quarterly label (e.g. "3 Months", "6 Months", "1 Year")
+function quarterlyLabel(quarter) {
+    const months = quarter * 3;
+    if (months % 12 === 0) return `${months / 12} Year${months / 12 > 1 ? 's' : ''}`;
+    return `${months} Months`;
+}
+
 function renderMilestones() {
     const container = document.getElementById('milestones-section');
     if (!container) return;
@@ -847,7 +881,6 @@ function renderMilestones() {
     
     const milestones = [
         { days: 50, emoji: '🌟', title: '50 Days Together' },
-        { days: 90, emoji: '💕', title: '3 Months Together!' },
         { days: 100, emoji: '💯', title: '100 Days Together' },
         { days: 150, emoji: '🌸', title: '150 Days Together' },
         { days: 200, emoji: '🎉', title: '200 Days Together' },
@@ -862,12 +895,51 @@ function renderMilestones() {
     const achieved = milestones.filter(m => m.days <= days).slice(-1);
     const toShow = [...achieved, ...upcoming];
     
-    if (toShow.length === 0) {
-        container.innerHTML = '';
-        return;
+    // Quarterly anniversary card
+    const nextQ = getNextQuarterlyAnniversary();
+    let quarterlyHTML = '';
+    if (nextQ) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const qDaysLeft = Math.ceil((nextQ.date - today) / (1000 * 60 * 60 * 24));
+        const qDateStr = nextQ.date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        const label = quarterlyLabel(nextQ.quarter);
+        const isToday = qDaysLeft === 0;
+        const prompts = [
+            "Plan something unforgettable today ✨",
+            "Make today a memory you'll never forget 💫",
+            "Today deserves something special, just like us 💖",
+            "Go create a beautiful moment together 🌹",
+            "Celebrate this day — it's ours 💕",
+        ];
+        const prompt = prompts[nextQ.quarter % prompts.length];
+
+        if (isToday) {
+            quarterlyHTML = `
+            <div class="milestone-card quarterly-anniversary today">
+                <div class="milestone-emoji">💝</div>
+                <div class="milestone-info">
+                    <div class="milestone-title">Happy ${label} Anniversary!</div>
+                    <div class="milestone-date">${qDateStr}</div>
+                    <div class="milestone-prompt">${prompt}</div>
+                </div>
+                <div class="milestone-badge anniversary-badge">🎉 Today!</div>
+            </div>`;
+        } else {
+            quarterlyHTML = `
+            <div class="milestone-card quarterly-anniversary upcoming">
+                <div class="milestone-emoji">💕</div>
+                <div class="milestone-info">
+                    <div class="milestone-title">${label} Anniversary</div>
+                    <div class="milestone-date">${qDateStr}</div>
+                    ${qDaysLeft <= 7 ? `<div class="milestone-prompt">Start planning something special! 🌟</div>` : ''}
+                </div>
+                <div class="milestone-badge">${qDaysLeft} days to go</div>
+            </div>`;
+        }
     }
     
-    container.innerHTML = toShow.map(m => {
+    let milestonesHTML = toShow.map(m => {
         const milestoneDate = new Date(startDate);
         milestoneDate.setDate(milestoneDate.getDate() + m.days);
         const dateStr = milestoneDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -884,6 +956,8 @@ function renderMilestones() {
             <div class="milestone-badge">${isUpcoming ? `${daysLeft} days to go` : '✓ achieved'}</div>
         </div>`;
     }).join('');
+    
+    container.innerHTML = quarterlyHTML + milestonesHTML;
 }
 
 // NEW: Memory Highlights - "On This Day"
@@ -2012,6 +2086,9 @@ function renderMemoriesTimeline() {
         const formattedDate = formatMemoryDate(date);
         const imageCount = memory.images.length;
         const tilt = getRandomTilt();
+        const isAnniversaryMemory = isQuarterlyAnniversary(date);
+        const anniversaryClass = isAnniversaryMemory ? ' anniversary-polaroid' : '';
+        const anniversaryBadge = isAnniversaryMemory ? '<div class="anniversary-memory-badge">💝 Anniversary</div>' : '';
         
         // Timeline string logic - show string between consecutive dates
         let showString = false;
@@ -2031,7 +2108,7 @@ function renderMemoriesTimeline() {
             return `
                 <div class="polaroid-wrapper">
                     ${stringHTML}
-                    <div class="polaroid" style="transform: rotate(${tilt}deg)" onclick="viewSinglePhoto('${memory.id}')">
+                    <div class="polaroid${anniversaryClass}" style="transform: rotate(${tilt}deg)" onclick="viewSinglePhoto('${memory.id}')">
                         <div class="polaroid-photo">
                             <img src="${memory.images[0]}" 
                                  alt="${memory.caption || 'Memory'}" 
@@ -2042,6 +2119,7 @@ function renderMemoriesTimeline() {
                             <p class="polaroid-date">${formattedDate}</p>
                             ${memory.caption ? `<p class="polaroid-caption">${memory.caption}</p>` : ''}
                         </div>
+                        ${anniversaryBadge}
                     </div>
                 </div>
             `;
@@ -2052,7 +2130,7 @@ function renderMemoriesTimeline() {
                     <div class="photo-stack" style="transform: rotate(${tilt}deg)" onclick="viewAlbum('${memory.id}')">
                         <div class="stack-card stack-back-2"></div>
                         <div class="stack-card stack-back-1"></div>
-                        <div class="polaroid">
+                        <div class="polaroid${anniversaryClass}">
                             <div class="polaroid-photo">
                                 <img src="${memory.images[0]}" 
                                      alt="${memory.caption || 'Album'}" 
@@ -2064,6 +2142,7 @@ function renderMemoriesTimeline() {
                                 ${memory.caption ? `<p class="polaroid-caption">${memory.caption}</p>` : ''}
                             </div>
                             <div class="album-count-badge">${imageCount} photos</div>
+                            ${anniversaryBadge}
                         </div>
                     </div>
                 </div>

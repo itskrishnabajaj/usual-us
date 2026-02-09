@@ -3137,6 +3137,53 @@ body {
     white-space: nowrap;
 }
 
+/* Quarterly Anniversary Milestone */
+.milestone-card.quarterly-anniversary {
+    border-color: rgba(194, 24, 91, 0.35);
+    background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(194, 24, 91, 0.08));
+}
+
+.milestone-card.quarterly-anniversary.today {
+    border-color: rgba(194, 24, 91, 0.5);
+    background: linear-gradient(135deg, rgba(255,240,245,0.8), rgba(194, 24, 91, 0.12));
+    animation: fadeInUp 0.5s ease-out both, glow 2.5s ease-in-out infinite;
+}
+
+.milestone-prompt {
+    font-size: 12px;
+    color: var(--us-accent, var(--accent));
+    margin-top: 4px;
+    font-style: italic;
+}
+
+.anniversary-badge {
+    background: rgba(194, 24, 91, 0.18);
+    font-weight: 600;
+}
+
+/* Anniversary Polaroid — special golden frame */
+.polaroid.anniversary-polaroid {
+    border: 2px solid rgba(212, 175, 55, 0.5);
+    box-shadow:
+        0 12px 48px rgba(0, 0, 0, 0.15),
+        0 6px 20px rgba(0, 0, 0, 0.1),
+        0 0 18px rgba(212, 175, 55, 0.15);
+}
+
+.anniversary-memory-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(212, 175, 55, 0.85);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 10px;
+    z-index: 5;
+    backdrop-filter: blur(4px);
+}
+
 /* Floating Heart Particles */
 @keyframes floatingHeartParticle {
     0% { opacity: 0; transform: translateY(0) scale(0.5); }
