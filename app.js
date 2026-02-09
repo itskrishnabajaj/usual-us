@@ -135,8 +135,8 @@ function isLateNight() {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 usual us - Initializing...');
     initializeAuth();
-    setupEventListeners();
     initializeMusicPlayer();
+    setupEventListeners();
 });
 
 // FIXED: Music Player Initialization
@@ -158,6 +158,15 @@ function initializeMusicPlayer() {
     ).join('');
     
     console.log('✅ Music player initialized with', PLAYLIST.length, 'songs');
+    
+    // Music player event listeners
+    musicPlayer.addEventListener('timeupdate', updateSeekBar);
+    musicPlayer.addEventListener('loadedmetadata', () => {
+        document.getElementById('duration').textContent = formatTime(musicPlayer.duration);
+    });
+    musicPlayer.addEventListener('ended', () => {
+        document.getElementById('play-pause-btn').textContent = '▶';
+    });
     
     // Load recently played
     const stored = localStorage.getItem('recentlyPlayed');
@@ -556,14 +565,6 @@ function setupEventListeners() {
     document.getElementById('play-pause-btn').addEventListener('click', togglePlayPause);
     document.getElementById('seek-bar').addEventListener('input', handleSeek);
     
-    musicPlayer.addEventListener('timeupdate', updateSeekBar);
-    musicPlayer.addEventListener('loadedmetadata', () => {
-        document.getElementById('duration').textContent = formatTime(musicPlayer.duration);
-    });
-    musicPlayer.addEventListener('ended', () => {
-        document.getElementById('play-pause-btn').textContent = '▶';
-    });
-    
     // NEW: Pull to Refresh
     setupPullToRefresh();
 }
@@ -650,11 +651,17 @@ function switchTab(tabName) {
     
     // Show/hide music player toggle - only visible on Us tab
     const musicToggle = document.getElementById('music-player-toggle');
+    const appHeader = document.getElementById('app-header');
+    const bottomNav = document.getElementById('bottom-nav');
     if (musicToggle) {
         if (tabName === 'us') {
             musicToggle.classList.remove('hidden');
+            if (appHeader) appHeader.classList.add('us-active');
+            if (bottomNav) bottomNav.classList.add('us-active');
         } else {
             musicToggle.classList.add('hidden');
+            if (appHeader) appHeader.classList.remove('us-active');
+            if (bottomNav) bottomNav.classList.remove('us-active');
         }
     }
     

@@ -159,6 +159,13 @@ body {
     top: 0;
     z-index: 100;
     backdrop-filter: blur(20px);
+    transition: background var(--transition-normal), border-color var(--transition-normal), color var(--transition-normal);
+}
+
+#app-header.us-active {
+    background: rgba(253, 242, 240, 0.9);
+    border-bottom-color: rgba(194, 24, 91, 0.1);
+    color: #3a2e2e;
 }
 
 #greeting {
@@ -844,13 +851,13 @@ textarea {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(255, 198, 217, 0.25) 0%, rgba(255, 198, 217, 0.15) 100%);
+    background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(12px);
-    border: 2px solid rgba(255, 198, 217, 0.4);
+    border: 2px solid rgba(194, 24, 91, 0.25);
     font-size: 24px;
     cursor: pointer;
     z-index: 90;
-    box-shadow: 0 8px 24px rgba(255, 198, 217, 0.3);
+    box-shadow: 0 8px 24px rgba(194, 24, 91, 0.15);
     transition: all var(--transition-fast);
     animation: pulse 2s ease-in-out infinite;
 }
@@ -2372,6 +2379,24 @@ textarea {
     justify-content: space-around;
     padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
     z-index: 100;
+    transition: background var(--transition-normal), border-color var(--transition-normal);
+}
+
+#bottom-nav.us-active {
+    background: rgba(253, 242, 240, 0.92);
+    border-top-color: rgba(194, 24, 91, 0.1);
+}
+
+#bottom-nav.us-active .nav-item {
+    color: #8b7b7b;
+}
+
+#bottom-nav.us-active .nav-item.active {
+    color: #c2185b;
+}
+
+#bottom-nav.us-active .nav-item::before {
+    background: #c2185b;
 }
 
 .nav-item {
