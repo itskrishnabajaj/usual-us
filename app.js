@@ -698,12 +698,18 @@ async function initializeUsTab() {
     document.getElementById('ritual-quote').textContent = getDailyQuote();
     
     const usTab = document.getElementById('us-tab');
+    const appHeader = document.getElementById('app-header');
+    const bottomNav = document.getElementById('bottom-nav');
     if (isLateNight()) {
         usTab.classList.add('late-night');
+        if (appHeader) appHeader.classList.remove('us-active');
+        if (bottomNav) bottomNav.classList.remove('us-active');
         const lateNightMsg = document.getElementById('late-night-message');
         if (lateNightMsg) lateNightMsg.classList.remove('hidden');
     } else {
         usTab.classList.remove('late-night');
+        if (appHeader) appHeader.classList.add('us-active');
+        if (bottomNav) bottomNav.classList.add('us-active');
         const lateNightMsg = document.getElementById('late-night-message');
         if (lateNightMsg) lateNightMsg.classList.add('hidden');
     }
