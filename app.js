@@ -149,13 +149,22 @@ function initializeMusicPlayer() {
         return;
     }
     
-    // Build visual song list
-    songList.innerHTML = PLAYLIST.map((song, index) => 
-        `<div class="song-item" data-index="${index}" onclick="selectSong(${index})">
+    // Build visual song list with escaped titles
+    songList.innerHTML = PLAYLIST.map((song, index) => {
+        const safeTitle = song.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return `<div class="song-item" data-index="${index}">
             <span class="song-item-number">${index + 1}</span>
-            <span class="song-item-title">${song.title}</span>
-        </div>`
-    ).join('');
+            <span class="song-item-title">${safeTitle}</span>
+        </div>`;
+    }).join('');
+    
+    // Event delegation for song selection
+    songList.addEventListener('click', (e) => {
+        const songItem = e.target.closest('.song-item');
+        if (!songItem) return;
+        const index = parseInt(songItem.dataset.index);
+        if (!isNaN(index)) selectSong(index);
+    });
     
     console.log('✅ Music player initialized with', PLAYLIST.length, 'songs');
     
@@ -181,7 +190,7 @@ function initializeMusicPlayer() {
 }
 
 // Select and load a song from the list
-window.selectSong = function(index) {
+function selectSong(index) {
     if (index < 0 || index >= PLAYLIST.length) return;
     
     currentSongIdx = index;
@@ -200,7 +209,7 @@ window.selectSong = function(index) {
     document.getElementById('play-pause-btn').disabled = false;
     document.getElementById('seek-bar').disabled = false;
     document.getElementById('play-pause-btn').textContent = '▶';
-};
+}
 
 // NEW: Recently Played Songs
 function addToRecentlyPlayed(songIndex) {
@@ -238,7 +247,7 @@ function renderRecentlyPlayed() {
 }
 
 window.playRecentSong = function(index) {
-    window.selectSong(index);
+    selectSong(index);
     togglePlayPause();
 };
 
