@@ -640,6 +640,16 @@ function switchTab(tabName) {
         }, 50);
     }, 150);
     
+    // Show/hide music player toggle - only visible on Us tab
+    const musicToggle = document.getElementById('music-player-toggle');
+    if (musicToggle) {
+        if (tabName === 'us') {
+            musicToggle.classList.remove('hidden');
+        } else {
+            musicToggle.classList.add('hidden');
+        }
+    }
+    
     // Music player auto pause/resume
     if (tabName === 'us') {
         if (musicWasPlaying && musicPlayer.paused) {
