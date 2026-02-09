@@ -1257,8 +1257,8 @@ async function handleExpenseSubmit(e) {
     showLoading(true);
     
     try {
-        await expensesCollection.add(expense);
-        console.log('✅ Expense added successfully');
+        const docRef = await expensesCollection.add(expense);
+        console.log('✅ Expense added successfully:', docRef.id);
         
         // Reset form IMMEDIATELY after successful save
         document.getElementById('expense-form').reset();
