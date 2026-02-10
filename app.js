@@ -434,6 +434,12 @@ function setupEventListeners() {
             switchTab(tab);
         });
     });
+
+    // Restore Us tab visibility if previously revealed this session
+    if (sessionStorage.getItem('usTabRevealed') === 'true') {
+        const usNavItem = document.querySelector('.nav-item[data-tab="us"]');
+        if (usNavItem) usNavItem.classList.add('revealed');
+    }
     
     // Split type toggle
     document.querySelectorAll('input[name="splitType"]').forEach(radio => {
@@ -742,6 +748,17 @@ function switchTab(tabName) {
     
     if (tabName === 'stats') {
         renderStats();
+        revealUsTab();
+    }
+}
+
+function revealUsTab() {
+    const usNavItem = document.querySelector('.nav-item[data-tab="us"]');
+    if (usNavItem && !usNavItem.classList.contains('revealed')) {
+        requestAnimationFrame(() => {
+            usNavItem.classList.add('revealed');
+        });
+        sessionStorage.setItem('usTabRevealed', 'true');
     }
 }
 
