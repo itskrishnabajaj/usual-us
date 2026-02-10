@@ -700,15 +700,21 @@ function switchTab(tabName) {
     const musicToggle = document.getElementById('music-player-toggle');
     const appHeader = document.getElementById('app-header');
     const bottomNav = document.getElementById('bottom-nav');
+    const appEl = document.getElementById('app');
     if (musicToggle) {
         if (tabName === 'us') {
             musicToggle.classList.remove('hidden');
             if (appHeader) appHeader.classList.add('us-active');
             if (bottomNav) bottomNav.classList.add('us-active');
+            document.body.classList.add('us-active');
+            if (appEl) appEl.classList.add('us-active');
         } else {
             musicToggle.classList.add('hidden');
-            if (appHeader) appHeader.classList.remove('us-active');
-            if (bottomNav) bottomNav.classList.remove('us-active');
+            if (appHeader) { appHeader.classList.remove('us-active'); appHeader.classList.remove('late-night'); }
+            if (bottomNav) { bottomNav.classList.remove('us-active'); bottomNav.classList.remove('late-night'); }
+            document.body.classList.remove('us-active');
+            document.body.classList.remove('late-night');
+            if (appEl) { appEl.classList.remove('us-active'); appEl.classList.remove('late-night'); }
         }
     }
     
@@ -738,16 +744,23 @@ async function initializeUsTab() {
     const usTab = document.getElementById('us-tab');
     const appHeader = document.getElementById('app-header');
     const bottomNav = document.getElementById('bottom-nav');
+    const appEl = document.getElementById('app');
     if (isLateNight()) {
         usTab.classList.add('late-night');
-        if (appHeader) appHeader.classList.remove('us-active');
-        if (bottomNav) bottomNav.classList.remove('us-active');
+        if (appHeader) { appHeader.classList.add('us-active'); appHeader.classList.add('late-night'); }
+        if (bottomNav) { bottomNav.classList.add('us-active'); bottomNav.classList.add('late-night'); }
+        document.body.classList.add('us-active');
+        document.body.classList.add('late-night');
+        if (appEl) { appEl.classList.add('us-active'); appEl.classList.add('late-night'); }
         const lateNightMsg = document.getElementById('late-night-message');
         if (lateNightMsg) lateNightMsg.classList.remove('hidden');
     } else {
         usTab.classList.remove('late-night');
-        if (appHeader) appHeader.classList.add('us-active');
-        if (bottomNav) bottomNav.classList.add('us-active');
+        if (appHeader) { appHeader.classList.add('us-active'); appHeader.classList.remove('late-night'); }
+        if (bottomNav) { bottomNav.classList.add('us-active'); bottomNav.classList.remove('late-night'); }
+        document.body.classList.add('us-active');
+        document.body.classList.remove('late-night');
+        if (appEl) { appEl.classList.add('us-active'); appEl.classList.remove('late-night'); }
         const lateNightMsg = document.getElementById('late-night-message');
         if (lateNightMsg) lateNightMsg.classList.add('hidden');
     }
