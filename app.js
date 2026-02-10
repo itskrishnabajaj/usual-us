@@ -67,6 +67,7 @@ const categoryEmojis = {
     gmasti: '☺️',
     gifts: '🎁',
     home: '🏠',
+    regret: '😭',
     misc: '✨'
 };
 
@@ -424,7 +425,23 @@ function setupEventListeners() {
         localStorage.removeItem('usual_us_user_id');
         document.getElementById('first-login-form').reset();
         document.getElementById('returning-login-form').reset();
+        document.getElementById('returning-pin-input').value = '';
         initializeAuth();
+    });
+    
+    // Numeric keypad for returning user PIN
+    document.querySelectorAll('.num-key[data-num]').forEach(key => {
+        key.addEventListener('click', () => {
+            const pinInput = document.getElementById('returning-pin-input');
+            if (pinInput.value.length < 4) {
+                pinInput.value += key.dataset.num;
+            }
+        });
+    });
+    
+    document.getElementById('num-key-del').addEventListener('click', () => {
+        const pinInput = document.getElementById('returning-pin-input');
+        pinInput.value = pinInput.value.slice(0, -1);
     });
     
     // Navigation with smooth transitions
@@ -491,6 +508,14 @@ function setupEventListeners() {
         document.getElementById('memory-form').classList.add('hidden');
         document.getElementById('memory-date').valueAsDate = new Date();
         selectedPhotos = [];
+    });
+    
+    // Scroll to oldest memory button
+    document.getElementById('scroll-to-oldest-btn').addEventListener('click', () => {
+        const timeline = document.getElementById('memories-timeline');
+        if (timeline && timeline.lastElementChild) {
+            timeline.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     });
     
     document.getElementById('close-memory-modal').addEventListener('click', () => {
@@ -1080,13 +1105,17 @@ function checkDailyMemoryReminder() {
 async function setMood(mood) {
     currentMood = mood;
     
+    // Persist mood in localStorage for the day
+    const today = new Date().toISOString().split('T')[0];
+    localStorage.setItem('usual_us_mood', JSON.stringify({ mood, date: today }));
+    
     try {
-        const today = new Date().toISOString().split('T')[0];
         await firebase.firestore()
             .collection('moods')
             .doc(today)
             .set({
                 [currentUserProfile.role]: mood,
+                [`${currentUserProfile.role}_time`]: firebase.firestore.FieldValue.serverTimestamp(),
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
         
@@ -1104,6 +1133,21 @@ async function setMood(mood) {
 }
 
 async function loadTodaysMood() {
+    // First check localStorage for persisted mood
+    const stored = localStorage.getItem('usual_us_mood');
+    if (stored) {
+        try {
+            const { mood, date } = JSON.parse(stored);
+            const today = new Date().toISOString().split('T')[0];
+            if (date === today && mood) {
+                currentMood = mood;
+                renderMoodIndicator();
+                const moodOption = document.querySelector(`[data-mood="${currentMood}"]`);
+                if (moodOption) moodOption.classList.add('selected');
+            }
+        } catch (e) { /* ignore */ }
+    }
+    
     try {
         const today = new Date().toISOString().split('T')[0];
         const doc = await firebase.firestore()
@@ -1118,19 +1162,29 @@ async function loadTodaysMood() {
                 currentMood = data[currentUserProfile.role];
                 renderMoodIndicator();
                 
+                document.querySelectorAll('.mood-option').forEach(opt => opt.classList.remove('selected'));
                 const moodOption = document.querySelector(`[data-mood="${currentMood}"]`);
                 if (moodOption) {
                     moodOption.classList.add('selected');
                 }
+                
+                // Persist to localStorage
+                localStorage.setItem('usual_us_mood', JSON.stringify({ mood: currentMood, date: today }));
             }
             
-            // Load partner mood
+            // Load partner mood with time
             const partnerRole = currentUserProfile.role === 'krishna' ? 'rashi' : 'krishna';
             const partnerName = currentUserProfile.role === 'krishna' ? 'Gugu' : 'Susu';
             if (data[partnerRole]) {
                 const partnerMoodDisplay = document.getElementById('partner-mood-display');
                 if (partnerMoodDisplay) {
-                    partnerMoodDisplay.innerHTML = `${partnerName} is feeling ${moodEmojis[data[partnerRole]]} today`;
+                    let timeStr = '';
+                    const partnerTimeField = `${partnerRole}_time`;
+                    if (data[partnerTimeField]) {
+                        const moodTime = data[partnerTimeField].toDate();
+                        timeStr = ` at ${moodTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+                    }
+                    partnerMoodDisplay.innerHTML = `${partnerName} is feeling ${moodEmojis[data[partnerRole]]}${timeStr}`;
                     partnerMoodDisplay.classList.remove('hidden');
                 }
             }
@@ -2125,6 +2179,16 @@ function getRandomTilt() {
     return (Math.random() * 6 - 3).toFixed(2);
 }
 
+function getStableTilt(id) {
+    // Generate a stable tilt based on the memory id so it doesn't change on re-render
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = ((hash << 5) - hash) + id.charCodeAt(i);
+        hash |= 0;
+    }
+    return ((Math.abs(hash) % 600) / 100 - 3).toFixed(2);
+}
+
 function renderMemoriesTimeline() {
     const container = document.getElementById('memories-timeline');
     
@@ -2142,7 +2206,7 @@ function renderMemoriesTimeline() {
         const date = memory.memoryDate ? memory.memoryDate.toDate() : new Date();
         const formattedDate = formatMemoryDate(date);
         const imageCount = memory.images.length;
-        const tilt = getRandomTilt();
+        const tilt = getStableTilt(memory.id);
         const isAnniversaryMemory = isQuarterlyAnniversary(date);
         const anniversaryClass = isAnniversaryMemory ? ' anniversary-polaroid' : '';
         const anniversaryBadge = isAnniversaryMemory ? '<div class="anniversary-memory-badge">💝 Anniversary</div>' : '';
@@ -2563,6 +2627,11 @@ function showBalanceCelebration() {
 function showLoading(show) {
     const loading = document.getElementById('loading');
     if (loading) {
+        // Don't show the full-screen loading overlay when on Us tab to prevent UI disruption
+        const usTabActive = document.querySelector('#us-tab.active');
+        if (show && usTabActive) {
+            return;
+        }
         if (show) {
             loading.classList.remove('hidden');
         } else {
