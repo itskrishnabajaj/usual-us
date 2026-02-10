@@ -36,13 +36,27 @@
             
             <!-- Returning User Login -->
             <form id="returning-login-form" class="login-form hidden">
+                <button type="button" id="switch-user-btn" class="btn-switch-user-corner">Switch User</button>
                 <p class="returning-welcome">Welcome back, <span id="returning-name"></span> 💝</p>
                 <div class="form-group">
                     <label>PIN</label>
-                    <input type="password" id="returning-pin-input" placeholder="4-digit PIN" maxlength="4" required>
+                    <input type="password" id="returning-pin-input" placeholder="4-digit PIN" maxlength="4" required readonly inputmode="none">
+                </div>
+                <div class="num-keypad">
+                    <button type="button" class="num-key" data-num="1">1</button>
+                    <button type="button" class="num-key" data-num="2">2</button>
+                    <button type="button" class="num-key" data-num="3">3</button>
+                    <button type="button" class="num-key" data-num="4">4</button>
+                    <button type="button" class="num-key" data-num="5">5</button>
+                    <button type="button" class="num-key" data-num="6">6</button>
+                    <button type="button" class="num-key" data-num="7">7</button>
+                    <button type="button" class="num-key" data-num="8">8</button>
+                    <button type="button" class="num-key" data-num="9">9</button>
+                    <button type="button" class="num-key num-key-empty"></button>
+                    <button type="button" class="num-key" data-num="0">0</button>
+                    <button type="button" class="num-key num-key-del" id="num-key-del">⌫</button>
                 </div>
                 <button type="submit" class="btn-login">Login</button>
-                <button type="button" id="switch-user-btn" class="btn-switch-user">Switch User</button>
             </form>
         </div>
     </div>
@@ -168,6 +182,10 @@
                             <label class="category-option">
                                 <input type="radio" name="category" value="home">
                                 <span>🏠 Home</span>
+                            </label>
+                            <label class="category-option">
+                                <input type="radio" name="category" value="regret">
+                                <span>😭 Regret</span>
                             </label>
                             <label class="category-option">
                                 <input type="radio" name="category" value="misc">
@@ -319,6 +337,7 @@
                 <!-- Add Memory Button -->
                 <div class="add-memory-section">
                     <button id="add-memory-btn" class="btn-add-memory-minimal">+ Add Memory</button>
+                    <button id="scroll-to-oldest-btn" class="btn-scroll-oldest" title="Scroll to first memory">↓</button>
                 </div>
 
                 <!-- Memories Timeline -->
@@ -447,8 +466,8 @@
                     <span class="photo-icon">🖼️</span>
                     <span>Gallery</span>
                 </button>
-                <input type="file" id="camera-input" accept="image/*" capture="environment" multiple hidden>
-                <input type="file" id="gallery-input" accept="image/*" multiple hidden>
+                <input type="file" id="camera-input" accept="image/*,video/*" capture="environment" multiple hidden>
+                <input type="file" id="gallery-input" accept="image/*,video/*" multiple hidden>
             </div>
             
             <!-- Memory Form -->

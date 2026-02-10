@@ -67,6 +67,7 @@ const categoryEmojis = {
     gmasti: '☺️',
     gifts: '🎁',
     home: '🏠',
+    regret: '😭',
     misc: '✨'
 };
 
@@ -424,7 +425,23 @@ function setupEventListeners() {
         localStorage.removeItem('usual_us_user_id');
         document.getElementById('first-login-form').reset();
         document.getElementById('returning-login-form').reset();
+        document.getElementById('returning-pin-input').value = '';
         initializeAuth();
+    });
+    
+    // Numeric keypad for returning user PIN
+    document.querySelectorAll('.num-key[data-num]').forEach(key => {
+        key.addEventListener('click', () => {
+            const pinInput = document.getElementById('returning-pin-input');
+            if (pinInput.value.length < 4) {
+                pinInput.value += key.dataset.num;
+            }
+        });
+    });
+    
+    document.getElementById('num-key-del').addEventListener('click', () => {
+        const pinInput = document.getElementById('returning-pin-input');
+        pinInput.value = pinInput.value.slice(0, -1);
     });
     
     // Navigation with smooth transitions
@@ -491,6 +508,14 @@ function setupEventListeners() {
         document.getElementById('memory-form').classList.add('hidden');
         document.getElementById('memory-date').valueAsDate = new Date();
         selectedPhotos = [];
+    });
+    
+    // Scroll to oldest memory button
+    document.getElementById('scroll-to-oldest-btn').addEventListener('click', () => {
+        const timeline = document.getElementById('memories-timeline');
+        if (timeline && timeline.lastElementChild) {
+            timeline.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     });
     
     document.getElementById('close-memory-modal').addEventListener('click', () => {
@@ -872,24 +897,37 @@ function createFloatingHearts() {
     const usTab = document.getElementById('us-tab');
     if (!usTab) return;
     
-    // Remove existing floating hearts
-    usTab.querySelectorAll('.floating-heart-particle').forEach(h => h.remove());
+    // Only create once — skip if hearts already exist
+    if (usTab.querySelector('.floating-heart-particle')) return;
     
     const hearts = ['💕', '💗', '✨', '💖', '🤍'];
     
+    // Stable positions and timing based on index (seeded pseudo-random)
+    const heartConfigs = [
+        { size: 12, left: 15, top: 20, dur: 10, delay: 0 },
+        { size: 9,  left: 75, top: 45, dur: 14, delay: 1.5 },
+        { size: 16, left: 40, top: 70, dur: 11, delay: 3 },
+        { size: 10, left: 85, top: 15, dur: 18, delay: 0.8 },
+        { size: 14, left: 25, top: 85, dur: 12, delay: 2.5 },
+        { size: 8,  left: 60, top: 35, dur: 16, delay: 4 },
+        { size: 11, left: 50, top: 55, dur: 9,  delay: 1 },
+        { size: 13, left: 90, top: 75, dur: 15, delay: 3.5 },
+    ];
+    
     for (let i = 0; i < 8; i++) {
+        const cfg = heartConfigs[i];
         const heart = document.createElement('span');
         heart.className = 'floating-heart-particle';
         heart.textContent = hearts[i % hearts.length];
         heart.style.cssText = `
             position: absolute;
-            font-size: ${8 + Math.random() * 10}px;
-            left: ${Math.random() * 100}%;
-            top: ${Math.random() * 100}%;
+            font-size: ${cfg.size}px;
+            left: ${cfg.left}%;
+            top: ${cfg.top}%;
             opacity: 0;
             pointer-events: none;
             z-index: 0;
-            animation: floatingHeartParticle ${8 + Math.random() * 12}s ease-in-out ${Math.random() * 5}s infinite;
+            animation: floatingHeartParticle ${cfg.dur}s ease-in-out ${cfg.delay}s infinite;
         `;
         usTab.appendChild(heart);
     }
@@ -1043,11 +1081,16 @@ function showMemoryHighlight(memory, yearsAgo) {
     const container = document.getElementById('memory-highlight');
     if (!container) return;
     
+    const highlightIsVideo = isVideoMedia(memory, 0);
+    const highlightMedia = highlightIsVideo 
+        ? `<video src="${memory.images[0]}" autoplay muted loop playsinline style="width:100%;height:200px;object-fit:cover;"></video>`
+        : `<img src="${memory.images[0]}" alt="Memory">`;
+    
     container.innerHTML = `
         <div class="highlight-banner">
             <p class="highlight-text">✨ ${yearsAgo} ${yearsAgo === 1 ? 'year' : 'years'} ago today</p>
             <div class="highlight-preview" onclick="viewSinglePhoto('${memory.id}')">
-                <img src="${memory.images[0]}" alt="Memory">
+                ${highlightMedia}
             </div>
         </div>
     `;
@@ -1080,13 +1123,17 @@ function checkDailyMemoryReminder() {
 async function setMood(mood) {
     currentMood = mood;
     
+    // Persist mood in localStorage for the day
+    const today = new Date().toISOString().split('T')[0];
+    localStorage.setItem('usual_us_mood', JSON.stringify({ mood, date: today }));
+    
     try {
-        const today = new Date().toISOString().split('T')[0];
         await firebase.firestore()
             .collection('moods')
             .doc(today)
             .set({
                 [currentUserProfile.role]: mood,
+                [`${currentUserProfile.role}_time`]: firebase.firestore.FieldValue.serverTimestamp(),
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
         
@@ -1104,6 +1151,22 @@ async function setMood(mood) {
 }
 
 async function loadTodaysMood() {
+    // First check localStorage for persisted mood
+    const stored = localStorage.getItem('usual_us_mood');
+    if (stored) {
+        try {
+            const { mood, date } = JSON.parse(stored);
+            const today = new Date().toISOString().split('T')[0];
+            if (date === today && mood) {
+                currentMood = mood;
+                renderMoodIndicator();
+                document.querySelectorAll('.mood-option').forEach(opt => opt.classList.remove('selected'));
+                const moodOption = document.querySelector(`[data-mood="${currentMood}"]`);
+                if (moodOption) moodOption.classList.add('selected');
+            }
+        } catch (e) { /* ignore corrupted localStorage */ }
+    }
+    
     try {
         const today = new Date().toISOString().split('T')[0];
         const doc = await firebase.firestore()
@@ -1118,19 +1181,29 @@ async function loadTodaysMood() {
                 currentMood = data[currentUserProfile.role];
                 renderMoodIndicator();
                 
+                document.querySelectorAll('.mood-option').forEach(opt => opt.classList.remove('selected'));
                 const moodOption = document.querySelector(`[data-mood="${currentMood}"]`);
                 if (moodOption) {
                     moodOption.classList.add('selected');
                 }
+                
+                // Persist to localStorage
+                localStorage.setItem('usual_us_mood', JSON.stringify({ mood: currentMood, date: today }));
             }
             
-            // Load partner mood
+            // Load partner mood with time
             const partnerRole = currentUserProfile.role === 'krishna' ? 'rashi' : 'krishna';
             const partnerName = currentUserProfile.role === 'krishna' ? 'Gugu' : 'Susu';
             if (data[partnerRole]) {
                 const partnerMoodDisplay = document.getElementById('partner-mood-display');
                 if (partnerMoodDisplay) {
-                    partnerMoodDisplay.innerHTML = `${partnerName} is feeling ${moodEmojis[data[partnerRole]]} today`;
+                    let timeStr = '';
+                    const partnerTimeField = `${partnerRole}_time`;
+                    if (data[partnerTimeField]) {
+                        const moodTime = data[partnerTimeField].toDate();
+                        timeStr = ` at ${moodTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+                    }
+                    partnerMoodDisplay.innerHTML = `${partnerName} is feeling ${moodEmojis[data[partnerRole]]}${timeStr}`;
                     partnerMoodDisplay.classList.remove('hidden');
                 }
             }
@@ -1983,9 +2056,33 @@ function renderStats() {
 // Continuing with memory functions in the final section...
 
 // Memory Handling
-function handlePhotoSelect(e) {
+async function handlePhotoSelect(e) {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
+    
+    // Validate video duration (max 20 seconds) before showing form
+    const videoFiles = files.filter(f => f.type.startsWith('video/'));
+    if (videoFiles.length > 0) {
+        const validationPromises = videoFiles.map(vf => new Promise((resolve) => {
+            const tempVideo = document.createElement('video');
+            tempVideo.preload = 'metadata';
+            tempVideo.onloadedmetadata = () => {
+                URL.revokeObjectURL(tempVideo.src);
+                resolve(tempVideo.duration <= 20);
+            };
+            tempVideo.onerror = () => {
+                URL.revokeObjectURL(tempVideo.src);
+                resolve(false);
+            };
+            tempVideo.src = URL.createObjectURL(vf);
+        }));
+        
+        const results = await Promise.all(validationPromises);
+        if (results.some(valid => !valid)) {
+            showError('Videos must be 20 seconds or shorter');
+            return;
+        }
+    }
     
     selectedPhotos = files;
     
@@ -1996,23 +2093,38 @@ function handlePhotoSelect(e) {
     previewContainer.innerHTML = '';
     
     files.forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
+        const isVideo = file.type.startsWith('video/');
+        
+        if (isVideo) {
             const preview = document.createElement('div');
-            preview.className = 'photo-preview-item';
+            preview.className = 'photo-preview-item video-preview-item';
             preview.dataset.zoom = '1';
+            const videoUrl = URL.createObjectURL(file);
             preview.innerHTML = `
-                <img src="${e.target.result}" alt="Preview ${index + 1}">
+                <video src="${videoUrl}" muted playsinline autoplay loop></video>
+                <div class="video-badge">🎬 Video</div>
                 <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
-                <div class="photo-preview-zoom-slider">
-                    <span>−</span>
-                    <input type="range" min="1" max="3" step="0.1" value="1" oninput="zoomPreviewSlider(this)">
-                    <span>+</span>
-                </div>
             `;
             previewContainer.appendChild(preview);
-        };
-        reader.readAsDataURL(file);
+        } else {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.createElement('div');
+                preview.className = 'photo-preview-item';
+                preview.dataset.zoom = '1';
+                preview.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview ${index + 1}">
+                    <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
+                    <div class="photo-preview-zoom-slider">
+                        <span>−</span>
+                        <input type="range" min="1" max="3" step="0.1" value="1" oninput="zoomPreviewSlider(this)">
+                        <span>+</span>
+                    </div>
+                `;
+                previewContainer.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
+        }
     });
 }
 
@@ -2024,8 +2136,48 @@ function removePhoto(index) {
         return;
     }
     
+    // Re-render all previews with correct indices to avoid stale onclick references
+    rerenderPhotoPreviews();
+}
+
+function rerenderPhotoPreviews() {
     const previewContainer = document.getElementById('photos-preview');
-    previewContainer.children[index].remove();
+    previewContainer.innerHTML = '';
+    
+    selectedPhotos.forEach((file, index) => {
+        const isVideo = file.type.startsWith('video/');
+        
+        if (isVideo) {
+            const preview = document.createElement('div');
+            preview.className = 'photo-preview-item video-preview-item';
+            preview.dataset.zoom = '1';
+            const videoUrl = URL.createObjectURL(file);
+            preview.innerHTML = `
+                <video src="${videoUrl}" muted playsinline autoplay loop></video>
+                <div class="video-badge">🎬 Video</div>
+                <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
+            `;
+            previewContainer.appendChild(preview);
+        } else {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.createElement('div');
+                preview.className = 'photo-preview-item';
+                preview.dataset.zoom = '1';
+                preview.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview ${index + 1}">
+                    <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
+                    <div class="photo-preview-zoom-slider">
+                        <span>−</span>
+                        <input type="range" min="1" max="3" step="0.1" value="1" oninput="zoomPreviewSlider(this)">
+                        <span>+</span>
+                    </div>
+                `;
+                previewContainer.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 }
 
 // Zoom in/out on photo preview when adding memories
@@ -2071,14 +2223,18 @@ async function handleMemoryUpload(e) {
     
     try {
         const imageUrls = [];
+        const mediaTypes = [];
         
         for (const photo of selectedPhotos) {
+            const isVideo = photo.type.startsWith('video/');
+            const uploadType = isVideo ? 'video' : 'image';
+            
             const formData = new FormData();
             formData.append('file', photo);
             formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
             formData.append('folder', CLOUDINARY_FOLDER);
             
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${uploadType}/upload`, {
                 method: 'POST',
                 body: formData
             });
@@ -2087,14 +2243,16 @@ async function handleMemoryUpload(e) {
             
             const data = await response.json();
             imageUrls.push(data.secure_url);
+            mediaTypes.push(isVideo ? 'video' : 'image');
         }
         
         const memory = {
             images: imageUrls,
+            mediaTypes: mediaTypes,
             caption: caption,
             memoryDate: firebase.firestore.Timestamp.fromDate(memoryDate),
             uploadedBy: currentUserProfile.role,
-            imagePosition: { x: 50, y: 50 }, // NEW: Default center position
+            imagePosition: { x: 50, y: 50 },
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
@@ -2125,6 +2283,27 @@ function getRandomTilt() {
     return (Math.random() * 6 - 3).toFixed(2);
 }
 
+function getStableTilt(id) {
+    // Generate a stable tilt based on the memory id so it doesn't change on re-render
+    // Uses hash * 31 algorithm (common string hash) to produce a tilt in range -3 to +3 degrees
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = ((hash << 5) - hash) + id.charCodeAt(i);
+        hash |= 0;
+    }
+    return ((Math.abs(hash) % 600) / 100 - 3).toFixed(2);
+}
+
+function getStableNoteRotation(id) {
+    // Stable rotation for sticky notes (-2 to +2 degrees) based on note ID
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = ((hash << 5) - hash) + id.charCodeAt(i);
+        hash |= 0;
+    }
+    return ((Math.abs(hash) % 400) / 100 - 2).toFixed(2);
+}
+
 function renderMemoriesTimeline() {
     const container = document.getElementById('memories-timeline');
     
@@ -2142,7 +2321,7 @@ function renderMemoriesTimeline() {
         const date = memory.memoryDate ? memory.memoryDate.toDate() : new Date();
         const formattedDate = formatMemoryDate(date);
         const imageCount = memory.images.length;
-        const tilt = getRandomTilt();
+        const tilt = getStableTilt(memory.id);
         const isAnniversaryMemory = isQuarterlyAnniversary(date);
         const anniversaryClass = isAnniversaryMemory ? ' anniversary-polaroid' : '';
         const anniversaryBadge = isAnniversaryMemory ? '<div class="anniversary-memory-badge">💝 Anniversary</div>' : '';
@@ -2160,6 +2339,8 @@ function renderMemoriesTimeline() {
         const stringHTML = showString ? '<div class="polaroid-string"></div>' : '';
         
         const imgStyle = getImageStyle(memory);
+        const firstIsVideo = isVideoMedia(memory, 0);
+        const firstMediaHTML = renderMediaElement(memory.images[0], firstIsVideo, memory.caption || 'Memory', imgStyle, '');
         
         if (imageCount === 1) {
             return `
@@ -2167,10 +2348,7 @@ function renderMemoriesTimeline() {
                     ${stringHTML}
                     <div class="polaroid${anniversaryClass}" style="transform: rotate(${tilt}deg)" onclick="viewSinglePhoto('${memory.id}')">
                         <div class="polaroid-photo">
-                            <img src="${memory.images[0]}" 
-                                 alt="${memory.caption || 'Memory'}" 
-                                 loading="lazy"
-                                 style="${imgStyle}">
+                            ${firstMediaHTML}
                         </div>
                         <div class="polaroid-caption-area">
                             <p class="polaroid-date">${formattedDate}</p>
@@ -2189,16 +2367,13 @@ function renderMemoriesTimeline() {
                         <div class="stack-card stack-back-1"></div>
                         <div class="polaroid${anniversaryClass}">
                             <div class="polaroid-photo">
-                                <img src="${memory.images[0]}" 
-                                     alt="${memory.caption || 'Album'}" 
-                                     loading="lazy"
-                                     style="${imgStyle}">
+                                ${firstMediaHTML}
                             </div>
                             <div class="polaroid-caption-area">
                                 <p class="polaroid-date">${formattedDate}</p>
                                 ${memory.caption ? `<p class="polaroid-caption">${memory.caption}</p>` : ''}
                             </div>
-                            <div class="album-count-badge">${imageCount} photos</div>
+                            <div class="album-count-badge">${imageCount} ${imageCount === 1 ? 'item' : 'items'}</div>
                             ${anniversaryBadge}
                         </div>
                     </div>
@@ -2212,6 +2387,12 @@ function renderMemoriesTimeline() {
 window.startImageAdjust = function(memoryId, imageIndex) {
     const memory = memories.find(m => m.id === memoryId);
     if (!memory) return;
+    
+    // Skip adjustment for videos
+    if (isVideoMedia(memory, imageIndex)) {
+        showError('Video position adjustment is not supported');
+        return;
+    }
     
     const currentPos = memory.imagePosition || { x: 50, y: 50 };
     const currentZoom = memory.imageZoom || 1;
@@ -2304,12 +2485,14 @@ function viewSinglePhoto(memoryId) {
     const formattedDate = formatMemoryDate(date);
     
     const imgStyle = getImageStyle(memory);
+    const isVideo = isVideoMedia(memory, 0);
+    const mediaHTML = renderMediaElement(memory.images[0], isVideo, 'Memory', imgStyle, '');
     
     const container = document.getElementById('single-photo-container');
     container.innerHTML = `
         <div class="viewer-polaroid">
             <div class="viewer-polaroid-photo">
-                <img src="${memory.images[0]}" alt="Memory" style="${imgStyle}">
+                ${mediaHTML}
             </div>
             <div class="viewer-polaroid-caption">
                 <p class="viewer-date">${formattedDate}</p>
@@ -2351,25 +2534,37 @@ function renderAlbumPhoto(memory) {
     const currentImage = memory.images[currentAlbumIndex];
     
     const imgStyle = getImageStyle(memory);
+    const isVideo = isVideoMedia(memory, currentAlbumIndex);
+    const mediaHTML = renderMediaElement(currentImage, isVideo, `Photo ${currentAlbumIndex + 1}`, imgStyle, '');
     
     container.innerHTML = `
         <div class="viewer-polaroid swipeable-polaroid">
             <div class="viewer-polaroid-photo">
-                <img src="${currentImage}" alt="Photo ${currentAlbumIndex + 1}" style="${imgStyle}">
+                ${mediaHTML}
             </div>
         </div>
     `;
 }
 
+let _albumSwipeStartHandler = null;
+let _albumSwipeEndHandler = null;
+
 function setupAlbumSwipe() {
     const container = document.getElementById('album-photos-container');
     let startX = 0;
     
-    container.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
-    }, { passive: true });
+    // Remove previous listeners to prevent accumulation
+    if (_albumSwipeStartHandler) {
+        container.removeEventListener('touchstart', _albumSwipeStartHandler);
+    }
+    if (_albumSwipeEndHandler) {
+        container.removeEventListener('touchend', _albumSwipeEndHandler);
+    }
     
-    container.addEventListener('touchend', (e) => {
+    _albumSwipeStartHandler = (e) => {
+        startX = e.touches[0].clientX;
+    };
+    _albumSwipeEndHandler = (e) => {
         const endX = e.changedTouches[0].clientX;
         const diff = startX - endX;
         
@@ -2380,7 +2575,10 @@ function setupAlbumSwipe() {
                 navigateAlbum(-1); // Swipe right - previous
             }
         }
-    });
+    };
+    
+    container.addEventListener('touchstart', _albumSwipeStartHandler, { passive: true });
+    container.addEventListener('touchend', _albumSwipeEndHandler);
 }
 
 function navigateAlbum(direction) {
@@ -2432,6 +2630,31 @@ function getImageStyle(memory) {
     const posY = memory.imagePosition ? memory.imagePosition.y : 50;
     const zoom = memory.imageZoom || 1;
     return `object-fit: cover; object-position: ${posX}% ${posY}%${zoom !== 1 ? `; transform: scale(${zoom})` : ''}`;
+}
+
+// Check if a media URL at given index is a video
+function isVideoMedia(memory, index) {
+    if (memory.mediaTypes && memory.mediaTypes[index]) {
+        return memory.mediaTypes[index] === 'video';
+    }
+    // Fallback: check URL extension
+    const url = (memory.images && memory.images[index]) || '';
+    return /\.(mp4|mov|webm|m4v|avi)(\?|$)/i.test(url) || url.includes('/video/');
+}
+
+// Render media element (image or video) as HTML string
+function renderMediaElement(url, isVideo, altText, style, extraAttrs) {
+    if (isVideo) {
+        return `<video src="${url}" 
+                    autoplay muted loop playsinline 
+                    ${extraAttrs || ''}
+                    style="${style}; width: 100%; height: 100%; object-fit: cover;"></video>`;
+    }
+    return `<img src="${url}" 
+                alt="${altText}" 
+                loading="lazy"
+                ${extraAttrs || ''}
+                style="${style}">`;
 }
 
 // Notes Handling
@@ -2490,7 +2713,8 @@ function renderNotes() {
     
     container.innerHTML = notes.map((note, index) => {
         const color = pastelColors[index % pastelColors.length];
-        const rotation = (Math.random() * 4 - 2).toFixed(2);
+        // Use stable rotation from note ID to prevent jitter on re-render
+        const rotation = getStableNoteRotation(note.id);
         
         return `
             <div class="sticky-note" 
@@ -2563,6 +2787,11 @@ function showBalanceCelebration() {
 function showLoading(show) {
     const loading = document.getElementById('loading');
     if (loading) {
+        // Don't show the full-screen loading overlay when on Us tab to prevent UI disruption
+        const usTabActive = document.querySelector('#us-tab.active');
+        if (show && usTabActive) {
+            return;
+        }
         if (show) {
             loading.classList.remove('hidden');
         } else {

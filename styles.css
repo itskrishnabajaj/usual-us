@@ -179,6 +179,71 @@ body.us-active {
     background: rgba(255, 255, 255, 0.05);
 }
 
+/* Switch user corner button for returning user */
+.btn-switch-user-corner {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    padding: 5px 10px;
+    background: transparent;
+    color: var(--text-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    z-index: 2;
+}
+
+.btn-switch-user-corner:active {
+    transform: scale(0.96);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Returning login form needs relative positioning for corner button */
+#returning-login-form {
+    position: relative;
+    padding-top: 10px;
+}
+
+/* Numeric Keypad */
+.num-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    max-width: 260px;
+    margin: 0 auto 16px;
+}
+
+.num-key {
+    height: 52px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 22px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.num-key:active {
+    transform: scale(0.93);
+    background: rgba(255, 198, 217, 0.15);
+    border-color: var(--accent);
+}
+
+.num-key-empty {
+    visibility: hidden;
+}
+
+.num-key-del {
+    font-size: 20px;
+    color: var(--text-secondary);
+}
+
 /* ============================================
    APP LAYOUT
    ============================================ */
@@ -1614,6 +1679,10 @@ textarea {
 .add-memory-section {
     text-align: center;
     margin: 32px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
 }
 
 .btn-add-memory-minimal {
@@ -1633,6 +1702,33 @@ textarea {
 .btn-add-memory-minimal:active {
     transform: scale(0.98);
     background: rgba(255, 198, 217, 0.15);
+}
+
+.btn-scroll-oldest {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid var(--us-card-border, rgba(255, 198, 217, 0.3));
+    color: var(--us-accent, var(--accent));
+    font-size: 16px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(194, 24, 91, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: bounceDown 2s ease-in-out infinite;
+}
+
+.btn-scroll-oldest:active {
+    transform: scale(0.93);
+}
+
+@keyframes bounceDown {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(4px); }
 }
 
 /* ============================================
@@ -1728,6 +1824,46 @@ textarea {
     height: 100%;
     object-fit: cover;
     display: block;
+}
+
+.polaroid-photo video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.viewer-polaroid-photo video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 2px;
+}
+
+/* Video preview badge */
+.video-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.video-preview-item {
+    position: relative;
+}
+
+.video-preview-item video {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
 }
 
 .polaroid-caption-area {
@@ -3362,6 +3498,7 @@ body {
 .category-stat:nth-child(4) { animation-delay: 0.24s; }
 .category-stat:nth-child(5) { animation-delay: 0.32s; }
 .category-stat:nth-child(6) { animation-delay: 0.4s; }
+.category-stat:nth-child(7) { animation-delay: 0.48s; }
 
 /* Expense item animations */
 .expense-item {
@@ -3370,6 +3507,146 @@ body {
 
 .expense-item:active {
     transform: scale(0.98);
+}
+
+/* ============================================
+   ENHANCED ANIMATIONS & MICRO-INTERACTIONS
+   ============================================ */
+
+/* Smooth entrance for balance card */
+.balance-card {
+    animation: fadeInUp 0.4s ease-out both;
+}
+
+/* Who pays next bounce */
+.who-pays-indicator {
+    transition: transform var(--transition-normal);
+}
+
+.who-pays-indicator:hover {
+    transform: scale(1.1);
+}
+
+/* Modal entrance animation */
+.modal:not(.hidden) .modal-content {
+    animation: modalSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Nav item interaction */
+.nav-item {
+    transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-item:active {
+    transform: scale(0.9);
+}
+
+.nav-icon {
+    display: inline-block;
+    transition: transform var(--transition-fast);
+}
+
+.nav-item.active .nav-icon {
+    transform: scale(1.15);
+}
+
+/* Settle button pulse on hover */
+.btn-settle {
+    transition: all var(--transition-fast), box-shadow var(--transition-normal);
+}
+
+.btn-settle:active {
+    transform: scale(0.96);
+}
+
+/* Stats card stagger */
+.stat-item {
+    animation: fadeInUp 0.4s ease-out both;
+}
+
+.stat-item:nth-child(1) { animation-delay: 0s; }
+.stat-item:nth-child(2) { animation-delay: 0.1s; }
+.stat-item:nth-child(3) { animation-delay: 0.2s; }
+
+/* Smooth loading overlay transition */
+.loading {
+    transition: opacity 0.25s ease;
+}
+
+.loading.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Polaroid hover/touch */
+.polaroid {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Toast entrance */
+.success-toast,
+.error-toast {
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Budget progress smooth fill */
+.budget-progress-fill {
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mood option bounce on select */
+.mood-option.selected {
+    animation: moodBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), glow 2s ease-in-out infinite 0.4s;
+}
+
+@keyframes moodBounce {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Milestone card entrance */
+.milestone-card {
+    animation: fadeInUp 0.5s ease-out both;
+}
+
+.milestone-card:nth-child(1) { animation-delay: 0s; }
+.milestone-card:nth-child(2) { animation-delay: 0.12s; }
+.milestone-card:nth-child(3) { animation-delay: 0.24s; }
+
+/* Celebration confetti effect */
+.balance-celebration:not(.hidden) .celebration-content {
+    animation: celebrationPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes celebrationPop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Sticky note subtle hover */
+.sticky-note {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Secret note reveal */
+.secret-note.unlocked {
+    animation: fadeInUp 0.5s ease-out both;
+}
+
+.secret-note.locked {
+    animation: fadeInUp 0.5s ease-out both;
 }
 
 /* ============================================
