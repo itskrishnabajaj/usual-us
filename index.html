@@ -18,6 +18,7 @@
     <!-- Login Screen -->
     <div id="login-screen" class="login-screen hidden">
         <div class="login-container">
+            <button type="button" id="switch-user-btn" class="btn-switch-user-corner hidden">Switch User</button>
             <h1 class="login-title">usual us</h1>
             <p class="login-subtitle">Our little corner of the internet</p>
             
@@ -36,12 +37,19 @@
             
             <!-- Returning User Login -->
             <form id="returning-login-form" class="login-form hidden">
-                <button type="button" id="switch-user-btn" class="btn-switch-user-corner">Switch User</button>
-                <p class="returning-welcome">Welcome back, <span id="returning-name"></span> 💝</p>
-                <div class="form-group">
-                    <label>PIN</label>
-                    <input type="password" id="returning-pin-input" placeholder="4-digit PIN" maxlength="4" required readonly inputmode="none">
+                <div class="returning-hero">
+                    <div class="returning-avatar">💝</div>
+                    <p class="returning-welcome">Welcome back</p>
+                    <p class="returning-name-display"><span id="returning-name"></span></p>
                 </div>
+                <input type="password" id="returning-pin-input" maxlength="4" required readonly inputmode="none" class="returning-pin-hidden">
+                <div class="pin-dots">
+                    <div class="pin-dot" data-index="0"></div>
+                    <div class="pin-dot" data-index="1"></div>
+                    <div class="pin-dot" data-index="2"></div>
+                    <div class="pin-dot" data-index="3"></div>
+                </div>
+                <p class="pin-label">Enter your PIN</p>
                 <div class="num-keypad">
                     <button type="button" class="num-key" data-num="1">1</button>
                     <button type="button" class="num-key" data-num="2">2</button>
@@ -56,7 +64,6 @@
                     <button type="button" class="num-key" data-num="0">0</button>
                     <button type="button" class="num-key num-key-del" id="num-key-del">⌫</button>
                 </div>
-                <button type="submit" class="btn-login">Login</button>
             </form>
         </div>
     </div>
