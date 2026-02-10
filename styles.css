@@ -40,6 +40,11 @@ body {
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background var(--transition-normal);
+}
+
+body.us-active {
+    background: #fdf2f0;
 }
 
 /* GPU Acceleration for smooth animations */
@@ -181,6 +186,11 @@ body {
 #app {
     min-height: 100vh;
     padding-bottom: 80px;
+    transition: background var(--transition-normal);
+}
+
+#app.us-active {
+    background: #fdf2f0;
 }
 
 #app-header {
@@ -195,9 +205,24 @@ body {
 }
 
 #app-header.us-active {
-    background: #fdf2f0;
+    background: linear-gradient(180deg, #fdf2f0 0%, #fdf2f0 100%);
     border-bottom-color: transparent;
     color: #3a2e2e;
+    box-shadow: 0 1px 8px rgba(194, 24, 91, 0.06);
+}
+
+#app-header.us-active.late-night {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    box-shadow: none;
+}
+
+body.us-active.late-night {
+    background: var(--bg-primary);
+}
+
+#app.us-active.late-night {
+    background: var(--bg-primary);
 }
 
 #greeting {
@@ -973,7 +998,7 @@ textarea {
    ============================================ */
 
 .us-tab {
-    margin-top: -1px;
+    margin-top: -20px;
     padding-top: 0;
     padding-bottom: 80px;
     padding-left: 20px;
@@ -984,6 +1009,7 @@ textarea {
     min-height: 100vh;
     /* Break out of #main-content padding */
     margin-left: -20px;
+    margin-bottom: -20px;
     width: calc(100% + 40px);
     /* Scoped color variables for light background */
     --us-text: #3a2e2e;
@@ -1441,12 +1467,12 @@ textarea {
     background: var(--us-card-bg, linear-gradient(135deg, rgba(255, 198, 217, 0.12) 0%, rgba(255, 198, 217, 0.06) 100%));
     border: 1px solid var(--us-card-border, rgba(255, 198, 217, 0.3));
     border-radius: 20px;
-    padding: 32px 24px;
+    padding: 36px 28px;
     margin: 0 auto 24px;
     max-width: 400px;
     text-align: center;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 32px rgba(194, 24, 91, 0.08);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(194, 24, 91, 0.08), 0 2px 8px rgba(194, 24, 91, 0.04);
     position: relative;
     animation: breathe 6s ease-in-out infinite;
 }
@@ -1491,7 +1517,8 @@ textarea {
     margin: 0 auto 24px;
     max-width: 400px;
     text-align: center;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(194, 24, 91, 0.05);
 }
 
 .mood-tracker-title {
@@ -1591,7 +1618,7 @@ textarea {
 
 .btn-add-memory-minimal {
     padding: 14px 32px;
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.65);
     border: 1px solid var(--us-card-border, rgba(255, 198, 217, 0.3));
     border-radius: 24px;
     color: var(--us-accent, var(--accent));
@@ -1599,7 +1626,8 @@ textarea {
     font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-fast);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(194, 24, 91, 0.06);
 }
 
 .btn-add-memory-minimal:active {
@@ -1913,7 +1941,8 @@ textarea {
     border-radius: 16px;
     padding: 20px;
     text-align: center;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(194, 24, 91, 0.05);
 }
 
 .secret-note.locked {
@@ -2773,9 +2802,28 @@ textarea {
 }
 
 #bottom-nav.us-active {
-    background: rgba(253, 242, 240, 0.95);
+    background: rgba(253, 242, 240, 0.98);
     backdrop-filter: blur(30px);
     border-top-color: transparent;
+    box-shadow: 0 -1px 8px rgba(194, 24, 91, 0.06);
+}
+
+#bottom-nav.us-active.late-night {
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(30px) saturate(180%);
+    box-shadow: none;
+}
+
+#bottom-nav.us-active.late-night .nav-item {
+    color: var(--text-secondary);
+}
+
+#bottom-nav.us-active.late-night .nav-item.active {
+    color: var(--accent);
+}
+
+#bottom-nav.us-active.late-night .nav-item::before {
+    background: var(--accent);
 }
 
 #bottom-nav.us-active .nav-item {
