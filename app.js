@@ -897,24 +897,37 @@ function createFloatingHearts() {
     const usTab = document.getElementById('us-tab');
     if (!usTab) return;
     
-    // Remove existing floating hearts
-    usTab.querySelectorAll('.floating-heart-particle').forEach(h => h.remove());
+    // Only create once — skip if hearts already exist
+    if (usTab.querySelector('.floating-heart-particle')) return;
     
     const hearts = ['💕', '💗', '✨', '💖', '🤍'];
     
+    // Stable positions and timing based on index (seeded pseudo-random)
+    const heartConfigs = [
+        { size: 12, left: 15, top: 20, dur: 10, delay: 0 },
+        { size: 9,  left: 75, top: 45, dur: 14, delay: 1.5 },
+        { size: 16, left: 40, top: 70, dur: 11, delay: 3 },
+        { size: 10, left: 85, top: 15, dur: 18, delay: 0.8 },
+        { size: 14, left: 25, top: 85, dur: 12, delay: 2.5 },
+        { size: 8,  left: 60, top: 35, dur: 16, delay: 4 },
+        { size: 11, left: 50, top: 55, dur: 9,  delay: 1 },
+        { size: 13, left: 90, top: 75, dur: 15, delay: 3.5 },
+    ];
+    
     for (let i = 0; i < 8; i++) {
+        const cfg = heartConfigs[i];
         const heart = document.createElement('span');
         heart.className = 'floating-heart-particle';
         heart.textContent = hearts[i % hearts.length];
         heart.style.cssText = `
             position: absolute;
-            font-size: ${8 + Math.random() * 10}px;
-            left: ${Math.random() * 100}%;
-            top: ${Math.random() * 100}%;
+            font-size: ${cfg.size}px;
+            left: ${cfg.left}%;
+            top: ${cfg.top}%;
             opacity: 0;
             pointer-events: none;
             z-index: 0;
-            animation: floatingHeartParticle ${8 + Math.random() * 12}s ease-in-out ${Math.random() * 5}s infinite;
+            animation: floatingHeartParticle ${cfg.dur}s ease-in-out ${cfg.delay}s infinite;
         `;
         usTab.appendChild(heart);
     }
@@ -2043,11 +2056,11 @@ function renderStats() {
 // Continuing with memory functions in the final section...
 
 // Memory Handling
-function handlePhotoSelect(e) {
+async function handlePhotoSelect(e) {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
     
-    // Validate video duration (max 20 seconds) before allowing proceed
+    // Validate video duration (max 20 seconds) before showing form
     const videoFiles = files.filter(f => f.type.startsWith('video/'));
     if (videoFiles.length > 0) {
         const validationPromises = videoFiles.map(vf => new Promise((resolve) => {
@@ -2064,12 +2077,11 @@ function handlePhotoSelect(e) {
             tempVideo.src = URL.createObjectURL(vf);
         }));
         
-        Promise.all(validationPromises).then(results => {
-            if (results.some(valid => !valid)) {
-                showError('Videos must be 20 seconds or shorter');
-                resetMemoryForm();
-            }
-        });
+        const results = await Promise.all(validationPromises);
+        if (results.some(valid => !valid)) {
+            showError('Videos must be 20 seconds or shorter');
+            return;
+        }
     }
     
     selectedPhotos = files;
@@ -2124,8 +2136,48 @@ function removePhoto(index) {
         return;
     }
     
+    // Re-render all previews with correct indices to avoid stale onclick references
+    rerenderPhotoPreviews();
+}
+
+function rerenderPhotoPreviews() {
     const previewContainer = document.getElementById('photos-preview');
-    previewContainer.children[index].remove();
+    previewContainer.innerHTML = '';
+    
+    selectedPhotos.forEach((file, index) => {
+        const isVideo = file.type.startsWith('video/');
+        
+        if (isVideo) {
+            const preview = document.createElement('div');
+            preview.className = 'photo-preview-item video-preview-item';
+            preview.dataset.zoom = '1';
+            const videoUrl = URL.createObjectURL(file);
+            preview.innerHTML = `
+                <video src="${videoUrl}" muted playsinline autoplay loop></video>
+                <div class="video-badge">🎬 Video</div>
+                <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
+            `;
+            previewContainer.appendChild(preview);
+        } else {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.createElement('div');
+                preview.className = 'photo-preview-item';
+                preview.dataset.zoom = '1';
+                preview.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview ${index + 1}">
+                    <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
+                    <div class="photo-preview-zoom-slider">
+                        <span>−</span>
+                        <input type="range" min="1" max="3" step="0.1" value="1" oninput="zoomPreviewSlider(this)">
+                        <span>+</span>
+                    </div>
+                `;
+                previewContainer.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 }
 
 // Zoom in/out on photo preview when adding memories
@@ -2240,6 +2292,16 @@ function getStableTilt(id) {
         hash |= 0;
     }
     return ((Math.abs(hash) % 600) / 100 - 3).toFixed(2);
+}
+
+function getStableNoteRotation(id) {
+    // Stable rotation for sticky notes (-2 to +2 degrees) based on note ID
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = ((hash << 5) - hash) + id.charCodeAt(i);
+        hash |= 0;
+    }
+    return ((Math.abs(hash) % 400) / 100 - 2).toFixed(2);
 }
 
 function renderMemoriesTimeline() {
@@ -2484,15 +2546,25 @@ function renderAlbumPhoto(memory) {
     `;
 }
 
+let _albumSwipeStartHandler = null;
+let _albumSwipeEndHandler = null;
+
 function setupAlbumSwipe() {
     const container = document.getElementById('album-photos-container');
     let startX = 0;
     
-    container.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
-    }, { passive: true });
+    // Remove previous listeners to prevent accumulation
+    if (_albumSwipeStartHandler) {
+        container.removeEventListener('touchstart', _albumSwipeStartHandler);
+    }
+    if (_albumSwipeEndHandler) {
+        container.removeEventListener('touchend', _albumSwipeEndHandler);
+    }
     
-    container.addEventListener('touchend', (e) => {
+    _albumSwipeStartHandler = (e) => {
+        startX = e.touches[0].clientX;
+    };
+    _albumSwipeEndHandler = (e) => {
         const endX = e.changedTouches[0].clientX;
         const diff = startX - endX;
         
@@ -2503,7 +2575,10 @@ function setupAlbumSwipe() {
                 navigateAlbum(-1); // Swipe right - previous
             }
         }
-    });
+    };
+    
+    container.addEventListener('touchstart', _albumSwipeStartHandler, { passive: true });
+    container.addEventListener('touchend', _albumSwipeEndHandler);
 }
 
 function navigateAlbum(direction) {
@@ -2638,7 +2713,8 @@ function renderNotes() {
     
     container.innerHTML = notes.map((note, index) => {
         const color = pastelColors[index % pastelColors.length];
-        const rotation = (Math.random() * 4 - 2).toFixed(2);
+        // Use stable rotation from note ID to prevent jitter on re-render
+        const rotation = getStableNoteRotation(note.id);
         
         return `
             <div class="sticky-note" 
