@@ -98,8 +98,9 @@ body.us-active {
 .login-container {
     width: 100%;
     max-width: 400px;
-    padding: 40px 30px;
-    padding-top: 48px;
+    max-height: 90vh;
+    padding: 28px 24px;
+    padding-top: 36px;
     background: rgba(26, 26, 26, 0.6);
     backdrop-filter: blur(24px);
     border-radius: 28px;
@@ -107,15 +108,16 @@ body.us-active {
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 80px rgba(194, 24, 91, 0.05);
     animation: scaleIn 0.6s ease-out;
     position: relative;
+    overflow-y: auto;
 }
 
 .login-title {
     font-family: 'Playfair Display', serif;
-    font-size: 46px;
+    font-size: 38px;
     font-weight: 600;
     font-style: italic;
     text-align: center;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     background: linear-gradient(135deg, var(--accent) 0%, #ffffff 50%, var(--accent) 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
@@ -127,8 +129,8 @@ body.us-active {
 .login-subtitle {
     text-align: center;
     color: var(--text-secondary);
-    font-size: 14px;
-    margin-bottom: 32px;
+    font-size: 13px;
+    margin-bottom: 20px;
     opacity: 0;
     animation: fadeInUp 0.6s ease-out 0.3s forwards;
 }
@@ -136,18 +138,18 @@ body.us-active {
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
 }
 
 .returning-hero {
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     animation: fadeInUp 0.6s ease-out 0.2s both;
 }
 
 .returning-avatar {
-    font-size: 48px;
-    margin-bottom: 16px;
+    font-size: 40px;
+    margin-bottom: 8px;
     animation: heartbeat 2s ease-in-out infinite;
 }
 
@@ -161,9 +163,13 @@ body.us-active {
 
 .returning-name-display {
     font-family: 'Playfair Display', serif;
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 600;
     font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
     background: linear-gradient(135deg, var(--accent) 0%, #ffffff 50%, var(--accent) 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
@@ -208,7 +214,7 @@ body.us-active {
     text-align: center;
     font-size: 12px;
     color: var(--text-tertiary);
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     letter-spacing: 0.5px;
     animation: fadeInUp 0.6s ease-out 0.35s both;
 }
@@ -287,7 +293,7 @@ body.us-active {
 .num-keypad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    gap: 6px;
     max-width: 250px;
     margin: 0 auto;
     animation: fadeInUp 0.6s ease-out 0.4s both;
@@ -295,7 +301,7 @@ body.us-active {
 
 .num-key {
     width: 68px;
-    height: 56px;
+    height: 46px;
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1172,6 +1178,7 @@ textarea {
     --us-card-border: rgba(194, 24, 91, 0.15);
     --us-accent: #c2185b;
     color: var(--us-text);
+    contain: layout style;
 }
 
 /* Ambient floating particles */
@@ -1771,6 +1778,8 @@ textarea {
     align-items: center;
     justify-content: center;
     gap: 12px;
+    position: relative;
+    z-index: 2;
 }
 
 .btn-add-memory-minimal {
@@ -1835,6 +1844,8 @@ textarea {
     display: flex;
     flex-direction: column;
     align-items: center;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 350px;
 }
 
 /* Timeline String - Elegant beaded chain */
@@ -2436,6 +2447,8 @@ textarea {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 12px;
     margin-bottom: 20px;
+    justify-items: center;
+    justify-content: center;
 }
 
 .photo-preview-item {
@@ -2444,6 +2457,7 @@ textarea {
     border-radius: 12px;
     overflow: hidden;
     background: var(--bg-tertiary);
+    width: 100%;
 }
 
 .photo-preview-item img {
@@ -2451,6 +2465,24 @@ textarea {
     height: 100%;
     object-fit: cover;
     transition: transform var(--transition-fast);
+}
+
+.audio-preview-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+}
+
+.audio-preview-placeholder {
+    font-size: 36px;
+    margin-bottom: 8px;
+}
+
+.audio-preview-item audio {
+    width: 90%;
+    height: 32px;
 }
 
 .photo-preview-zoom {

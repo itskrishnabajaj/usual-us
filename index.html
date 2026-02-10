@@ -39,8 +39,7 @@
             <form id="returning-login-form" class="login-form hidden">
                 <div class="returning-hero">
                     <div class="returning-avatar">💝</div>
-                    <p class="returning-welcome">Welcome back</p>
-                    <p class="returning-name-display"><span id="returning-name"></span></p>
+                    <p class="returning-name-display">Welcome back, <span id="returning-name"></span></p>
                 </div>
                 <input type="password" id="returning-pin-input" maxlength="4" required readonly inputmode="none" class="returning-pin-hidden">
                 <div class="pin-dots">
@@ -473,8 +472,8 @@
                     <span class="photo-icon">🖼️</span>
                     <span>Gallery</span>
                 </button>
-                <input type="file" id="camera-input" accept="image/*,video/*" capture="environment" multiple hidden>
-                <input type="file" id="gallery-input" accept="image/*,video/*" multiple hidden>
+                <input type="file" id="camera-input" accept="image/*,video/*,audio/*" capture="environment" multiple hidden>
+                <input type="file" id="gallery-input" accept="image/*,video/*,audio/*" multiple hidden>
             </div>
             
             <!-- Memory Form -->

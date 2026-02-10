@@ -933,16 +933,7 @@ function createFloatingHearts() {
         { size: 16, left: 40, top: 70, dur: 11, delay: 3 },
         { size: 10, left: 85, top: 15, dur: 18, delay: 0.8 },
         { size: 14, left: 25, top: 85, dur: 12, delay: 2.5 },
-        { size: 8,  left: 60, top: 35, dur: 16, delay: 4 },
         { size: 11, left: 50, top: 55, dur: 9,  delay: 1 },
-        { size: 13, left: 90, top: 75, dur: 15, delay: 3.5 },
-        { size: 10, left: 5,  top: 50, dur: 13, delay: 0.5 },
-        { size: 15, left: 70, top: 10, dur: 10, delay: 2 },
-        { size: 9,  left: 35, top: 90, dur: 17, delay: 1.2 },
-        { size: 12, left: 55, top: 25, dur: 11, delay: 3.8 },
-        { size: 8,  left: 20, top: 60, dur: 14, delay: 4.5 },
-        { size: 14, left: 80, top: 65, dur: 12, delay: 0.3 },
-        { size: 11, left: 45, top: 40, dur: 16, delay: 2.8 },
     ];
     
     for (let i = 0; i < heartConfigs.length; i++) {
@@ -2125,6 +2116,7 @@ async function handlePhotoSelect(e) {
     
     files.forEach((file, index) => {
         const isVideo = file.type.startsWith('video/');
+        const isAudio = file.type.startsWith('audio/');
         
         if (isVideo) {
             const preview = document.createElement('div');
@@ -2137,6 +2129,17 @@ async function handlePhotoSelect(e) {
                 <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
             `;
             previewContainer.appendChild(preview);
+        } else if (isAudio) {
+            const preview = document.createElement('div');
+            preview.className = 'photo-preview-item audio-preview-item';
+            preview.dataset.zoom = '1';
+            const audioUrl = URL.createObjectURL(file);
+            preview.innerHTML = `
+                <div class="audio-preview-placeholder">🎵</div>
+                <audio src="${audioUrl}" controls></audio>
+                <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
+            `;
+            previewContainer.appendChild(preview);
         } else {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -2146,11 +2149,6 @@ async function handlePhotoSelect(e) {
                 preview.innerHTML = `
                     <img src="${e.target.result}" alt="Preview ${index + 1}">
                     <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
-                    <div class="photo-preview-zoom-slider">
-                        <span>−</span>
-                        <input type="range" min="1" max="3" step="0.1" value="1" oninput="zoomPreviewSlider(this)">
-                        <span>+</span>
-                    </div>
                 `;
                 previewContainer.appendChild(preview);
             };
@@ -2177,6 +2175,7 @@ function rerenderPhotoPreviews() {
     
     selectedPhotos.forEach((file, index) => {
         const isVideo = file.type.startsWith('video/');
+        const isAudio = file.type.startsWith('audio/');
         
         if (isVideo) {
             const preview = document.createElement('div');
@@ -2189,6 +2188,17 @@ function rerenderPhotoPreviews() {
                 <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
             `;
             previewContainer.appendChild(preview);
+        } else if (isAudio) {
+            const preview = document.createElement('div');
+            preview.className = 'photo-preview-item audio-preview-item';
+            preview.dataset.zoom = '1';
+            const audioUrl = URL.createObjectURL(file);
+            preview.innerHTML = `
+                <div class="audio-preview-placeholder">🎵</div>
+                <audio src="${audioUrl}" controls></audio>
+                <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
+            `;
+            previewContainer.appendChild(preview);
         } else {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -2198,11 +2208,6 @@ function rerenderPhotoPreviews() {
                 preview.innerHTML = `
                     <img src="${e.target.result}" alt="Preview ${index + 1}">
                     <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
-                    <div class="photo-preview-zoom-slider">
-                        <span>−</span>
-                        <input type="range" min="1" max="3" step="0.1" value="1" oninput="zoomPreviewSlider(this)">
-                        <span>+</span>
-                    </div>
                 `;
                 previewContainer.appendChild(preview);
             };
@@ -2258,7 +2263,9 @@ async function handleMemoryUpload(e) {
         
         for (const photo of selectedPhotos) {
             const isVideo = photo.type.startsWith('video/');
-            const uploadType = isVideo ? 'video' : 'image';
+            const isAudio = photo.type.startsWith('audio/');
+            const uploadType = (isVideo || isAudio) ? 'video' : 'image';
+            const mediaType = isVideo ? 'video' : (isAudio ? 'audio' : 'image');
             
             const formData = new FormData();
             formData.append('file', photo);
@@ -2274,7 +2281,7 @@ async function handleMemoryUpload(e) {
             
             const data = await response.json();
             imageUrls.push(data.secure_url);
-            mediaTypes.push(isVideo ? 'video' : 'image');
+            mediaTypes.push(mediaType);
         }
         
         const memory = {
