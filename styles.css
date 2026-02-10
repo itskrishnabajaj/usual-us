@@ -99,12 +99,14 @@ body.us-active {
     width: 100%;
     max-width: 400px;
     padding: 40px 30px;
+    padding-top: 48px;
     background: rgba(26, 26, 26, 0.6);
     backdrop-filter: blur(24px);
     border-radius: 28px;
     border: 1px solid rgba(255, 198, 217, 0.1);
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 80px rgba(194, 24, 91, 0.05);
     animation: scaleIn 0.6s ease-out;
+    position: relative;
 }
 
 .login-title {
@@ -251,26 +253,33 @@ body.us-active {
     position: absolute;
     top: 16px;
     left: 16px;
-    padding: 5px 10px;
-    background: transparent;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.04);
     color: var(--text-tertiary);
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
     font-size: 11px;
+    letter-spacing: 0.3px;
     cursor: pointer;
     transition: all var(--transition-fast);
     z-index: 2;
+    animation: fadeInUp 0.5s ease-out 0.1s both;
+}
+
+.btn-switch-user-corner:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 198, 217, 0.2);
+    color: var(--text-secondary);
 }
 
 .btn-switch-user-corner:active {
     transform: scale(0.96);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 198, 217, 0.1);
 }
 
-/* Returning login form needs relative positioning for corner button */
+/* Returning login form */
 #returning-login-form {
-    position: relative;
-    padding-top: 10px;
+    padding-top: 0;
     align-items: center;
 }
 
@@ -278,23 +287,23 @@ body.us-active {
 .num-keypad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    max-width: 240px;
+    gap: 10px;
+    max-width: 250px;
     margin: 0 auto;
     animation: fadeInUp 0.6s ease-out 0.4s both;
 }
 
 .num-key {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
+    width: 68px;
+    height: 56px;
+    border-radius: 14px;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
     color: var(--text-primary);
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 400;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     display: flex;
@@ -304,9 +313,10 @@ body.us-active {
 }
 
 .num-key:active {
-    transform: scale(0.9);
-    background: rgba(255, 198, 217, 0.15);
-    border-color: rgba(255, 198, 217, 0.3);
+    transform: scale(0.92);
+    background: rgba(255, 198, 217, 0.12);
+    border-color: rgba(255, 198, 217, 0.25);
+    box-shadow: 0 0 12px rgba(255, 198, 217, 0.1);
 }
 
 .num-key-empty {
@@ -3473,9 +3483,9 @@ body {
 /* Floating Heart Particles */
 @keyframes floatingHeartParticle {
     0% { opacity: 0; transform: translateY(0) scale(0.5); }
-    15% { opacity: 0.4; }
-    50% { opacity: 0.2; transform: translateY(-40px) scale(1) rotate(10deg); }
-    85% { opacity: 0.3; }
+    15% { opacity: 0.5; }
+    50% { opacity: 0.3; transform: translateY(-40px) scale(1) rotate(10deg); }
+    85% { opacity: 0.4; }
     100% { opacity: 0; transform: translateY(-80px) scale(0.5) rotate(-10deg); }
 }
 

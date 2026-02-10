@@ -276,10 +276,12 @@ function initializeAuth() {
         document.getElementById('returning-name').textContent = USERS[savedUserId].name;
         document.getElementById('first-login-form').classList.add('hidden');
         document.getElementById('returning-login-form').classList.remove('hidden');
+        document.getElementById('switch-user-btn').classList.remove('hidden');
     } else {
         localStorage.removeItem('usual_us_user_id');
         document.getElementById('first-login-form').classList.remove('hidden');
         document.getElementById('returning-login-form').classList.add('hidden');
+        document.getElementById('switch-user-btn').classList.add('hidden');
     }
     
     document.getElementById('login-screen').classList.remove('hidden');
@@ -922,7 +924,7 @@ function createFloatingHearts() {
     // Only create once — skip if hearts already exist
     if (usTab.querySelector('.floating-heart-particle')) return;
     
-    const hearts = ['💕', '💗', '✨', '💖', '🤍'];
+    const hearts = ['💕', '💗', '✨', '💖', '🤍', '💞', '♥️'];
     
     // Stable positions and timing based on index (seeded pseudo-random)
     const heartConfigs = [
@@ -934,9 +936,16 @@ function createFloatingHearts() {
         { size: 8,  left: 60, top: 35, dur: 16, delay: 4 },
         { size: 11, left: 50, top: 55, dur: 9,  delay: 1 },
         { size: 13, left: 90, top: 75, dur: 15, delay: 3.5 },
+        { size: 10, left: 5,  top: 50, dur: 13, delay: 0.5 },
+        { size: 15, left: 70, top: 10, dur: 10, delay: 2 },
+        { size: 9,  left: 35, top: 90, dur: 17, delay: 1.2 },
+        { size: 12, left: 55, top: 25, dur: 11, delay: 3.8 },
+        { size: 8,  left: 20, top: 60, dur: 14, delay: 4.5 },
+        { size: 14, left: 80, top: 65, dur: 12, delay: 0.3 },
+        { size: 11, left: 45, top: 40, dur: 16, delay: 2.8 },
     ];
     
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < heartConfigs.length; i++) {
         const cfg = heartConfigs[i];
         const heart = document.createElement('span');
         heart.className = 'floating-heart-particle';
