@@ -167,6 +167,9 @@ body.us-active {
     font-weight: 600;
     font-style: italic;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
     background: linear-gradient(135deg, var(--accent) 0%, #ffffff 50%, var(--accent) 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;

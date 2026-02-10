@@ -2264,7 +2264,8 @@ async function handleMemoryUpload(e) {
         for (const photo of selectedPhotos) {
             const isVideo = photo.type.startsWith('video/');
             const isAudio = photo.type.startsWith('audio/');
-            const uploadType = isVideo ? 'video' : (isAudio ? 'video' : 'image');
+            const uploadType = (isVideo || isAudio) ? 'video' : 'image';
+            const mediaType = isVideo ? 'video' : (isAudio ? 'audio' : 'image');
             
             const formData = new FormData();
             formData.append('file', photo);
@@ -2280,7 +2281,7 @@ async function handleMemoryUpload(e) {
             
             const data = await response.json();
             imageUrls.push(data.secure_url);
-            mediaTypes.push(isVideo ? 'video' : (isAudio ? 'audio' : 'image'));
+            mediaTypes.push(mediaType);
         }
         
         const memory = {
