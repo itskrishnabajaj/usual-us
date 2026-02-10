@@ -422,6 +422,9 @@ function setupEventListeners() {
         const pin = document.getElementById('returning-pin-input').value;
         const success = await handleLogin(savedUserId, pin, true);
         if (!success) {
+            const dotsContainer = document.querySelector('.pin-dots');
+            dotsContainer.classList.add('shake');
+            setTimeout(() => dotsContainer.classList.remove('shake'), 500);
             document.getElementById('returning-pin-input').value = '';
             document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.remove('filled'));
         }
@@ -880,8 +883,8 @@ function createUsTabStars() {
     const usHeader = document.querySelector('.us-header-section');
     if (!usHeader) return;
     
-    // Remove existing dynamic stars
-    usHeader.querySelectorAll('.dynamic-star').forEach(s => s.remove());
+    // Only create once — skip if stars already exist
+    if (usHeader.querySelector('.dynamic-star')) return;
     
     const starPositions = [
         { top: '10%', left: '8%', delay: '0s', size: '8px' },
