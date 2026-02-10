@@ -7,6 +7,10 @@
 const CLOUDINARY_CLOUD_NAME = 'ddyj2njes';
 const CLOUDINARY_UPLOAD_PRESET = 'usual_us';
 const CLOUDINARY_FOLDER = 'usual-us/memories';
+// Cloudinary API credentials for signed operations (deletion)
+// Fill these in from your Cloudinary Dashboard → Settings → API Keys
+const CLOUDINARY_API_KEY = '';
+const CLOUDINARY_API_SECRET = '';
 
 // User credentials
 const USERS = {
@@ -2247,6 +2251,90 @@ window.zoomPreviewSlider = function(slider) {
     img.style.transform = `scale(${zoom})`;
 };
 
+// Cloudinary deletion helpers
+
+// Extract public_id from a Cloudinary URL (backward compat for existing memories)
+function extractCloudinaryPublicId(url) {
+    try {
+        // URLs look like: https://res.cloudinary.com/{cloud}/image/upload/v12345/folder/filename.ext
+        const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.\w+)?$/);
+        return match ? match[1] : null;
+    } catch {
+        return null;
+    }
+}
+
+// Detect resource_type from a Cloudinary URL
+function extractCloudinaryResourceType(url) {
+    if (url.includes('/video/upload/')) return 'video';
+    return 'image';
+}
+
+// Generate SHA-1 signature for Cloudinary signed requests
+async function generateCloudinarySignature(paramsToSign) {
+    const sortedKeys = Object.keys(paramsToSign).sort();
+    const signatureString = sortedKeys.map(k => `${k}=${paramsToSign[k]}`).join('&') + CLOUDINARY_API_SECRET;
+    const encoder = new TextEncoder();
+    const data = encoder.encode(signatureString);
+    const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Delete a single asset from Cloudinary
+async function deleteFromCloudinary(publicId, resourceType) {
+    if (!CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+        console.warn('⚠️ Cloudinary API credentials not configured — skipping Cloudinary deletion for:', publicId);
+        return false;
+    }
+    try {
+        const timestamp = Math.floor(Date.now() / 1000);
+        const paramsToSign = { public_id: publicId, timestamp: timestamp };
+        const signature = await generateCloudinarySignature(paramsToSign);
+
+        const formData = new FormData();
+        formData.append('public_id', publicId);
+        formData.append('signature', signature);
+        formData.append('api_key', CLOUDINARY_API_KEY);
+        formData.append('timestamp', timestamp);
+
+        const res = await fetch(
+            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/destroy`,
+            { method: 'POST', body: formData }
+        );
+        const result = await res.json();
+        if (result.result === 'ok') {
+            console.log('✅ Cloudinary asset deleted:', publicId);
+            return true;
+        }
+        console.warn('⚠️ Cloudinary deletion response:', result);
+        return false;
+    } catch (error) {
+        console.warn('⚠️ Cloudinary deletion failed for:', publicId, error);
+        return false;
+    }
+}
+
+// Delete all Cloudinary assets for a memory
+async function deleteMemoryFromCloudinary(memory) {
+    if (!memory || !memory.images || memory.images.length === 0) return;
+
+    const deletePromises = memory.images.map((url, i) => {
+        // Prefer stored public_id, fall back to extracting from URL
+        const publicId = (memory.publicIds && memory.publicIds[i])
+            ? memory.publicIds[i]
+            : extractCloudinaryPublicId(url);
+        if (!publicId) return Promise.resolve(false);
+
+        const resourceType = (memory.mediaTypes && memory.mediaTypes[i] === 'video')
+            ? 'video'
+            : extractCloudinaryResourceType(url);
+        return deleteFromCloudinary(publicId, resourceType);
+    });
+
+    await Promise.allSettled(deletePromises);
+}
+
 async function handleMemoryUpload(e) {
     e.preventDefault();
     
@@ -2261,10 +2349,8 @@ async function handleMemoryUpload(e) {
     showLoading(true);
     
     try {
-        const imageUrls = [];
-        const mediaTypes = [];
-        
-        for (const photo of selectedPhotos) {
+        // Upload all files in parallel for faster performance
+        const uploadPromises = selectedPhotos.map(photo => {
             const isVideo = photo.type.startsWith('video/');
             const isAudio = photo.type.startsWith('audio/');
             const uploadType = (isVideo || isAudio) ? 'video' : 'image';
@@ -2275,21 +2361,25 @@ async function handleMemoryUpload(e) {
             formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
             formData.append('folder', CLOUDINARY_FOLDER);
             
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${uploadType}/upload`, {
+            return fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${uploadType}/upload`, {
                 method: 'POST',
                 body: formData
+            }).then(async response => {
+                if (!response.ok) throw new Error('Upload failed');
+                const data = await response.json();
+                return { url: data.secure_url, publicId: data.public_id, mediaType };
             });
-            
-            if (!response.ok) throw new Error('Upload failed');
-            
-            const data = await response.json();
-            imageUrls.push(data.secure_url);
-            mediaTypes.push(mediaType);
-        }
+        });
+
+        const results = await Promise.all(uploadPromises);
+        const imageUrls = results.map(r => r.url);
+        const mediaTypes = results.map(r => r.mediaType);
+        const publicIds = results.map(r => r.publicId);
         
         const memory = {
             images: imageUrls,
             mediaTypes: mediaTypes,
+            publicIds: publicIds,
             caption: caption,
             memoryDate: firebase.firestore.Timestamp.fromDate(memoryDate),
             uploadedBy: currentUserProfile.role,
@@ -2648,6 +2738,16 @@ async function handleMemoryDelete() {
     
     showLoading(true);
     try {
+        // Find the memory to get its Cloudinary assets before deleting from Firestore
+        const memory = memories.find(m => m.id === currentViewingMemoryId);
+        
+        // Delete assets from Cloudinary (runs in parallel, non-blocking)
+        if (memory) {
+            deleteMemoryFromCloudinary(memory).catch(err =>
+                console.warn('⚠️ Cloudinary cleanup error:', err)
+            );
+        }
+        
         await memoriesCollection.doc(currentViewingMemoryId).delete();
         console.log('✅ Memory deleted');
         document.getElementById('album-viewer-modal').classList.add('hidden');
