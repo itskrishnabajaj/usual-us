@@ -1068,11 +1068,16 @@ function showMemoryHighlight(memory, yearsAgo) {
     const container = document.getElementById('memory-highlight');
     if (!container) return;
     
+    const highlightIsVideo = isVideoMedia(memory, 0);
+    const highlightMedia = highlightIsVideo 
+        ? `<video src="${memory.images[0]}" autoplay muted loop playsinline style="width:100%;height:200px;object-fit:cover;"></video>`
+        : `<img src="${memory.images[0]}" alt="Memory">`;
+    
     container.innerHTML = `
         <div class="highlight-banner">
             <p class="highlight-text">✨ ${yearsAgo} ${yearsAgo === 1 ? 'year' : 'years'} ago today</p>
             <div class="highlight-preview" onclick="viewSinglePhoto('${memory.id}')">
-                <img src="${memory.images[0]}" alt="Memory">
+                ${highlightMedia}
             </div>
         </div>
     `;
@@ -1142,10 +1147,11 @@ async function loadTodaysMood() {
             if (date === today && mood) {
                 currentMood = mood;
                 renderMoodIndicator();
+                document.querySelectorAll('.mood-option').forEach(opt => opt.classList.remove('selected'));
                 const moodOption = document.querySelector(`[data-mood="${currentMood}"]`);
                 if (moodOption) moodOption.classList.add('selected');
             }
-        } catch (e) { /* ignore */ }
+        } catch (e) { /* ignore corrupted localStorage */ }
     }
     
     try {
@@ -2041,6 +2047,25 @@ function handlePhotoSelect(e) {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
     
+    // Validate video duration (max 20 seconds)
+    const videoFiles = files.filter(f => f.type.startsWith('video/'));
+    if (videoFiles.length > 0) {
+        let validated = 0;
+        videoFiles.forEach(vf => {
+            const tempVideo = document.createElement('video');
+            tempVideo.preload = 'metadata';
+            tempVideo.onloadedmetadata = () => {
+                URL.revokeObjectURL(tempVideo.src);
+                if (tempVideo.duration > 20) {
+                    showError('Videos must be 20 seconds or shorter');
+                    return;
+                }
+                validated++;
+            };
+            tempVideo.src = URL.createObjectURL(vf);
+        });
+    }
+    
     selectedPhotos = files;
     
     document.getElementById('photo-selection').classList.add('hidden');
@@ -2050,23 +2075,38 @@ function handlePhotoSelect(e) {
     previewContainer.innerHTML = '';
     
     files.forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
+        const isVideo = file.type.startsWith('video/');
+        
+        if (isVideo) {
             const preview = document.createElement('div');
-            preview.className = 'photo-preview-item';
+            preview.className = 'photo-preview-item video-preview-item';
             preview.dataset.zoom = '1';
+            const videoUrl = URL.createObjectURL(file);
             preview.innerHTML = `
-                <img src="${e.target.result}" alt="Preview ${index + 1}">
+                <video src="${videoUrl}" muted playsinline autoplay loop></video>
+                <div class="video-badge">🎬 Video</div>
                 <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
-                <div class="photo-preview-zoom-slider">
-                    <span>−</span>
-                    <input type="range" min="1" max="3" step="0.1" value="1" oninput="zoomPreviewSlider(this)">
-                    <span>+</span>
-                </div>
             `;
             previewContainer.appendChild(preview);
-        };
-        reader.readAsDataURL(file);
+        } else {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.createElement('div');
+                preview.className = 'photo-preview-item';
+                preview.dataset.zoom = '1';
+                preview.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview ${index + 1}">
+                    <button type="button" class="btn-remove-photo" onclick="removePhoto(${index})">×</button>
+                    <div class="photo-preview-zoom-slider">
+                        <span>−</span>
+                        <input type="range" min="1" max="3" step="0.1" value="1" oninput="zoomPreviewSlider(this)">
+                        <span>+</span>
+                    </div>
+                `;
+                previewContainer.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
+        }
     });
 }
 
@@ -2125,14 +2165,18 @@ async function handleMemoryUpload(e) {
     
     try {
         const imageUrls = [];
+        const mediaTypes = [];
         
         for (const photo of selectedPhotos) {
+            const isVideo = photo.type.startsWith('video/');
+            const uploadType = isVideo ? 'video' : 'image';
+            
             const formData = new FormData();
             formData.append('file', photo);
             formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
             formData.append('folder', CLOUDINARY_FOLDER);
             
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${uploadType}/upload`, {
                 method: 'POST',
                 body: formData
             });
@@ -2141,14 +2185,16 @@ async function handleMemoryUpload(e) {
             
             const data = await response.json();
             imageUrls.push(data.secure_url);
+            mediaTypes.push(isVideo ? 'video' : 'image');
         }
         
         const memory = {
             images: imageUrls,
+            mediaTypes: mediaTypes,
             caption: caption,
             memoryDate: firebase.firestore.Timestamp.fromDate(memoryDate),
             uploadedBy: currentUserProfile.role,
-            imagePosition: { x: 50, y: 50 }, // NEW: Default center position
+            imagePosition: { x: 50, y: 50 },
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
@@ -2224,6 +2270,8 @@ function renderMemoriesTimeline() {
         const stringHTML = showString ? '<div class="polaroid-string"></div>' : '';
         
         const imgStyle = getImageStyle(memory);
+        const firstIsVideo = isVideoMedia(memory, 0);
+        const firstMediaHTML = renderMediaElement(memory.images[0], firstIsVideo, memory.caption || 'Memory', imgStyle, '');
         
         if (imageCount === 1) {
             return `
@@ -2231,10 +2279,7 @@ function renderMemoriesTimeline() {
                     ${stringHTML}
                     <div class="polaroid${anniversaryClass}" style="transform: rotate(${tilt}deg)" onclick="viewSinglePhoto('${memory.id}')">
                         <div class="polaroid-photo">
-                            <img src="${memory.images[0]}" 
-                                 alt="${memory.caption || 'Memory'}" 
-                                 loading="lazy"
-                                 style="${imgStyle}">
+                            ${firstMediaHTML}
                         </div>
                         <div class="polaroid-caption-area">
                             <p class="polaroid-date">${formattedDate}</p>
@@ -2253,16 +2298,13 @@ function renderMemoriesTimeline() {
                         <div class="stack-card stack-back-1"></div>
                         <div class="polaroid${anniversaryClass}">
                             <div class="polaroid-photo">
-                                <img src="${memory.images[0]}" 
-                                     alt="${memory.caption || 'Album'}" 
-                                     loading="lazy"
-                                     style="${imgStyle}">
+                                ${firstMediaHTML}
                             </div>
                             <div class="polaroid-caption-area">
                                 <p class="polaroid-date">${formattedDate}</p>
                                 ${memory.caption ? `<p class="polaroid-caption">${memory.caption}</p>` : ''}
                             </div>
-                            <div class="album-count-badge">${imageCount} photos</div>
+                            <div class="album-count-badge">${imageCount} ${imageCount === 1 ? 'item' : 'items'}</div>
                             ${anniversaryBadge}
                         </div>
                     </div>
@@ -2276,6 +2318,12 @@ function renderMemoriesTimeline() {
 window.startImageAdjust = function(memoryId, imageIndex) {
     const memory = memories.find(m => m.id === memoryId);
     if (!memory) return;
+    
+    // Skip adjustment for videos
+    if (isVideoMedia(memory, imageIndex)) {
+        showError('Video position adjustment is not supported');
+        return;
+    }
     
     const currentPos = memory.imagePosition || { x: 50, y: 50 };
     const currentZoom = memory.imageZoom || 1;
@@ -2368,12 +2416,14 @@ function viewSinglePhoto(memoryId) {
     const formattedDate = formatMemoryDate(date);
     
     const imgStyle = getImageStyle(memory);
+    const isVideo = isVideoMedia(memory, 0);
+    const mediaHTML = renderMediaElement(memory.images[0], isVideo, 'Memory', imgStyle, '');
     
     const container = document.getElementById('single-photo-container');
     container.innerHTML = `
         <div class="viewer-polaroid">
             <div class="viewer-polaroid-photo">
-                <img src="${memory.images[0]}" alt="Memory" style="${imgStyle}">
+                ${mediaHTML}
             </div>
             <div class="viewer-polaroid-caption">
                 <p class="viewer-date">${formattedDate}</p>
@@ -2415,11 +2465,13 @@ function renderAlbumPhoto(memory) {
     const currentImage = memory.images[currentAlbumIndex];
     
     const imgStyle = getImageStyle(memory);
+    const isVideo = isVideoMedia(memory, currentAlbumIndex);
+    const mediaHTML = renderMediaElement(currentImage, isVideo, `Photo ${currentAlbumIndex + 1}`, imgStyle, '');
     
     container.innerHTML = `
         <div class="viewer-polaroid swipeable-polaroid">
             <div class="viewer-polaroid-photo">
-                <img src="${currentImage}" alt="Photo ${currentAlbumIndex + 1}" style="${imgStyle}">
+                ${mediaHTML}
             </div>
         </div>
     `;
@@ -2496,6 +2548,31 @@ function getImageStyle(memory) {
     const posY = memory.imagePosition ? memory.imagePosition.y : 50;
     const zoom = memory.imageZoom || 1;
     return `object-fit: cover; object-position: ${posX}% ${posY}%${zoom !== 1 ? `; transform: scale(${zoom})` : ''}`;
+}
+
+// Check if a media URL at given index is a video
+function isVideoMedia(memory, index) {
+    if (memory.mediaTypes && memory.mediaTypes[index]) {
+        return memory.mediaTypes[index] === 'video';
+    }
+    // Fallback: check URL extension
+    const url = (memory.images && memory.images[index]) || '';
+    return /\.(mp4|mov|webm|m4v|avi)(\?|$)/i.test(url) || url.includes('/video/');
+}
+
+// Render media element (image or video) as HTML string
+function renderMediaElement(url, isVideo, altText, style, extraAttrs) {
+    if (isVideo) {
+        return `<video src="${url}" 
+                    autoplay muted loop playsinline 
+                    ${extraAttrs || ''}
+                    style="${style}; width: 100%; height: 100%; object-fit: cover;"></video>`;
+    }
+    return `<img src="${url}" 
+                alt="${altText}" 
+                loading="lazy"
+                ${extraAttrs || ''}
+                style="${style}">`;
 }
 
 // Notes Handling

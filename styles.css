@@ -1826,6 +1826,46 @@ textarea {
     display: block;
 }
 
+.polaroid-photo video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.viewer-polaroid-photo video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 2px;
+}
+
+/* Video preview badge */
+.video-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.video-preview-item {
+    position: relative;
+}
+
+.video-preview-item video {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
 .polaroid-caption-area {
     margin-top: 12px;
     text-align: center;
