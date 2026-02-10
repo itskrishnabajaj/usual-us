@@ -418,7 +418,11 @@ function setupEventListeners() {
         e.preventDefault();
         const savedUserId = localStorage.getItem('usual_us_user_id');
         const pin = document.getElementById('returning-pin-input').value;
-        await handleLogin(savedUserId, pin, true);
+        const success = await handleLogin(savedUserId, pin, true);
+        if (!success) {
+            document.getElementById('returning-pin-input').value = '';
+            document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.remove('filled'));
+        }
     });
     
     document.getElementById('switch-user-btn').addEventListener('click', () => {
@@ -426,15 +430,32 @@ function setupEventListeners() {
         document.getElementById('first-login-form').reset();
         document.getElementById('returning-login-form').reset();
         document.getElementById('returning-pin-input').value = '';
+        document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.remove('filled'));
         initializeAuth();
     });
     
     // Numeric keypad for returning user PIN
+    function updatePinDots() {
+        const pinInput = document.getElementById('returning-pin-input');
+        const dots = document.querySelectorAll('.pin-dot');
+        dots.forEach((dot, i) => {
+            if (i < pinInput.value.length) {
+                dot.classList.add('filled');
+            } else {
+                dot.classList.remove('filled');
+            }
+        });
+    }
+
     document.querySelectorAll('.num-key[data-num]').forEach(key => {
         key.addEventListener('click', () => {
             const pinInput = document.getElementById('returning-pin-input');
             if (pinInput.value.length < 4) {
                 pinInput.value += key.dataset.num;
+                updatePinDots();
+                if (pinInput.value.length === 4) {
+                    document.getElementById('returning-login-form').requestSubmit();
+                }
             }
         });
     });
@@ -442,6 +463,7 @@ function setupEventListeners() {
     document.getElementById('num-key-del').addEventListener('click', () => {
         const pinInput = document.getElementById('returning-pin-input');
         pinInput.value = pinInput.value.slice(0, -1);
+        updatePinDots();
     });
     
     // Navigation with smooth transitions

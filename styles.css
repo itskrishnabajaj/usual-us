@@ -137,11 +137,78 @@ body.us-active {
     gap: 20px;
 }
 
-.returning-welcome {
+.returning-hero {
     text-align: center;
-    font-size: 16px;
+    margin-bottom: 24px;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.returning-avatar {
+    font-size: 48px;
+    margin-bottom: 16px;
+    animation: heartbeat 2s ease-in-out infinite;
+}
+
+.returning-welcome {
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 4px;
+}
+
+.returning-name-display {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 600;
+    font-style: italic;
+    background: linear-gradient(135deg, var(--accent) 0%, #ffffff 50%, var(--accent) 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmerText 4s ease-in-out infinite;
+}
+
+.returning-pin-hidden {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    width: 0;
+}
+
+.pin-dots {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 8px;
+    animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+.pin-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 198, 217, 0.3);
+    background: transparent;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pin-dot.filled {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(255, 198, 217, 0.4);
+}
+
+.pin-label {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-tertiary);
     margin-bottom: 20px;
-    color: var(--accent);
+    letter-spacing: 0.5px;
+    animation: fadeInUp 0.6s ease-out 0.35s both;
 }
 
 .btn-login {
@@ -204,35 +271,42 @@ body.us-active {
 #returning-login-form {
     position: relative;
     padding-top: 10px;
+    align-items: center;
 }
 
 /* Numeric Keypad */
 .num-keypad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    max-width: 260px;
-    margin: 0 auto 16px;
+    gap: 12px;
+    max-width: 240px;
+    margin: 0 auto;
+    animation: fadeInUp 0.6s ease-out 0.4s both;
 }
 
 .num-key {
-    height: 52px;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--border-color);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     color: var(--text-primary);
-    font-size: 22px;
-    font-weight: 500;
+    font-size: 24px;
+    font-weight: 400;
     cursor: pointer;
     transition: all var(--transition-fast);
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
 }
 
 .num-key:active {
-    transform: scale(0.93);
+    transform: scale(0.9);
     background: rgba(255, 198, 217, 0.15);
-    border-color: var(--accent);
+    border-color: rgba(255, 198, 217, 0.3);
 }
 
 .num-key-empty {
@@ -598,6 +672,10 @@ textarea {
 
 .category-option:active {
     transform: scale(0.98);
+}
+
+.category-option:last-child {
+    grid-column: 1 / -1;
 }
 
 .checkbox-label {
