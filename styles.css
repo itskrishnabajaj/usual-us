@@ -1183,7 +1183,7 @@ textarea {
     contain: layout style;
 }
 
-/* Ambient floating particles */
+/* Ambient floating particles — extends 10px beyond container to hide edge seams during translateY animation */
 .us-tab::before {
     content: '';
     position: absolute;

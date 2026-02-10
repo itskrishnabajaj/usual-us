@@ -2257,7 +2257,7 @@ window.zoomPreviewSlider = function(slider) {
 function extractCloudinaryPublicId(url) {
     try {
         // URLs look like: https://res.cloudinary.com/{cloud}/image/upload/v12345/folder/filename.ext
-        const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.\w+)?$/);
+        const match = url.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/);
         return match ? match[1] : null;
     } catch {
         return null;
@@ -2318,6 +2318,11 @@ async function deleteFromCloudinary(publicId, resourceType) {
 // Delete all Cloudinary assets for a memory
 async function deleteMemoryFromCloudinary(memory) {
     if (!memory || !memory.images || memory.images.length === 0) return;
+
+    if (!CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+        console.warn('⚠️ Cloudinary API credentials not configured — skipping Cloudinary deletion. Set CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET in app.js to enable cleanup.');
+        return;
+    }
 
     const deletePromises = memory.images.map((url, i) => {
         // Prefer stored public_id, fall back to extracting from URL
