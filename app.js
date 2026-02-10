@@ -2047,22 +2047,28 @@ function handlePhotoSelect(e) {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
     
-    // Validate video duration (max 20 seconds)
+    // Validate video duration (max 20 seconds) before allowing proceed
     const videoFiles = files.filter(f => f.type.startsWith('video/'));
     if (videoFiles.length > 0) {
-        let validated = 0;
-        videoFiles.forEach(vf => {
+        const validationPromises = videoFiles.map(vf => new Promise((resolve) => {
             const tempVideo = document.createElement('video');
             tempVideo.preload = 'metadata';
             tempVideo.onloadedmetadata = () => {
                 URL.revokeObjectURL(tempVideo.src);
-                if (tempVideo.duration > 20) {
-                    showError('Videos must be 20 seconds or shorter');
-                    return;
-                }
-                validated++;
+                resolve(tempVideo.duration <= 20);
+            };
+            tempVideo.onerror = () => {
+                URL.revokeObjectURL(tempVideo.src);
+                resolve(false);
             };
             tempVideo.src = URL.createObjectURL(vf);
+        }));
+        
+        Promise.all(validationPromises).then(results => {
+            if (results.some(valid => !valid)) {
+                showError('Videos must be 20 seconds or shorter');
+                resetMemoryForm();
+            }
         });
     }
     
@@ -2227,6 +2233,7 @@ function getRandomTilt() {
 
 function getStableTilt(id) {
     // Generate a stable tilt based on the memory id so it doesn't change on re-render
+    // Uses hash * 31 algorithm (common string hash) to produce a tilt in range -3 to +3 degrees
     let hash = 0;
     for (let i = 0; i < id.length; i++) {
         hash = ((hash << 5) - hash) + id.charCodeAt(i);
