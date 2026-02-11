@@ -1,4 +1,4 @@
-const CACHE_NAME = 'usual-us-v3';
+const CACHE_NAME = 'usual-us-v4';
 
 const urlsToCache = [
     '/',
@@ -7,16 +7,16 @@ const urlsToCache = [
     '/firebase.js',
     '/js/config.js',
     '/js/state.js',
-    '/js/auth.js',
-    '/js/music.js',
-    '/js/mood.js',
-    '/js/expenses.js',
-    '/js/budget.js',
-    '/js/memories.js',
-    '/js/notes.js',
+    '/js/ui.js',
     '/js/stats.js',
     '/js/us-tab.js',
-    '/js/ui.js',
+    '/js/budget.js',
+    '/js/expenses.js',
+    '/js/memories.js',
+    '/js/notes.js',
+    '/js/mood.js',
+    '/js/music.js',
+    '/js/auth.js',
     '/js/app.js',
     '/manifest.json'
 ];
