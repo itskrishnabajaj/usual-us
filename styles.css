@@ -1213,7 +1213,7 @@ textarea {
 }
 
 .music-player-toggle:active {
-    transform: scale(0.9) !important;
+    transform: scale(0.9);
     animation: none;
 }
 

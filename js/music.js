@@ -79,7 +79,7 @@ function toggleMusicPlayer() {
             backdrop.addEventListener('click', toggleMusicPlayer);
             document.body.appendChild(backdrop);
         }
-        // Trigger reflow before adding active class for transition
+        // Force reflow before adding active class so the transition animates
         void backdrop.offsetWidth;
         backdrop.classList.add('active');
         panel.classList.add('active');
