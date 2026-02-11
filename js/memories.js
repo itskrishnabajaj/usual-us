@@ -744,12 +744,14 @@ function observeTimelineVideos() {
         entries.forEach(entry => {
             const video = entry.target;
             if (entry.isIntersecting) {
-                video.play().catch(() => {});
+                video.play().catch(() => {
+                    // Expected on some mobile browsers due to autoplay policies
+                });
             } else {
                 video.pause();
             }
         });
-    }, { rootMargin: '50px' });
+    }, { rootMargin: '200px' });
 
     const timeline = document.getElementById('memories-timeline');
     if (!timeline) return;
