@@ -353,11 +353,3 @@ function setupEventListeners() {
     setupPullToRefresh();
 }
 
-function showEasterEgg() {
-    const easterEgg = document.getElementById('easter-egg');
-    if (easterEgg) {
-        easterEgg.classList.remove('hidden');
-        setTimeout(() => easterEgg.classList.add('hidden'), 4000);
-    }
-}
-
