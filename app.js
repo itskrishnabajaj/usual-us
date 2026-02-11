@@ -772,6 +772,13 @@ function switchTab(tabName) {
             if (appEl) appEl.classList.add('us-active');
         } else {
             musicToggle.classList.add('hidden');
+            // Close music panel when leaving Us tab
+            const musicPanel = document.getElementById('music-player-panel');
+            if (musicPanel && !musicPanel.classList.contains('hidden')) {
+                musicPanel.classList.add('hidden');
+                const backdrop = document.querySelector('.music-panel-backdrop');
+                if (backdrop) backdrop.remove();
+            }
             if (appHeader) {
                 appHeader.classList.remove('us-active');
                 appHeader.classList.remove('late-night');
