@@ -358,16 +358,6 @@ function getStableTilt(id) {
     return ((Math.abs(hash) % 600) / 100 - 3).toFixed(2);
 }
 
-function getStableNoteRotation(id) {
-    // Stable rotation for sticky notes (-2 to +2 degrees) based on note ID
-    let hash = 0;
-    for (let i = 0; i < id.length; i++) {
-        hash = ((hash << 5) - hash) + id.charCodeAt(i);
-        hash |= 0;
-    }
-    return ((Math.abs(hash) % 400) / 100 - 2).toFixed(2);
-}
-
 function renderMemoriesTimeline() {
     const container = document.getElementById('memories-timeline');
     
