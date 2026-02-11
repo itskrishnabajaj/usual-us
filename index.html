@@ -250,43 +250,6 @@
 
             <!-- Us Tab -->
             <section id="us-tab" class="tab-content us-tab">
-                <!-- Music Player Toggle Button -->
-                <button id="music-player-toggle" class="music-player-toggle hidden">🎵</button>
-                
-                <!-- Music Player Panel (NEW: Upper-center positioned) -->
-                <div id="music-player-panel" class="music-player-panel hidden">
-                    <div class="music-player-header">
-                        <span>Our Playlist</span>
-                        <button id="close-music-player" class="btn-close-music">×</button>
-                    </div>
-                    
-                    <select id="song-selector" class="song-selector">
-                    </select>
-                    <div id="song-list" class="song-list"></div>
-                    
-                    <div class="music-controls">
-                        <div class="control-row">
-                            <button id="play-pause-btn" class="btn-play-pause" disabled>▶</button>
-                            <div class="seek-bar-container">
-                                <input type="range" id="seek-bar" class="seek-bar" min="0" max="100" value="0" disabled>
-                                <div class="time-display">
-                                    <span id="current-time">0:00</span>
-                                    <span id="duration">0:00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- NEW: Recently Played Section -->
-                    <div id="recently-played-section" class="recently-played-section hidden">
-                        <div class="recently-played-header" id="recently-played-toggle-btn">
-                            <p class="recently-played-title">Recently Played</p>
-                            <span class="recently-played-toggle" id="recently-played-arrow">▾</span>
-                        </div>
-                        <div id="recently-played-list" class="recently-played-list"></div>
-                    </div>
-                </div>
-
                 <!-- Us Header -->
                 <div class="us-header-section">
                     <h1 class="us-title" id="us-title">Us</h1>
@@ -399,6 +362,43 @@
                 <span class="nav-label">Us</span>
             </button>
         </nav>
+
+        <!-- Music Player Toggle Button (fixed overlay, outside us-tab to avoid contain:layout clipping) -->
+        <button id="music-player-toggle" class="music-player-toggle">🎵</button>
+        
+        <!-- Music Player Panel -->
+        <div id="music-player-panel" class="music-player-panel">
+            <div class="music-player-header">
+                <span>Our Playlist</span>
+                <button id="close-music-player" class="btn-close-music">×</button>
+            </div>
+            
+            <select id="song-selector" class="song-selector">
+            </select>
+            <div id="song-list" class="song-list"></div>
+            
+            <div class="music-controls">
+                <div class="control-row">
+                    <button id="play-pause-btn" class="btn-play-pause" disabled>▶</button>
+                    <div class="seek-bar-container">
+                        <input type="range" id="seek-bar" class="seek-bar" min="0" max="100" value="0" disabled>
+                        <div class="time-display">
+                            <span id="current-time">0:00</span>
+                            <span id="duration">0:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recently Played Section -->
+            <div id="recently-played-section" class="recently-played-section hidden">
+                <div class="recently-played-header" id="recently-played-toggle-btn">
+                    <p class="recently-played-title">Recently Played</p>
+                    <span class="recently-played-toggle" id="recently-played-arrow">▾</span>
+                </div>
+                <div id="recently-played-list" class="recently-played-list"></div>
+            </div>
+        </div>
     </div>
 
     <!-- Modals -->

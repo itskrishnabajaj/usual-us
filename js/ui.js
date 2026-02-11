@@ -335,9 +335,12 @@ function setupEventListeners() {
     // Music player
     document.getElementById('music-player-toggle').addEventListener('click', toggleMusicPlayer);
     document.getElementById('close-music-player').addEventListener('click', () => {
-        document.getElementById('music-player-panel').classList.add('hidden');
+        document.getElementById('music-player-panel').classList.remove('active');
         const backdrop = document.querySelector('.music-panel-backdrop');
-        if (backdrop) backdrop.remove();
+        if (backdrop) {
+            backdrop.classList.remove('active');
+            setTimeout(() => backdrop.remove(), 300);
+        }
     });
     
     document.getElementById('play-pause-btn').addEventListener('click', togglePlayPause);

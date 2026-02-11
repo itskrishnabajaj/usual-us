@@ -69,9 +69,9 @@ function selectSong(index) {
 
 function toggleMusicPlayer() {
     const panel = document.getElementById('music-player-panel');
-    const isHidden = panel.classList.contains('hidden');
+    const isOpen = panel.classList.contains('active');
     
-    if (isHidden) {
+    if (!isOpen) {
         let backdrop = document.querySelector('.music-panel-backdrop');
         if (!backdrop) {
             backdrop = document.createElement('div');
@@ -79,11 +79,17 @@ function toggleMusicPlayer() {
             backdrop.addEventListener('click', toggleMusicPlayer);
             document.body.appendChild(backdrop);
         }
-        panel.classList.remove('hidden');
+        // Trigger reflow before adding active class for transition
+        void backdrop.offsetWidth;
+        backdrop.classList.add('active');
+        panel.classList.add('active');
     } else {
         const backdrop = document.querySelector('.music-panel-backdrop');
-        if (backdrop) backdrop.remove();
-        panel.classList.add('hidden');
+        if (backdrop) {
+            backdrop.classList.remove('active');
+            setTimeout(() => backdrop.remove(), 300);
+        }
+        panel.classList.remove('active');
     }
 }
 
