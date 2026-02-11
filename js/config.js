@@ -6,8 +6,8 @@
 const CLOUDINARY_CLOUD_NAME = 'ddyj2njes';
 const CLOUDINARY_UPLOAD_PRESET = 'usual_us';
 const CLOUDINARY_FOLDER = 'usual-us/memories';
-const CLOUDINARY_API_KEY = '';
-const CLOUDINARY_API_SECRET = '';
+const CLOUDINARY_API_KEY = '544188769782152';
+const CLOUDINARY_API_SECRET = 'E9PKGWlJ5UqruAWco46agySKFm8';
 
 // User credentials
 const USERS = {
