@@ -1,11 +1,23 @@
-const CACHE_NAME = 'usual-us-v2';
+const CACHE_NAME = 'usual-us-v4';
 
 const urlsToCache = [
     '/',
     '/index.html',
     '/styles.css',
-    '/app.js',
     '/firebase.js',
+    '/js/config.js',
+    '/js/state.js',
+    '/js/ui.js',
+    '/js/stats.js',
+    '/js/us-tab.js',
+    '/js/budget.js',
+    '/js/expenses.js',
+    '/js/memories.js',
+    '/js/notes.js',
+    '/js/mood.js',
+    '/js/music.js',
+    '/js/auth.js',
+    '/js/app.js',
     '/manifest.json'
 ];
 

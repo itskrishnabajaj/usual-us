@@ -256,35 +256,6 @@ body.us-active {
     background: rgba(255, 255, 255, 0.05);
 }
 
-/* Switch user corner button for returning user */
-.btn-switch-user-corner {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    padding: 6px 14px;
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--text-tertiary);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    font-size: 11px;
-    letter-spacing: 0.3px;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    z-index: 2;
-    animation: fadeInUp 0.5s ease-out 0.1s both;
-}
-
-.btn-switch-user-corner:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 198, 217, 0.2);
-    color: var(--text-secondary);
-}
-
-.btn-switch-user-corner:active {
-    transform: scale(0.96);
-    background: rgba(255, 198, 217, 0.1);
-}
-
 /* Returning login form */
 #returning-login-form {
     padding-top: 0;
@@ -327,8 +298,15 @@ body.us-active {
     box-shadow: 0 0 20px rgba(255, 198, 217, 0.15);
 }
 
-.num-key-empty {
-    visibility: hidden;
+.num-key-switch {
+    font-size: 18px;
+    color: var(--text-tertiary);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.num-key-switch:active {
+    background: rgba(255, 198, 217, 0.1);
+    border-color: rgba(255, 198, 217, 0.25);
 }
 
 .num-key-del {
