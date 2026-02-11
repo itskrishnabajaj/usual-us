@@ -1182,7 +1182,7 @@ textarea {
     will-change: transform;
 }
 
-/* NEW: Music Player Toggle */
+/* Music Player Toggle */
 .music-player-toggle {
     position: fixed;
     top: 80px;
@@ -1197,21 +1197,32 @@ textarea {
     cursor: pointer;
     z-index: 90;
     box-shadow: 0 8px 24px rgba(194, 24, 91, 0.15);
-    transition: all var(--transition-fast);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(0.6);
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.3s;
+}
+
+.music-player-toggle.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: scale(1);
     animation: pulse 2s ease-in-out infinite;
 }
 
 .music-player-toggle:active {
-    transform: scale(0.95);
+    transform: scale(0.9);
     animation: none;
 }
 
-/* NEW: Music Player Panel - Upper Center Positioned */
+/* Music Player Panel - Upper Center Positioned */
 .music-player-panel {
     position: fixed;
     top: 15%;
     left: 50%;
-    transform: translate(-50%, 0);
+    transform: translate(-50%, -10px) scale(0.97);
     width: 90%;
     max-width: 420px;
     background: rgba(30, 25, 35, 0.85);
@@ -1226,6 +1237,17 @@ textarea {
         inset 0 1px 0 rgba(255, 255, 255, 0.1),
         inset 0 -1px 0 rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+}
+
+.music-player-panel.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translate(-50%, 0) scale(1);
 }
 
 /* Music panel backdrop overlay */
@@ -1238,7 +1260,12 @@ textarea {
     background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(4px);
     z-index: 899;
-    animation: fadeIn 0.2s ease-out;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.music-panel-backdrop.active {
+    opacity: 1;
 }
 
 .music-player-header {
@@ -3766,6 +3793,108 @@ body {
 
 .secret-note.locked {
     animation: fadeInUp 0.5s ease-out both;
+}
+
+/* ============================================
+   MICRO TRANSITIONS & ANIMATIONS
+   Subtle, GPU-friendly enhancements
+   ============================================ */
+
+/* Input focus micro-animation: subtle lift */
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus {
+    transform: translateY(-1px);
+}
+
+/* Radio/category option selection pop */
+.radio-option:has(input:checked) {
+    animation: selectPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.category-option.selected {
+    animation: selectPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes selectPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Expense item stagger entrance */
+.expense-item:nth-child(1) { animation: fadeInUp 0.3s ease-out both; animation-delay: 0s; }
+.expense-item:nth-child(2) { animation: fadeInUp 0.3s ease-out both; animation-delay: 0.04s; }
+.expense-item:nth-child(3) { animation: fadeInUp 0.3s ease-out both; animation-delay: 0.08s; }
+.expense-item:nth-child(4) { animation: fadeInUp 0.3s ease-out both; animation-delay: 0.12s; }
+.expense-item:nth-child(5) { animation: fadeInUp 0.3s ease-out both; animation-delay: 0.16s; }
+
+/* Song item active transition */
+.song-item.active {
+    background: rgba(255, 198, 217, 0.15);
+    transform: translateX(2px);
+    transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+/* Header greeting entrance */
+#app-header h1 {
+    animation: fadeInUp 0.4s ease-out both;
+}
+
+/* Balance amount smooth transition */
+.balance-amount {
+    transition: transform 0.2s ease;
+}
+
+/* Milestones section entrance */
+.us-tab .milestones-section {
+    animation: fadeInUp 0.5s ease-out 0.25s both;
+}
+
+/* Memory timeline item entrance */
+.timeline-entry {
+    animation: fadeInUp 0.4s ease-out both;
+}
+
+.timeline-entry:nth-child(1) { animation-delay: 0s; }
+.timeline-entry:nth-child(2) { animation-delay: 0.06s; }
+.timeline-entry:nth-child(3) { animation-delay: 0.12s; }
+.timeline-entry:nth-child(4) { animation-delay: 0.18s; }
+.timeline-entry:nth-child(5) { animation-delay: 0.24s; }
+
+/* Note cards entrance stagger */
+.sticky-note:nth-child(1) { animation: fadeInUp 0.35s ease-out both; animation-delay: 0s; }
+.sticky-note:nth-child(2) { animation: fadeInUp 0.35s ease-out both; animation-delay: 0.06s; }
+.sticky-note:nth-child(3) { animation: fadeInUp 0.35s ease-out both; animation-delay: 0.12s; }
+.sticky-note:nth-child(4) { animation: fadeInUp 0.35s ease-out both; animation-delay: 0.18s; }
+
+/* Budget progress card entrance */
+.budget-progress-card:not(.hidden) {
+    animation: fadeInUp 0.4s ease-out 0.15s both;
+}
+
+/* Who pays next subtle bounce on load */
+.who-pays-next {
+    animation: fadeInUp 0.4s ease-out 0.2s both;
+}
+
+/* Settle button subtle glow */
+.btn-settle {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Pin dot fill animation */
+.pin-dot.filled {
+    animation: pinDotFill 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pinDotFill {
+    0% { transform: scale(0.5); }
+    100% { transform: scale(1); }
 }
 
 /* ============================================

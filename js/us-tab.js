@@ -80,19 +80,22 @@ function switchTab(tabName) {
     const appEl = document.getElementById('app');
     if (musicToggle) {
         if (tabName === 'us') {
-            musicToggle.classList.remove('hidden');
+            musicToggle.classList.add('visible');
             if (appHeader) appHeader.classList.add('us-active');
             if (bottomNav) bottomNav.classList.add('us-active');
             document.body.classList.add('us-active');
             if (appEl) appEl.classList.add('us-active');
         } else {
-            musicToggle.classList.add('hidden');
+            musicToggle.classList.remove('visible');
             // Close music panel when leaving Us tab
             const musicPanel = document.getElementById('music-player-panel');
-            if (musicPanel && !musicPanel.classList.contains('hidden')) {
-                musicPanel.classList.add('hidden');
+            if (musicPanel && musicPanel.classList.contains('active')) {
+                musicPanel.classList.remove('active');
                 const backdrop = document.querySelector('.music-panel-backdrop');
-                if (backdrop) backdrop.remove();
+                if (backdrop) {
+                    backdrop.classList.remove('active');
+                    setTimeout(() => backdrop.remove(), 300);
+                }
             }
             if (appHeader) {
                 appHeader.classList.remove('us-active');
