@@ -394,7 +394,7 @@ function renderMemoriesTimeline() {
         
         const imgStyle = getImageStyle(memory);
         const firstIsVideo = isVideoMedia(memory, 0);
-        const firstMediaHTML = renderMediaElement(memory.images[0], firstIsVideo, memory.caption || 'Memory', imgStyle, '');
+        const firstMediaHTML = renderMediaElement(memory.images[0], firstIsVideo, memory.caption || 'Memory', imgStyle, '', true);
         
         if (imageCount === 1) {
             return `
@@ -435,6 +435,9 @@ function renderMemoriesTimeline() {
             `;
         }
     }).join('');
+
+    // Set up IntersectionObserver for lazy video playback
+    observeTimelineVideos();
 }
 
 // NEW: Image Adjustment Feature
@@ -707,10 +710,17 @@ function isVideoMedia(memory, index) {
 }
 
 // Render media element (image or video) as HTML string
-function renderMediaElement(url, isVideo, altText, style, extraAttrs) {
+// When lazy is true, videos use preload="metadata" and don't autoplay (for timeline thumbnails)
+function renderMediaElement(url, isVideo, altText, style, extraAttrs, lazy) {
     if (isVideo) {
+        if (lazy) {
+            return `<video src="${url}" 
+                        muted loop playsinline preload="metadata"
+                        ${extraAttrs || ''}
+                        style="${style}; width: 100%; height: 100%; object-fit: cover;"></video>`;
+        }
         return `<video src="${url}" 
-                    autoplay muted loop playsinline 
+                    autoplay muted loop playsinline preload="auto"
                     ${extraAttrs || ''}
                     style="${style}; width: 100%; height: 100%; object-fit: cover;"></video>`;
     }
@@ -719,6 +729,34 @@ function renderMediaElement(url, isVideo, altText, style, extraAttrs) {
                 loading="lazy"
                 ${extraAttrs || ''}
                 style="${style}">`;
+}
+
+// IntersectionObserver to play/pause timeline videos based on visibility
+let timelineVideoObserver = null;
+
+function observeTimelineVideos() {
+    // Disconnect previous observer if any
+    if (timelineVideoObserver) {
+        timelineVideoObserver.disconnect();
+    }
+
+    timelineVideoObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            const video = entry.target;
+            if (entry.isIntersecting) {
+                video.play().catch(() => {
+                    // Expected on some mobile browsers due to autoplay policies
+                });
+            } else {
+                video.pause();
+            }
+        });
+    }, { rootMargin: '200px' });
+
+    const timeline = document.getElementById('memories-timeline');
+    if (!timeline) return;
+    const videos = timeline.querySelectorAll('video');
+    videos.forEach(video => timelineVideoObserver.observe(video));
 }
 
 // Notes Handling

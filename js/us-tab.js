@@ -437,7 +437,7 @@ function showMemoryHighlight(memory, yearsAgo) {
     
     const highlightIsVideo = isVideoMedia(memory, 0);
     const highlightMedia = highlightIsVideo 
-        ? `<video src="${memory.images[0]}" autoplay muted loop playsinline style="width:100%;height:200px;object-fit:cover;"></video>`
+        ? `<video src="${memory.images[0]}" autoplay muted loop playsinline preload="auto" style="width:100%;height:200px;object-fit:cover;"></video>`
         : `<img src="${memory.images[0]}" alt="Memory">`;
     
     container.innerHTML = `
