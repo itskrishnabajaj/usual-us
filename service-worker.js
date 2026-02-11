@@ -46,8 +46,9 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
     // Skip service worker for video/audio requests to ensure range requests work properly on mobile
+    const reqUrl = new URL(event.request.url);
     if (event.request.destination === 'video' || event.request.destination === 'audio' ||
-        event.request.url.includes('res.cloudinary.com')) {
+        reqUrl.hostname === 'res.cloudinary.com') {
         return;
     }
 
