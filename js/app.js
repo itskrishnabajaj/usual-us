@@ -85,13 +85,9 @@ function closeTopOverlay() {
 }
 
 window.addEventListener('popstate', () => {
-    if (closeTopOverlay()) {
-        // Re-push so there's always a state to pop next time
-        pushBackState();
-    } else {
-        // Nothing to close — push state again to prevent app exit
-        pushBackState();
-    }
+    closeTopOverlay();
+    // Always re-push so there's a state to pop next time (prevents app exit)
+    pushBackState();
 });
 
 // Initialize app
