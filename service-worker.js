@@ -1,4 +1,4 @@
-const CACHE_NAME = 'usual-us-v4';
+const CACHE_NAME = 'usual-us-v5';
 
 const urlsToCache = [
     '/',
@@ -45,6 +45,12 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    // Skip service worker for video/audio requests to ensure range requests work properly on mobile
+    if (event.request.destination === 'video' || event.request.destination === 'audio' ||
+        event.request.url.includes('res.cloudinary.com')) {
+        return;
+    }
+
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
