@@ -337,7 +337,7 @@ function renderBalance() {
     } else {
         balanceAmount.textContent = '₹0';
         balanceStatus.textContent = 'All settled';
-        whoPayIndicator.innerHTML = '✨';
+        whoPayIndicator.innerHTML = '<img src="icons/allsettled.svg" alt="All settled" class="icon-whopays">';
         
         if (balanceBeforeAction !== null && balanceBeforeAction !== 0) {
             showBalanceCelebration();
