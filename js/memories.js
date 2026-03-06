@@ -405,17 +405,8 @@ function renderMemoriesTimeline() {
         const anniversaryClass = isAnniversaryMemory ? ' anniversary-polaroid' : '';
         const anniversaryBadge = isAnniversaryMemory ? '<div class="anniversary-memory-badge">💝 Anniversary</div>' : '';
         
-        // Timeline string logic - show string between consecutive dates
-        let showString = false;
-        if (index < memories.length - 1) {
-            const nextMemory = memories[index + 1];
-            const nextDate = nextMemory.memoryDate ? nextMemory.memoryDate.toDate() : new Date();
-            if (nextDate < date) {
-                showString = true;
-            }
-        }
-        
-        const stringHTML = showString ? '<div class="polaroid-string"></div>' : '';
+        // Show connector between every pair of memories for a stable timeline
+        const connectorHTML = index > 0 ? '<div class="polaroid-connector"></div>' : '';
         
         const imgStyle = getImageStyle(memory);
         const firstIsVideo = isVideoMedia(memory, 0);
@@ -424,7 +415,7 @@ function renderMemoriesTimeline() {
         if (imageCount === 1) {
             return `
                 <div class="polaroid-wrapper">
-                    ${stringHTML}
+                    ${connectorHTML}
                     <div class="polaroid${anniversaryClass}" style="transform: rotate(${tilt}deg)" onclick="viewSinglePhoto('${memory.id}')">
                         <div class="polaroid-photo">
                             ${firstMediaHTML}
@@ -440,7 +431,7 @@ function renderMemoriesTimeline() {
         } else {
             return `
                 <div class="polaroid-wrapper">
-                    ${stringHTML}
+                    ${connectorHTML}
                     <div class="photo-stack" style="transform: rotate(${tilt}deg)" onclick="viewAlbum('${memory.id}')">
                         <div class="stack-card stack-back-2"></div>
                         <div class="stack-card stack-back-1"></div>
@@ -485,7 +476,7 @@ window.startImageAdjust = function(memoryId, imageIndex) {
         <div class="image-adjust-content">
             <h3>Adjust Image Position</h3>
             <div class="image-adjust-preview">
-                <img src="${memory.images[imageIndex]}" id="adjust-preview-img" style="object-fit: cover; object-position: ${currentPos.x}% ${currentPos.y}%; transform: scale(${currentZoom});">
+                <img src="${memory.images[imageIndex]}" id="adjust-preview-img" style="object-fit: cover; object-position: ${currentPos.x}% ${currentPos.y}%; transform: scale(${currentZoom}); transform-origin: ${currentPos.x}% ${currentPos.y}%;">
             </div>
             <div class="adjust-controls">
                 <label>
@@ -515,17 +506,18 @@ window.startImageAdjust = function(memoryId, imageIndex) {
     const ySlider = document.getElementById('adjust-y');
     const zoomSlider = document.getElementById('adjust-zoom');
     
-    xSlider.addEventListener('input', (e) => {
-        img.style.objectPosition = `${e.target.value}% ${ySlider.value}%`;
-    });
+    function updatePreview() {
+        const x = xSlider.value;
+        const y = ySlider.value;
+        const zoom = zoomSlider.value;
+        img.style.objectPosition = x + '% ' + y + '%';
+        img.style.transform = 'scale(' + zoom + ')';
+        img.style.transformOrigin = x + '% ' + y + '%';
+    }
     
-    ySlider.addEventListener('input', (e) => {
-        img.style.objectPosition = `${xSlider.value}% ${e.target.value}%`;
-    });
-    
-    zoomSlider.addEventListener('input', (e) => {
-        img.style.transform = `scale(${e.target.value})`;
-    });
+    xSlider.addEventListener('input', updatePreview);
+    ySlider.addEventListener('input', updatePreview);
+    zoomSlider.addEventListener('input', updatePreview);
 };
 
 window.saveImagePosition = async function(memoryId) {
@@ -724,7 +716,11 @@ function getImageStyle(memory) {
     const posX = memory.imagePosition ? memory.imagePosition.x : 50;
     const posY = memory.imagePosition ? memory.imagePosition.y : 50;
     const zoom = memory.imageZoom || 1;
-    return `object-fit: cover; object-position: ${posX}% ${posY}%${zoom !== 1 ? `; transform: scale(${zoom})` : ''}`;
+    let style = `object-fit: cover; object-position: ${posX}% ${posY}%`;
+    if (zoom !== 1) {
+        style += `; transform: scale(${zoom}); transform-origin: ${posX}% ${posY}%`;
+    }
+    return style;
 }
 
 // Check if a media URL at given index is a video

@@ -164,9 +164,13 @@ function renderMomentsPreview() {
 
     const itemsHTML = upcoming.map(m => {
         const info = getMomentTypeInfo(m.type);
+        const notePreview = m.notes ? `<div class="moments-preview-note">${escapeHTML(m.notes)}</div>` : '';
         return `<div class="moments-preview-item" onclick="openMomentsFullView()">
             <span class="moments-preview-emoji">${info.emoji}</span>
-            <span class="moments-preview-text">${escapeHTML(m.title)}</span>
+            <div class="moments-preview-info">
+                <div class="moments-preview-text">${escapeHTML(m.title)}</div>
+                ${notePreview}
+            </div>
             <span class="moments-preview-date">${getMomentRelativeLabel(m)}</span>
         </div>`;
     }).join('');
