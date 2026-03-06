@@ -319,11 +319,11 @@
                     <p id="partner-mood-display" class="partner-mood-display hidden"></p>
                 </div>
                 
-                <!-- Upcoming Moments Preview (lightweight) -->
-                <div id="moments-preview" class="moments-preview"></div>
-
                 <!-- Relationship Milestones -->
                 <div id="milestones-section" class="milestones-section"></div>
+
+                <!-- Upcoming Moments Preview (below milestones — past → future flow) -->
+                <div id="moments-preview" class="moments-preview"></div>
                 
                 <!-- NEW: Memory Highlight Banner -->
                 <div id="memory-highlight" class="memory-highlight hidden"></div>
@@ -668,30 +668,33 @@
     <div id="moment-form-modal" class="modal-overlay hidden">
         <div class="moment-form-content">
             <h2 id="moment-form-title">New Moment</h2>
-            <label class="moment-form-label">Title
-                <input type="text" id="moment-title-input" class="moment-form-input" placeholder="e.g. Dinner Date" maxlength="100">
-            </label>
-            <label class="moment-form-label">Date
-                <input type="date" id="moment-date-input" class="moment-form-input">
-            </label>
-            <label class="moment-form-label">Type
-                <select id="moment-type-select" class="moment-form-input">
-                    <option value="date">💕 Date</option>
-                    <option value="trip">✈️ Trip</option>
-                    <option value="anniversary">💍 Anniversary</option>
-                    <option value="movie">🎬 Movie</option>
-                    <option value="dinner">🍽️ Dinner</option>
-                    <option value="outing">🌸 Outing</option>
-                    <option value="special">⭐ Special</option>
-                    <option value="other">🤍 Other</option>
-                </select>
-            </label>
-            <label class="moment-form-label">Notes (optional)
-                <textarea id="moment-notes-input" class="moment-form-input moment-form-textarea" rows="3" placeholder="Add details..." maxlength="500"></textarea>
-            </label>
-            <div class="moment-form-actions">
-                <button class="moment-form-cancel" onclick="closeMomentForm()">Cancel</button>
-                <button class="moment-form-save" onclick="handleMomentFormSubmit()">Save</button>
+            <p class="moment-form-subtitle">Plan something beautiful together</p>
+            <div class="moment-form-card">
+                <label class="moment-form-label">Title
+                    <input type="text" id="moment-title-input" class="moment-form-input" placeholder="e.g. Dinner Date" maxlength="100">
+                </label>
+                <label class="moment-form-label">Date
+                    <input type="date" id="moment-date-input" class="moment-form-input">
+                </label>
+                <label class="moment-form-label">Type
+                    <select id="moment-type-select" class="moment-form-input">
+                        <option value="date">💕 Date</option>
+                        <option value="trip">✈️ Trip</option>
+                        <option value="anniversary">💍 Anniversary</option>
+                        <option value="movie">🎬 Movie</option>
+                        <option value="dinner">🍽️ Dinner</option>
+                        <option value="outing">🌸 Outing</option>
+                        <option value="special">⭐ Special</option>
+                        <option value="other">🤍 Other</option>
+                    </select>
+                </label>
+                <label class="moment-form-label">Notes (optional)
+                    <textarea id="moment-notes-input" class="moment-form-input moment-form-textarea" rows="3" placeholder="Add details..." maxlength="500"></textarea>
+                </label>
+                <div class="moment-form-actions">
+                    <button class="moment-form-cancel" onclick="closeMomentForm()">Cancel</button>
+                    <button class="moment-form-save" onclick="handleMomentFormSubmit()">Save</button>
+                </div>
             </div>
         </div>
     </div>
@@ -712,6 +715,7 @@
     <!-- Application Modules - Load in dependency order -->
     <script src="js/config.js"></script>
     <script src="js/state.js"></script>
+    <script src="js/event-bus.js"></script>
     <script src="js/sounds.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/stats.js"></script>

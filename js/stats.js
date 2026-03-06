@@ -142,3 +142,15 @@ function renderMonthlyTrends() {
     
     container.innerHTML = `<div class="trend-bars-container">${bars}</div>`;
 }
+
+// ---- Event-driven rendering ----
+// Re-render stats when expense data changes (only if stats tab is visible)
+EventBus.on('expenses:loaded', () => {
+    const statsActive = document.querySelector('#stats-tab.active');
+    if (statsActive) renderStats();
+});
+
+// Render stats when switching to the stats tab
+EventBus.on('tab:switched', (detail) => {
+    if (detail && detail.tab === 'stats') renderStats();
+});

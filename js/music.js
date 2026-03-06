@@ -95,16 +95,19 @@ function playRandomSongWithFadeIn() {
         const volumeStep = MUSIC_TARGET_VOLUME / MUSIC_FADE_IN_STEPS;
         let currentStep = 0;
 
-        musicFadeInterval = setInterval(() => {
+        // Store interval ID locally so we can verify it hasn't been replaced
+        const intervalId = setInterval(() => {
             currentStep++;
             if (currentStep >= MUSIC_FADE_IN_STEPS || !musicPlayer || musicPlayer.paused) {
                 if (musicPlayer) musicPlayer.volume = MUSIC_TARGET_VOLUME;
-                clearInterval(musicFadeInterval);
-                musicFadeInterval = null;
+                clearInterval(intervalId);
+                // Only null out the global if it still points to this interval
+                if (musicFadeInterval === intervalId) musicFadeInterval = null;
                 return;
             }
             musicPlayer.volume = Math.min(volumeStep * currentStep, MUSIC_TARGET_VOLUME);
         }, stepInterval);
+        musicFadeInterval = intervalId;
     }).catch(err => {
         console.warn('Auto-play blocked by browser:', err.message);
         musicPlayer.volume = MUSIC_TARGET_VOLUME;
@@ -141,18 +144,22 @@ function selectSong(index) {
     document.getElementById('play-pause-btn').textContent = '▶';
 }
 
+function removeMusicBackdrop() {
+    // Remove ALL music-panel-backdrop elements to prevent orphaned nodes
+    document.querySelectorAll('.music-panel-backdrop').forEach(el => el.remove());
+}
+
 function toggleMusicPlayer() {
     const panel = document.getElementById('music-player-panel');
     const isOpen = panel.classList.contains('active');
     
     if (!isOpen) {
-        let backdrop = document.querySelector('.music-panel-backdrop');
-        if (!backdrop) {
-            backdrop = document.createElement('div');
-            backdrop.className = 'music-panel-backdrop';
-            backdrop.addEventListener('click', toggleMusicPlayer);
-            document.body.appendChild(backdrop);
-        }
+        // Clean up any stale backdrops before creating a new one
+        removeMusicBackdrop();
+        const backdrop = document.createElement('div');
+        backdrop.className = 'music-panel-backdrop';
+        backdrop.addEventListener('click', toggleMusicPlayer);
+        document.body.appendChild(backdrop);
         // Force reflow before adding active class so the transition animates
         void backdrop.offsetWidth;
         backdrop.classList.add('active');
@@ -161,7 +168,7 @@ function toggleMusicPlayer() {
         const backdrop = document.querySelector('.music-panel-backdrop');
         if (backdrop) {
             backdrop.classList.remove('active');
-            setTimeout(() => backdrop.remove(), 300);
+            setTimeout(() => removeMusicBackdrop(), 300);
         }
         panel.classList.remove('active');
     }

@@ -96,3 +96,9 @@ function renderMoodIndicator() {
     indicator.innerHTML = `Today: ${moodEmojis[currentMood] || ''}`;
     indicator.classList.remove('hidden');
 }
+
+// ---- Event-driven rendering ----
+// Re-render mood indicator when switching to the Us tab
+EventBus.on('tab:switched', (detail) => {
+    if (detail && detail.tab === 'us') renderMoodIndicator();
+});

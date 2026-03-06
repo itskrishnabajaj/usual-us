@@ -72,6 +72,8 @@ function setupPullToRefresh() {
 async function refreshUsTab() {
     console.log('🔄 Refreshing Us tab...');
     showLoading(true);
+    // Notify listeners (extensibility hook for future modules)
+    EventBus.emit('us:refresh');
     await Promise.all([
         loadMemories(),
         loadNotes(),
@@ -82,8 +84,8 @@ async function refreshUsTab() {
 }
 
 function switchTab(tabName) {
-    // Play tab switching sound
-    SoundFX.play('tabSwitch');
+    // Emit navigation event so other modules can react
+    EventBus.emit('tab:switched', { tab: tabName });
 
     // Cancel any pending music delay timer and active fade-in when switching tabs
     if (musicDelayTimer) {
@@ -139,12 +141,15 @@ function switchTab(tabName) {
             const musicPanel = document.getElementById('music-player-panel');
             if (musicPanel && musicPanel.classList.contains('active')) {
                 musicPanel.classList.remove('active');
-                const backdrop = document.querySelector('.music-panel-backdrop');
-                if (backdrop) {
-                    backdrop.classList.remove('active');
-                    setTimeout(() => backdrop.remove(), 300);
-                }
             }
+            // Always clean up any stale music backdrops on tab leave
+            if (typeof removeMusicBackdrop === 'function') removeMusicBackdrop();
+            
+            // Disconnect timeline video observer when leaving Us tab
+            if (typeof timelineVideoObserver !== 'undefined' && timelineVideoObserver) {
+                timelineVideoObserver.disconnect();
+            }
+            
             if (appHeader) {
                 appHeader.classList.remove('us-active');
                 appHeader.classList.remove('late-night');
@@ -188,7 +193,6 @@ function switchTab(tabName) {
     }
     
     if (tabName === 'stats') {
-        renderStats();
         revealUsTab();
     }
 }
@@ -203,7 +207,7 @@ function revealUsTab() {
     }
 }
 
-async function initializeUsTab() {
+function initializeUsTab() {
     const days = getDaysTogether();
     document.getElementById('us-day-counter').textContent = `Day ${days} of us`;
     document.getElementById('ritual-quote').textContent = getDailyQuote();
@@ -256,19 +260,10 @@ async function initializeUsTab() {
     // NEW: Check for daily memory reminder
     checkDailyMemoryReminder();
     
-    // NEW: Update last seen
-    await updateLastSeen();
-    
-    // Re-render mood indicator (mood data already loaded at startup by loadData)
-    renderMoodIndicator();
-    
     // Stars, floating hearts, milestones
     createUsTabStars();
     createFloatingHearts();
     renderMilestones();
-
-    // Lightweight moments preview (all logic in moments.js)
-    if (typeof renderMomentsPreview === 'function') renderMomentsPreview();
 }
 
 function createUsTabStars() {

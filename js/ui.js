@@ -180,13 +180,13 @@ function setupEventListeners() {
     
     // Paid By radio buttons - play button sound
     document.querySelectorAll('input[name="paidBy"]').forEach(radio => {
-        radio.addEventListener('change', () => SoundFX.play('button'));
+        radio.addEventListener('change', () => EventBus.emit('ui:button'));
     });
     
     // Split type toggle
     document.querySelectorAll('input[name="splitType"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
-            SoundFX.play('button');
+            EventBus.emit('ui:button');
             const customSplit = document.getElementById('custom-split');
             if (e.target.value === 'custom') {
                 customSplit.classList.remove('hidden');
@@ -198,21 +198,21 @@ function setupEventListeners() {
     
     // Category radio buttons - play button sound
     document.querySelectorAll('input[name="category"]').forEach(radio => {
-        radio.addEventListener('change', () => SoundFX.play('button'));
+        radio.addEventListener('change', () => EventBus.emit('ui:button'));
     });
     
     // Edit modal paid-by and category - play button sound
     document.querySelectorAll('input[name="editPaidBy"]').forEach(radio => {
-        radio.addEventListener('change', () => SoundFX.play('button'));
+        radio.addEventListener('change', () => EventBus.emit('ui:button'));
     });
     document.querySelectorAll('input[name="editCategory"]').forEach(radio => {
-        radio.addEventListener('change', () => SoundFX.play('button'));
+        radio.addEventListener('change', () => EventBus.emit('ui:button'));
     });
     
     // Budget toggle - play button sound
     const budgetToggle = document.getElementById('count-towards-budget');
     if (budgetToggle) {
-        budgetToggle.addEventListener('change', () => SoundFX.play('button'));
+        budgetToggle.addEventListener('change', () => EventBus.emit('ui:button'));
     }
     
     // Expense forms
@@ -375,11 +375,7 @@ function setupEventListeners() {
     document.getElementById('music-player-toggle').addEventListener('click', toggleMusicPlayer);
     document.getElementById('close-music-player').addEventListener('click', () => {
         document.getElementById('music-player-panel').classList.remove('active');
-        const backdrop = document.querySelector('.music-panel-backdrop');
-        if (backdrop) {
-            backdrop.classList.remove('active');
-            setTimeout(() => backdrop.remove(), 300);
-        }
+        if (typeof removeMusicBackdrop === 'function') removeMusicBackdrop();
     });
     
     document.getElementById('play-pause-btn').addEventListener('click', togglePlayPause);
@@ -409,7 +405,7 @@ function setupEventListeners() {
     const filterPaidBy = document.getElementById('filter-paid-by');
     if (filterPaidBy) {
         filterPaidBy.addEventListener('change', (e) => {
-            SoundFX.play('button');
+            EventBus.emit('ui:button');
             expenseFilters.paidBy = e.target.value;
             renderAllExpenses();
         });
@@ -418,7 +414,7 @@ function setupEventListeners() {
     const filterMonth = document.getElementById('filter-month');
     if (filterMonth) {
         filterMonth.addEventListener('change', (e) => {
-            SoundFX.play('button');
+            EventBus.emit('ui:button');
             expenseFilters.month = e.target.value;
             renderAllExpenses();
         });

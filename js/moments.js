@@ -164,9 +164,13 @@ function renderMomentsPreview() {
 
     const itemsHTML = upcoming.map(m => {
         const info = getMomentTypeInfo(m.type);
+        const notePreview = m.notes ? `<div class="moments-preview-note">${escapeHTML(m.notes)}</div>` : '';
         return `<div class="moments-preview-item" onclick="openMomentsFullView()">
             <span class="moments-preview-emoji">${info.emoji}</span>
-            <span class="moments-preview-text">${escapeHTML(m.title)}</span>
+            <div class="moments-preview-info">
+                <div class="moments-preview-text">${escapeHTML(m.title)}</div>
+                ${notePreview}
+            </div>
             <span class="moments-preview-date">${getMomentRelativeLabel(m)}</span>
         </div>`;
     }).join('');
@@ -298,7 +302,7 @@ async function handleMomentFormSubmit() {
         } else {
             await addMoment({ title, date, type, notes });
             showSuccess('Moment created');
-            SoundFX.play('button');
+            EventBus.emit('moment:created');
         }
         closeMomentForm();
         renderMomentsFullView();
@@ -315,3 +319,9 @@ window.openEditMoment = openEditMoment;
 window.closeMomentForm = closeMomentForm;
 window.handleMomentFormSubmit = handleMomentFormSubmit;
 window.deleteMoment = deleteMoment;
+
+// ---- Event-driven rendering ----
+// Render moments preview when switching to the Us tab
+EventBus.on('tab:switched', (detail) => {
+    if (detail && detail.tab === 'us') renderMomentsPreview();
+});
