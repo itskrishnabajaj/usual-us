@@ -933,7 +933,7 @@ textarea {
 }
 
 .who-pays-indicator {
-    font-size: 48px;
+    line-height: 1;
 }
 
 .btn-settle {
@@ -987,7 +987,7 @@ textarea {
 }
 
 .expense-category {
-    font-size: 24px;
+    line-height: 1;
     margin-bottom: 4px;
 }
 
@@ -3713,7 +3713,6 @@ body {
 }
 
 .nav-icon {
-    display: inline-block;
     transition: transform var(--transition-fast);
 }
 
