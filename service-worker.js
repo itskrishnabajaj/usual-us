@@ -1,4 +1,4 @@
-const CACHE_NAME = 'usual-us-v8';
+const CACHE_NAME = 'usual-us-v9';
 
 const urlsToCache = [
     '/',

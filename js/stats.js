@@ -85,7 +85,7 @@ function renderStats() {
         return `
         <div class="category-stat">
             <div class="category-info">
-                <div class="category-emoji">${categoryEmojis[category]}</div>
+                <div class="category-emoji">${categoryEmojis[category] || ''}</div>
                 <div class="category-name">${category}</div>
             </div>
             <div class="category-amount-group">

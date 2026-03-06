@@ -79,7 +79,7 @@ async function loadTodaysMood() {
                         const moodTime = data[partnerTimeField].toDate();
                         timeStr = ` at ${moodTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
                     }
-                    partnerMoodDisplay.innerHTML = `${partnerName} is feeling ${moodEmojis[data[partnerRole]]}${timeStr}`;
+                    partnerMoodDisplay.innerHTML = `${partnerName} is feeling ${moodEmojis[data[partnerRole]] || data[partnerRole]}${timeStr}`;
                     partnerMoodDisplay.classList.remove('hidden');
                 }
             }
@@ -93,6 +93,6 @@ function renderMoodIndicator() {
     const indicator = document.getElementById('current-mood-display');
     if (!indicator || !currentMood) return;
     
-    indicator.innerHTML = `Today: ${moodEmojis[currentMood]}`;
+    indicator.innerHTML = `Today: ${moodEmojis[currentMood] || currentMood}`;
     indicator.classList.remove('hidden');
 }
