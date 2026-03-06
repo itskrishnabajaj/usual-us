@@ -87,7 +87,10 @@ async function handleExpenseSubmit(e) {
         document.getElementById('custom-split').classList.add('hidden');
         document.getElementById('count-towards-budget').checked = true;
         // Reset expense date to today
-        document.getElementById('expense-date').valueAsDate = new Date();
+        const today = new Date();
+        document.getElementById('expense-date').value = today.getFullYear() + '-' + 
+            String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(today.getDate()).padStart(2, '0');
         
         switchTab('home');
         

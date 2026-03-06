@@ -383,7 +383,10 @@ function setupEventListeners() {
     // Set expense date default to today
     const expenseDateInput = document.getElementById('expense-date');
     if (expenseDateInput) {
-        expenseDateInput.valueAsDate = new Date();
+        const today = new Date();
+        expenseDateInput.value = today.getFullYear() + '-' + 
+            String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(today.getDate()).padStart(2, '0');
     }
 }
 
