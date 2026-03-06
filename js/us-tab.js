@@ -2,6 +2,8 @@
 // Us Tab - Timeline and Features
 // ============================================
 
+const MUSIC_AUTOPLAY_DELAY_MS = 12000;
+
 function setupPullToRefresh() {
     const usTab = document.getElementById('us-tab');
     if (!usTab) return;
@@ -53,28 +55,44 @@ function switchTab(tabName) {
     // Play tab switching sound
     SoundFX.play('tabSwitch');
 
-    // Smooth fade transition
+    // Cancel any pending music delay timer and active fade-in when switching tabs
+    if (musicDelayTimer) {
+        clearTimeout(musicDelayTimer);
+        musicDelayTimer = null;
+    }
+    cancelMusicFade();
+
+    // Smooth fade-out then swap
     const currentActive = document.querySelector('.tab-content.active');
     if (currentActive) {
         currentActive.style.opacity = '0';
+        currentActive.style.transform = 'translateY(6px)';
     }
     
-    setTimeout(() => {
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-        
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-            content.style.opacity = '0';
-        });
-        
-        const newTab = document.getElementById(`${tabName}-tab`);
-        newTab.classList.add('active');
-        
+    requestAnimationFrame(() => {
         setTimeout(() => {
-            newTab.style.opacity = '1';
-        }, 50);
-    }, 150);
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            const activeNavItem = document.querySelector(`[data-tab="${tabName}"]`);
+            if (activeNavItem) activeNavItem.classList.add('active');
+            
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.opacity = '0';
+                content.style.transform = 'translateY(6px)';
+            });
+            
+            const newTab = document.getElementById(`${tabName}-tab`);
+            if (newTab) {
+                newTab.classList.add('active');
+                // Allow a frame for display:block to take effect before animating
+                requestAnimationFrame(() => {
+                    newTab.style.opacity = '1';
+                    newTab.style.transform = 'translateY(0)';
+                });
+            }
+        }, 120);
+    });
     
     // Show/hide music player toggle - only visible on Us tab
     const musicToggle = document.getElementById('music-player-toggle');
@@ -117,19 +135,28 @@ function switchTab(tabName) {
         }
     }
     
-    // Music player auto pause/resume
+    // Music player: delayed auto-play on Us tab, pause on leave
     if (tabName === 'us') {
-        if (musicWasPlaying && musicPlayer.paused) {
+        if (musicWasPlaying && musicPlayer && musicPlayer.paused) {
+            // Resume immediately if user was already listening
             musicPlayer.play().catch(() => {});
-        } else if (musicPlayer.paused) {
-            // Auto-play a random song when entering Us tab
-            playRandomSong();
+        } else if (musicPlayer && musicPlayer.paused) {
+            musicDelayTimer = setTimeout(() => {
+                musicDelayTimer = null;
+                // Only play if still on Us tab
+                const stillOnUs = document.querySelector('.nav-item[data-tab="us"].active');
+                if (stillOnUs && musicPlayer && musicPlayer.paused) {
+                    playRandomSongWithFadeIn();
+                }
+            }, MUSIC_AUTOPLAY_DELAY_MS);
         }
         initializeUsTab();
     } else {
-        musicWasPlaying = !musicPlayer.paused;
-        if (!musicPlayer.paused) {
-            musicPlayer.pause();
+        if (musicPlayer) {
+            musicWasPlaying = !musicPlayer.paused;
+            if (!musicPlayer.paused) {
+                musicPlayer.pause();
+            }
         }
     }
     

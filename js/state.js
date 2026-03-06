@@ -23,6 +23,8 @@ let recentlyPlayed = [];
 let currentMood = null;
 let isPullingToRefresh = false;
 let currentSongIdx = -1;
+let musicDelayTimer = null;
+let musicFadeInterval = null;
 
 // Expense filter state
 let expenseFilters = {

@@ -30,6 +30,12 @@
     padding: 0;
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
+    scrollbar-width: none;           /* Firefox */
+    -ms-overflow-style: none;        /* IE/Edge */
+}
+
+*::-webkit-scrollbar {
+    display: none;                   /* Chrome, Safari, Android */
 }
 
 body {
@@ -375,24 +381,32 @@ body.us-active.late-night {
 .tab-content {
     display: none;
     opacity: 0;
-    transition: opacity var(--transition-normal);
+    transform: translateY(6px);
+    transition: opacity var(--transition-normal), transform var(--transition-normal);
+    will-change: opacity, transform;
 }
 
 .tab-content.active {
     display: block;
     opacity: 1;
-    animation: fadeIn var(--transition-normal);
+    transform: translateY(0);
+    animation: tabSlideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
-@keyframes fadeIn {
+@keyframes tabSlideIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(6px);
     }
     to {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
 }
 
 /* ============================================
@@ -919,7 +933,7 @@ textarea {
 }
 
 .who-pays-indicator {
-    font-size: 48px;
+    line-height: 1;
 }
 
 .btn-settle {
@@ -973,7 +987,7 @@ textarea {
 }
 
 .expense-category {
-    font-size: 24px;
+    line-height: 1;
     margin-bottom: 4px;
 }
 
@@ -1313,15 +1327,6 @@ textarea {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     min-height: 0;
-}
-
-.song-list::-webkit-scrollbar {
-    width: 4px;
-}
-
-.song-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
 }
 
 .song-item {
@@ -3173,8 +3178,8 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
 }
 
 .nav-label {
@@ -3708,7 +3713,6 @@ body {
 }
 
 .nav-icon {
-    display: inline-block;
     transition: transform var(--transition-fast);
 }
 
@@ -4027,16 +4031,16 @@ select:focus {
 
 /* Tab navigation icons */
 .icon-tab {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     display: block;
     object-fit: contain;
 }
 
 /* Category icons (expense forms, history, stats) */
 .icon-category {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     display: inline-block;
     vertical-align: middle;
     object-fit: contain;
@@ -4044,21 +4048,21 @@ select:focus {
 
 /* Category icons in the category-option labels need alignment */
 .category-option .icon-category {
-    width: 22px;
-    height: 22px;
+    width: 28px;
+    height: 28px;
     margin-right: 2px;
 }
 
 /* Category icon in expense item (recent expenses) */
 .expense-category .icon-category {
-    width: 26px;
-    height: 26px;
+    width: 30px;
+    height: 30px;
 }
 
 /* Category icon in stats breakdown */
 .category-emoji .icon-category {
-    width: 26px;
-    height: 26px;
+    width: 30px;
+    height: 30px;
 }
 
 /* Mood icons */
@@ -4087,8 +4091,8 @@ select:focus {
 
 /* Who pays next icon */
 .icon-whopays {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     display: block;
     margin: 0 auto;
     object-fit: contain;
@@ -4096,8 +4100,8 @@ select:focus {
 
 /* Legend item icons in stats pie chart */
 .legend-item .icon-category {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
 }
 
 /* ============================================

@@ -2,6 +2,10 @@
 // Music Player
 // ============================================
 
+const MUSIC_FADE_IN_DURATION_MS = 4000;
+const MUSIC_FADE_IN_STEPS = 40;
+const MUSIC_TARGET_VOLUME = 1.0;
+
 function initializeMusicPlayer() {
     musicPlayer = document.getElementById('music-player');
     const songList = document.getElementById('song-list');
@@ -68,6 +72,53 @@ function playRandomSong(forcePlay) {
     }).catch(err => {
         console.warn('Auto-play blocked by browser:', err.message);
     });
+}
+
+function playRandomSongWithFadeIn() {
+    if (!musicPlayer || PLAYLIST.length === 0) return;
+    if (!musicPlayer.paused && currentSongIdx >= 0) return;
+
+    cancelMusicFade();
+
+    let idx = Math.floor(Math.random() * PLAYLIST.length);
+    if (PLAYLIST.length > 1 && idx === currentSongIdx) {
+        idx = (idx + 1) % PLAYLIST.length;
+    }
+
+    selectSong(idx);
+    musicPlayer.volume = 0;
+    musicPlayer.play().then(() => {
+        document.getElementById('play-pause-btn').textContent = '⏸';
+        addToRecentlyPlayed(idx);
+
+        const stepInterval = MUSIC_FADE_IN_DURATION_MS / MUSIC_FADE_IN_STEPS;
+        const volumeStep = MUSIC_TARGET_VOLUME / MUSIC_FADE_IN_STEPS;
+        let currentStep = 0;
+
+        musicFadeInterval = setInterval(() => {
+            currentStep++;
+            if (currentStep >= MUSIC_FADE_IN_STEPS || !musicPlayer || musicPlayer.paused) {
+                if (musicPlayer) musicPlayer.volume = MUSIC_TARGET_VOLUME;
+                clearInterval(musicFadeInterval);
+                musicFadeInterval = null;
+                return;
+            }
+            musicPlayer.volume = Math.min(volumeStep * currentStep, MUSIC_TARGET_VOLUME);
+        }, stepInterval);
+    }).catch(err => {
+        console.warn('Auto-play blocked by browser:', err.message);
+        musicPlayer.volume = MUSIC_TARGET_VOLUME;
+    });
+}
+
+function cancelMusicFade() {
+    if (musicFadeInterval) {
+        clearInterval(musicFadeInterval);
+        musicFadeInterval = null;
+    }
+    if (musicPlayer) {
+        musicPlayer.volume = MUSIC_TARGET_VOLUME;
+    }
 }
 
 function selectSong(index) {
