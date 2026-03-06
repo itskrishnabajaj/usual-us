@@ -2,6 +2,8 @@
 // Us Tab - Timeline and Features
 // ============================================
 
+const MUSIC_AUTOPLAY_DELAY_MS = 12000;
+
 function setupPullToRefresh() {
     const usTab = document.getElementById('us-tab');
     if (!usTab) return;
@@ -138,7 +140,6 @@ function switchTab(tabName) {
             // Resume immediately if user was already listening
             musicPlayer.play().catch(() => {});
         } else if (musicPlayer && musicPlayer.paused) {
-            // Delay auto-play by 12 seconds
             musicDelayTimer = setTimeout(() => {
                 musicDelayTimer = null;
                 // Only play if still on Us tab
@@ -146,7 +147,7 @@ function switchTab(tabName) {
                 if (stillOnUs && musicPlayer && musicPlayer.paused) {
                     playRandomSong();
                 }
-            }, 12000);
+            }, MUSIC_AUTOPLAY_DELAY_MS);
         }
         initializeUsTab();
     } else {
