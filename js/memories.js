@@ -511,6 +511,7 @@ window.startImageAdjust = function(memoryId, imageIndex) {
     const zoomSlider = document.getElementById('adjust-zoom');
     
     function updatePreview() {
+        // x and y are integer percentages (0-100) used directly in CSS strings
         const x = xSlider.value;
         const y = ySlider.value;
         const zoom = parseFloat(zoomSlider.value);
