@@ -69,11 +69,7 @@ function closeTopOverlay() {
     const musicPanel = document.getElementById('music-player-panel');
     if (musicPanel && musicPanel.classList.contains('active')) {
         musicPanel.classList.remove('active');
-        const backdrop = document.querySelector('.music-panel-backdrop');
-        if (backdrop) {
-            backdrop.classList.remove('active');
-            setTimeout(() => backdrop.remove(), 300);
-        }
+        if (typeof removeMusicBackdrop === 'function') removeMusicBackdrop();
         return true;
     }
 

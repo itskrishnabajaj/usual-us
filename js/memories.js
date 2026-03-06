@@ -470,6 +470,10 @@ window.startImageAdjust = function(memoryId, imageIndex) {
     const currentPos = memory.imagePosition || { x: 50, y: 50 };
     const currentZoom = memory.imageZoom || 1;
     
+    // Clean up any existing adjust modal first
+    const existing = document.querySelector('.image-adjust-modal');
+    if (existing) existing.remove();
+    
     const modal = document.createElement('div');
     modal.className = 'image-adjust-modal';
     modal.innerHTML = `
@@ -509,9 +513,11 @@ window.startImageAdjust = function(memoryId, imageIndex) {
     function updatePreview() {
         const x = xSlider.value;
         const y = ySlider.value;
-        const zoom = zoomSlider.value;
+        const zoom = parseFloat(zoomSlider.value);
         img.style.objectPosition = x + '% ' + y + '%';
         img.style.transform = 'scale(' + zoom + ')';
+        // Transform-origin follows position so zoom pans around the selected point.
+        // This ensures horizontal movement works when zoomed (overflow exists).
         img.style.transformOrigin = x + '% ' + y + '%';
     }
     
