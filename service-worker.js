@@ -1,4 +1,4 @@
-const CACHE_NAME = 'usual-us-v14';
+const CACHE_NAME = 'usual-us-v15';
 
 const urlsToCache = [
     '/',
@@ -16,6 +16,7 @@ const urlsToCache = [
     '/js/memories.js',
     '/js/notes.js',
     '/js/mood.js',
+    '/js/moments.js',
     '/js/music.js',
     '/js/auth.js',
     '/js/app.js',

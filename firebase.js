@@ -15,6 +15,7 @@ let expensesCollection = null;
 let memoriesCollection = null;
 let notesCollection = null;
 let budgetCollection = null;
+let momentsCollection = null;
 let firebaseInitialized = false;
 
 function initializeFirebase() {
@@ -33,6 +34,7 @@ function initializeFirebase() {
         memoriesCollection = db.collection('memories');
         notesCollection = db.collection('notes');
         budgetCollection = db.collection('budget');
+        momentsCollection = db.collection('moments');
         
         firebaseInitialized = true;
         console.log('✅ Firebase initialized');

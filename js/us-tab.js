@@ -239,6 +239,9 @@ async function initializeUsTab() {
     createUsTabStars();
     createFloatingHearts();
     renderMilestones();
+
+    // Lightweight moments preview (all logic in moments.js)
+    if (typeof renderMomentsPreview === 'function') renderMomentsPreview();
 }
 
 function createUsTabStars() {
