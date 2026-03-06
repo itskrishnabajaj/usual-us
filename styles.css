@@ -1862,7 +1862,7 @@ textarea {
     contain-intrinsic-size: auto 350px;
 }
 
-/* Timeline connector — stable vertical line between memories */
+/* Timeline connector - stable vertical line between memories */
 .polaroid-connector {
     width: 2px;
     height: 40px;
@@ -1891,7 +1891,7 @@ textarea {
     line-height: 1;
 }
 
-/* Legacy class kept for backwards compat — maps to new connector */
+/* Legacy class - maps to new connector style */
 .polaroid-string {
     width: 2px;
     height: 40px;
@@ -1904,10 +1904,6 @@ textarea {
         rgba(194, 24, 91, 0.22) 85%, 
         transparent 100%);
     border-radius: 1px;
-}
-
-.polaroid-string::before {
-    display: none;
 }
 
 .polaroid-string::after {

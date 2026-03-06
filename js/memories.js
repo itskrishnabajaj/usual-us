@@ -405,7 +405,7 @@ function renderMemoriesTimeline() {
         const anniversaryClass = isAnniversaryMemory ? ' anniversary-polaroid' : '';
         const anniversaryBadge = isAnniversaryMemory ? '<div class="anniversary-memory-badge">💝 Anniversary</div>' : '';
         
-        // Show connector between every pair of memories for a stable timeline
+        // Show connector before each memory except the first for a stable timeline
         const connectorHTML = index > 0 ? '<div class="polaroid-connector"></div>' : '';
         
         const imgStyle = getImageStyle(memory);
