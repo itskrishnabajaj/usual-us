@@ -1,4 +1,4 @@
-const CACHE_NAME = 'usual-us-v16';
+const CACHE_NAME = 'usual-us-v17';
 
 const urlsToCache = [
     '/',
@@ -7,6 +7,7 @@ const urlsToCache = [
     '/firebase.js',
     '/js/config.js',
     '/js/state.js',
+    '/js/event-bus.js',
     '/js/sounds.js',
     '/js/ui.js',
     '/js/stats.js',

@@ -46,3 +46,15 @@ const SoundFX = (() => {
 
 // Initialise sound system as soon as the script loads
 SoundFX.init();
+
+// ---- Event-driven sound playback ----
+// Sound reactions are centralized here so feature modules don't call SoundFX directly.
+EventBus.on('expense:created',  () => SoundFX.play('expAdded'));
+EventBus.on('expense:edited',   () => SoundFX.play('expAdded'));
+EventBus.on('expense:deleted',  () => SoundFX.play('expDel'));
+EventBus.on('expense:settled',  () => SoundFX.play('expAdded'));
+EventBus.on('memory:created',   () => SoundFX.play('memoryAdded'));
+EventBus.on('memory:viewed',    () => SoundFX.play('largeMemory'));
+EventBus.on('moment:created',   () => SoundFX.play('button'));
+EventBus.on('tab:switched',     () => SoundFX.play('tabSwitch'));
+EventBus.on('ui:button',        () => SoundFX.play('button'));

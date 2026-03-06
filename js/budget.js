@@ -140,3 +140,9 @@ function updateBudgetProgress() {
         fill.classList.remove('warning');
     }
 }
+
+// ---- Event-driven updates ----
+// Update budget progress whenever expense data is refreshed
+EventBus.on('expenses:loaded', () => {
+    updateBudgetProgress();
+});

@@ -298,7 +298,7 @@ async function handleMomentFormSubmit() {
         } else {
             await addMoment({ title, date, type, notes });
             showSuccess('Moment created');
-            SoundFX.play('button');
+            EventBus.emit('moment:created');
         }
         closeMomentForm();
         renderMomentsFullView();

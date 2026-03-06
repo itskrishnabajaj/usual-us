@@ -11,12 +11,10 @@ async function loadExpenses() {
         renderBalance();
         renderRecentExpenses();
         renderAllExpenses();
-        updateBudgetProgress();
         populateMonthFilter();
 
-        // Only re-render stats when the stats tab is actually visible
-        const statsActive = document.querySelector('#stats-tab.active');
-        if (statsActive) renderStats();
+        // Notify other modules that expense data has been refreshed
+        EventBus.emit('expenses:loaded');
     } catch (error) {
         console.error('❌ Error loading expenses:', error);
     }
@@ -95,7 +93,7 @@ async function handleExpenseSubmit(e) {
     try {
         const docRef = await expensesCollection.add(expense);
         console.log('✅ Expense added successfully:', docRef.id);
-        SoundFX.play('expAdded');
+        EventBus.emit('expense:created', { id: docRef.id });
         
         document.getElementById('expense-form').reset();
         document.getElementById('custom-split').classList.add('hidden');
@@ -177,7 +175,7 @@ async function handleExpenseEdit(e) {
         });
         
         console.log('✅ Expense updated:', expenseId);
-        SoundFX.play('expAdded');
+        EventBus.emit('expense:edited', { id: expenseId });
         document.getElementById('edit-expense-modal').classList.add('hidden');
         await loadExpenses();
     } catch (error) {
@@ -189,7 +187,7 @@ async function handleExpenseEdit(e) {
 }
 
 function showEditExpense(expenseId) {
-    SoundFX.play('button');
+    EventBus.emit('ui:button');
     const expense = expenses.find(e => e.id === expenseId);
     if (!expense) return;
     
@@ -229,7 +227,7 @@ async function deleteExpense(expenseId) {
     try {
         await expensesCollection.doc(expenseId).delete();
         console.log('✅ Expense deleted');
-        SoundFX.play('expDel');
+        EventBus.emit('expense:deleted', { id: expenseId });
         await loadExpenses();
     } catch (error) {
         console.error('❌ Delete failed:', error);
@@ -310,7 +308,7 @@ async function handleSettle() {
     try {
         await expensesCollection.add(settlement);
         console.log('✅ Settlement completed');
-        SoundFX.play('expAdded');
+        EventBus.emit('expense:settled');
         document.getElementById('settle-modal').classList.add('hidden');
         settleAmountInput.value = '';
         await loadExpenses();

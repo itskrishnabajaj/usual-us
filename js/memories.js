@@ -346,7 +346,7 @@ async function handleMemoryUpload(e) {
         await memoriesCollection.add(memory);
         
         console.log('✅ Memory uploaded');
-        SoundFX.play('memoryAdded');
+        EventBus.emit('memory:created');
         resetMemoryForm();
         document.getElementById('memory-modal').classList.add('hidden');
         await loadMemories();
@@ -561,7 +561,7 @@ function viewSinglePhoto(memoryId) {
     const memory = memories.find(m => m.id === memoryId);
     if (!memory || memory.images.length === 0) return;
     
-    SoundFX.play('largeMemory');
+    EventBus.emit('memory:viewed', { id: memoryId });
     currentViewingMemoryId = memoryId;
     
     const date = memory.memoryDate ? memory.memoryDate.toDate() : new Date();
@@ -591,7 +591,7 @@ function viewAlbum(memoryId) {
     const memory = memories.find(m => m.id === memoryId);
     if (!memory || memory.images.length === 0) return;
     
-    SoundFX.play('largeMemory');
+    EventBus.emit('memory:viewed', { id: memoryId });
     currentViewingMemoryId = memoryId;
     currentAlbumIndex = 0;
     
@@ -703,6 +703,7 @@ async function handleMemoryDelete() {
         
         await memoriesCollection.doc(currentViewingMemoryId).delete();
         console.log('✅ Memory deleted');
+        EventBus.emit('memory:deleted', { id: currentViewingMemoryId });
         document.getElementById('album-viewer-modal').classList.add('hidden');
         document.getElementById('photo-viewer-modal').classList.add('hidden');
         currentViewingMemoryId = null;

@@ -82,8 +82,8 @@ async function refreshUsTab() {
 }
 
 function switchTab(tabName) {
-    // Play tab switching sound
-    SoundFX.play('tabSwitch');
+    // Emit navigation event so other modules can react
+    EventBus.emit('tab:switched', { tab: tabName });
 
     // Cancel any pending music delay timer and active fade-in when switching tabs
     if (musicDelayTimer) {
@@ -188,7 +188,6 @@ function switchTab(tabName) {
     }
     
     if (tabName === 'stats') {
-        renderStats();
         revealUsTab();
     }
 }
