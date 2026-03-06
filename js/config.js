@@ -61,22 +61,22 @@ const DAILY_QUOTES = [
     "I love growing with you.", "You're my yesterday, today, and tomorrow.", "Thank you for making life sweeter."
 ];
 
-// Category emojis
+// Category icons (SVG)
 const categoryEmojis = {
-    food: '🍕',
-    dates: '🎬',
-    gmasti: '☺️',
-    gifts: '🎁',
-    home: '🏠',
-    regret: '😭',
-    misc: '✨'
+    food: '<img src="icons/c1food.svg" alt="Food" class="icon-category">',
+    dates: '<img src="icons/c2dates.svg" alt="Dates" class="icon-category">',
+    gmasti: '<img src="icons/c3g_masti.svg" alt="G-Masti" class="icon-category">',
+    gifts: '<img src="icons/c4gifts.svg" alt="Gifts" class="icon-category">',
+    home: '<img src="icons/c5home.svg" alt="Home" class="icon-category">',
+    regret: '<img src="icons/c6regrets.svg" alt="Regrets" class="icon-category">',
+    misc: '<img src="icons/c7misc.svg" alt="Misc" class="icon-category">'
 };
 
-// Mood emojis
+// Mood icons (SVG)
 const moodEmojis = {
-    happy: '😊',
-    love: '😍',
-    neutral: '😐',
-    sad: '😔',
-    sleepy: '😴'
+    happy: '<img src="icons/1fhappy.svg" alt="Happy" class="icon-mood">',
+    love: '<img src="icons/2flovely.svg" alt="Lovely" class="icon-mood">',
+    neutral: '<img src="icons/3fsad.svg" alt="Neutral" class="icon-mood">',
+    sad: '<img src="icons/4fcry.svg" alt="Sad" class="icon-mood">',
+    sleepy: '<img src="icons/5ftired.svg" alt="Tired" class="icon-mood">'
 };

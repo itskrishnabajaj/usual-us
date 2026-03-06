@@ -92,6 +92,7 @@ async function handleExpenseSubmit(e) {
     try {
         const docRef = await expensesCollection.add(expense);
         console.log('✅ Expense added successfully:', docRef.id);
+        SoundFX.play('expAdded');
         
         document.getElementById('expense-form').reset();
         document.getElementById('custom-split').classList.add('hidden');
@@ -173,6 +174,7 @@ async function handleExpenseEdit(e) {
         });
         
         console.log('✅ Expense updated:', expenseId);
+        SoundFX.play('expAdded');
         document.getElementById('edit-expense-modal').classList.add('hidden');
         await loadExpenses();
     } catch (error) {
@@ -184,6 +186,7 @@ async function handleExpenseEdit(e) {
 }
 
 function showEditExpense(expenseId) {
+    SoundFX.play('button');
     const expense = expenses.find(e => e.id === expenseId);
     if (!expense) return;
     
@@ -223,6 +226,7 @@ async function deleteExpense(expenseId) {
     try {
         await expensesCollection.doc(expenseId).delete();
         console.log('✅ Expense deleted');
+        SoundFX.play('expDel');
         await loadExpenses();
     } catch (error) {
         console.error('❌ Delete failed:', error);
@@ -303,6 +307,7 @@ async function handleSettle() {
     try {
         await expensesCollection.add(settlement);
         console.log('✅ Settlement completed');
+        SoundFX.play('expAdded');
         document.getElementById('settle-modal').classList.add('hidden');
         settleAmountInput.value = '';
         await loadExpenses();
@@ -324,15 +329,15 @@ function renderBalance() {
     if (balance > 0) {
         balanceAmount.textContent = `₹${balance.toFixed(2)}`;
         balanceStatus.textContent = `${partnerName} owes you`;
-        whoPayIndicator.textContent = currentUserProfile.role === 'krishna' ? '👩' : '👨';
+        whoPayIndicator.innerHTML = currentUserProfile.role === 'krishna' ? '<img src="icons/her.svg" alt="Her" class="icon-whopays">' : '<img src="icons/him.svg" alt="Him" class="icon-whopays">';
     } else if (balance < 0) {
         balanceAmount.textContent = `₹${Math.abs(balance).toFixed(2)}`;
         balanceStatus.textContent = `You owe ${partnerName}`;
-        whoPayIndicator.textContent = '🙋';
+        whoPayIndicator.innerHTML = currentUserProfile.role === 'krishna' ? '<img src="icons/him.svg" alt="Him" class="icon-whopays">' : '<img src="icons/her.svg" alt="Her" class="icon-whopays">';
     } else {
         balanceAmount.textContent = '₹0';
         balanceStatus.textContent = 'All settled';
-        whoPayIndicator.textContent = '✨';
+        whoPayIndicator.innerHTML = '✨';
         
         if (balanceBeforeAction !== null && balanceBeforeAction !== 0) {
             showBalanceCelebration();
@@ -379,7 +384,7 @@ function renderRecentExpenses() {
         return `
             <div class="expense-item">
                 <div class="expense-details">
-                    <div class="expense-category">${categoryEmojis[expense.category] || '📦'}</div>
+                    <div class="expense-category">${categoryEmojis[expense.category] || ''}</div>
                     ${expense.note ? `<div class="expense-note">${escapeHTML(expense.note)}</div>` : ''}
                     <div class="expense-meta">${formattedDate} • Paid by ${escapeHTML(paidByText)}</div>
                 </div>
@@ -475,7 +480,7 @@ function renderAllExpenses() {
             <div class="expense-item-full">
                 <div class="expense-header">
                     <div class="expense-info">
-                        <div class="expense-title">${categoryEmojis[expense.category] || '📦'} ${escapeHTML(expense.note || expense.category)}</div>
+                        <div class="expense-title">${categoryEmojis[expense.category] || ''} ${escapeHTML(expense.note || expense.category)}</div>
                         <div class="expense-subtitle">${formattedDate}</div>
                     </div>
                     <div class="expense-price">₹${expense.amount.toFixed(2)}</div>

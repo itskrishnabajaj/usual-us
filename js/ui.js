@@ -178,9 +178,15 @@ function setupEventListeners() {
         if (usNavItem) usNavItem.classList.add('revealed');
     }
     
+    // Paid By radio buttons - play button sound
+    document.querySelectorAll('input[name="paidBy"]').forEach(radio => {
+        radio.addEventListener('change', () => SoundFX.play('button'));
+    });
+    
     // Split type toggle
     document.querySelectorAll('input[name="splitType"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
+            SoundFX.play('button');
             const customSplit = document.getElementById('custom-split');
             if (e.target.value === 'custom') {
                 customSplit.classList.remove('hidden');
@@ -189,6 +195,25 @@ function setupEventListeners() {
             }
         });
     });
+    
+    // Category radio buttons - play button sound
+    document.querySelectorAll('input[name="category"]').forEach(radio => {
+        radio.addEventListener('change', () => SoundFX.play('button'));
+    });
+    
+    // Edit modal paid-by and category - play button sound
+    document.querySelectorAll('input[name="editPaidBy"]').forEach(radio => {
+        radio.addEventListener('change', () => SoundFX.play('button'));
+    });
+    document.querySelectorAll('input[name="editCategory"]').forEach(radio => {
+        radio.addEventListener('change', () => SoundFX.play('button'));
+    });
+    
+    // Budget toggle - play button sound
+    const budgetToggle = document.getElementById('count-towards-budget');
+    if (budgetToggle) {
+        budgetToggle.addEventListener('change', () => SoundFX.play('button'));
+    }
     
     // Expense forms
     document.getElementById('expense-form').addEventListener('submit', handleExpenseSubmit);
@@ -384,6 +409,7 @@ function setupEventListeners() {
     const filterPaidBy = document.getElementById('filter-paid-by');
     if (filterPaidBy) {
         filterPaidBy.addEventListener('change', (e) => {
+            SoundFX.play('button');
             expenseFilters.paidBy = e.target.value;
             renderAllExpenses();
         });
@@ -392,6 +418,7 @@ function setupEventListeners() {
     const filterMonth = document.getElementById('filter-month');
     if (filterMonth) {
         filterMonth.addEventListener('change', (e) => {
+            SoundFX.play('button');
             expenseFilters.month = e.target.value;
             renderAllExpenses();
         });

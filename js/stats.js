@@ -65,7 +65,7 @@ function renderStats() {
             const percent = ((amount / totalSpent) * 100).toFixed(0);
             return `<div class="legend-item">
                 <div class="legend-color" style="background:${color}"></div>
-                <span>${categoryEmojis[category] || '📦'} ${category} ${percent}%</span>
+                <span>${categoryEmojis[category] || ''} ${category} ${percent}%</span>
             </div>`;
         }).join('');
         

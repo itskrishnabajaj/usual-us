@@ -1,4 +1,4 @@
-const CACHE_NAME = 'usual-us-v7';
+const CACHE_NAME = 'usual-us-v8';
 
 const urlsToCache = [
     '/',
@@ -7,6 +7,7 @@ const urlsToCache = [
     '/firebase.js',
     '/js/config.js',
     '/js/state.js',
+    '/js/sounds.js',
     '/js/ui.js',
     '/js/stats.js',
     '/js/us-tab.js',
@@ -18,7 +19,32 @@ const urlsToCache = [
     '/js/music.js',
     '/js/auth.js',
     '/js/app.js',
-    '/manifest.json'
+    '/manifest.json',
+    '/sounds/tabswitching.mp3',
+    '/sounds/expadded.mp3',
+    '/sounds/expdel.mp3',
+    '/sounds/largememories.mp3',
+    '/sounds/memoryadded.mp3',
+    '/sounds/buttons.mp3',
+    '/icons/tabs/hometab.svg',
+    '/icons/tabs/addtab.svg',
+    '/icons/tabs/historytab.svg',
+    '/icons/tabs/statstab.svg',
+    '/icons/tabs/ustab.svg',
+    '/icons/1fhappy.svg',
+    '/icons/2flovely.svg',
+    '/icons/3fsad.svg',
+    '/icons/4fcry.svg',
+    '/icons/5ftired.svg',
+    '/icons/c1food.svg',
+    '/icons/c2dates.svg',
+    '/icons/c3g_masti.svg',
+    '/icons/c4gifts.svg',
+    '/icons/c5home.svg',
+    '/icons/c6regrets.svg',
+    '/icons/c7misc.svg',
+    '/icons/him.svg',
+    '/icons/her.svg'
 ];
 
 self.addEventListener('install', (event) => {

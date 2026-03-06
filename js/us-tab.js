@@ -50,6 +50,9 @@ async function refreshUsTab() {
 }
 
 function switchTab(tabName) {
+    // Play tab switching sound
+    SoundFX.play('tabSwitch');
+
     // Smooth fade transition
     const currentActive = document.querySelector('.tab-content.active');
     if (currentActive) {
