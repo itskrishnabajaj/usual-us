@@ -72,6 +72,7 @@ function setupPullToRefresh() {
 async function refreshUsTab() {
     console.log('🔄 Refreshing Us tab...');
     showLoading(true);
+    // Notify listeners (extensibility hook for future modules)
     EventBus.emit('us:refresh');
     await Promise.all([
         loadMemories(),
