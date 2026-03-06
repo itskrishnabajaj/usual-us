@@ -315,3 +315,9 @@ window.openEditMoment = openEditMoment;
 window.closeMomentForm = closeMomentForm;
 window.handleMomentFormSubmit = handleMomentFormSubmit;
 window.deleteMoment = deleteMoment;
+
+// ---- Event-driven rendering ----
+// Render moments preview when switching to the Us tab
+EventBus.on('tab:switched', (detail) => {
+    if (detail && detail.tab === 'us') renderMomentsPreview();
+});

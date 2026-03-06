@@ -72,6 +72,7 @@ function setupPullToRefresh() {
 async function refreshUsTab() {
     console.log('🔄 Refreshing Us tab...');
     showLoading(true);
+    EventBus.emit('us:refresh');
     await Promise.all([
         loadMemories(),
         loadNotes(),
@@ -202,7 +203,7 @@ function revealUsTab() {
     }
 }
 
-async function initializeUsTab() {
+function initializeUsTab() {
     const days = getDaysTogether();
     document.getElementById('us-day-counter').textContent = `Day ${days} of us`;
     document.getElementById('ritual-quote').textContent = getDailyQuote();
@@ -255,19 +256,10 @@ async function initializeUsTab() {
     // NEW: Check for daily memory reminder
     checkDailyMemoryReminder();
     
-    // NEW: Update last seen
-    await updateLastSeen();
-    
-    // Re-render mood indicator (mood data already loaded at startup by loadData)
-    renderMoodIndicator();
-    
     // Stars, floating hearts, milestones
     createUsTabStars();
     createFloatingHearts();
     renderMilestones();
-
-    // Lightweight moments preview (all logic in moments.js)
-    if (typeof renderMomentsPreview === 'function') renderMomentsPreview();
 }
 
 function createUsTabStars() {

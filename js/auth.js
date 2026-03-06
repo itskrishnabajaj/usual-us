@@ -136,3 +136,9 @@ function formatTimeAgo(date) {
     
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
+
+// ---- Event-driven updates ----
+// Update last seen when switching to the Us tab
+EventBus.on('tab:switched', (detail) => {
+    if (detail && detail.tab === 'us') updateLastSeen();
+});
