@@ -55,11 +55,12 @@ function switchTab(tabName) {
     // Play tab switching sound
     SoundFX.play('tabSwitch');
 
-    // Cancel any pending music delay timer when switching tabs
+    // Cancel any pending music delay timer and active fade-in when switching tabs
     if (musicDelayTimer) {
         clearTimeout(musicDelayTimer);
         musicDelayTimer = null;
     }
+    cancelMusicFade();
 
     // Smooth fade-out then swap
     const currentActive = document.querySelector('.tab-content.active');
@@ -145,7 +146,7 @@ function switchTab(tabName) {
                 // Only play if still on Us tab
                 const stillOnUs = document.querySelector('.nav-item[data-tab="us"].active');
                 if (stillOnUs && musicPlayer && musicPlayer.paused) {
-                    playRandomSong();
+                    playRandomSongWithFadeIn();
                 }
             }, MUSIC_AUTOPLAY_DELAY_MS);
         }
