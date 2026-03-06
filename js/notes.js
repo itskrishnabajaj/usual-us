@@ -78,7 +78,7 @@ function renderNotes() {
                  ontouchstart="handleNoteTouchStart(event, '${note.id}')"
                  ontouchend="handleNoteTouchEnd()"
                  ontouchmove="handleNoteTouchMove()">
-                <p>${note.text}</p>
+                <p>${escapeHTML(note.text)}</p>
             </div>
         `;
     }).join('');
@@ -145,7 +145,7 @@ function renderSecretNotes() {
             return `
                 <div class="secret-note unlocked">
                     <div class="secret-note-icon">💝</div>
-                    <div class="secret-note-content">${note.content}</div>
+                    <div class="secret-note-content">${escapeHTML(note.content)}</div>
                     <div class="secret-note-date">Unlocked ${formatDate(unlockDate)}</div>
                 </div>
             `;
@@ -153,7 +153,7 @@ function renderSecretNotes() {
             return `
                 <div class="secret-note locked">
                     <div class="secret-note-icon">🔒</div>
-                    <div class="secret-note-title">${note.title || 'Secret Note'}</div>
+                    <div class="secret-note-title">${escapeHTML(note.title || 'Secret Note')}</div>
                     <div class="secret-note-countdown">Unlocks in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}</div>
                 </div>
             `;

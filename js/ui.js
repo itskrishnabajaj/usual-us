@@ -87,6 +87,20 @@ function showEasterEgg() {
 }
 
 function setupEventListeners() {
+    // Modal backdrop click-to-close (close when clicking outside modal-content)
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            // Only close if the click is directly on the modal backdrop, not on modal-content children
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                // Reset memory form when closing memory modal
+                if (modal.id === 'memory-modal' && typeof resetMemoryForm === 'function') {
+                    resetMemoryForm();
+                }
+            }
+        });
+    });
+    
     // Auth forms
     document.getElementById('first-login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -354,5 +368,42 @@ function setupEventListeners() {
     
     // NEW: Pull to Refresh
     setupPullToRefresh();
+    
+    // Expense history filters
+    const expenseSearch = document.getElementById('expense-search');
+    if (expenseSearch) {
+        const debouncedSearch = debounce((value) => {
+            expenseFilters.search = value;
+            renderAllExpenses();
+        }, 200);
+        expenseSearch.addEventListener('input', (e) => {
+            debouncedSearch(e.target.value);
+        });
+    }
+    
+    const filterPaidBy = document.getElementById('filter-paid-by');
+    if (filterPaidBy) {
+        filterPaidBy.addEventListener('change', (e) => {
+            expenseFilters.paidBy = e.target.value;
+            renderAllExpenses();
+        });
+    }
+    
+    const filterMonth = document.getElementById('filter-month');
+    if (filterMonth) {
+        filterMonth.addEventListener('change', (e) => {
+            expenseFilters.month = e.target.value;
+            renderAllExpenses();
+        });
+    }
+    
+    // Set expense date default to today
+    const expenseDateInput = document.getElementById('expense-date');
+    if (expenseDateInput) {
+        const today = new Date();
+        expenseDateInput.value = today.getFullYear() + '-' + 
+            String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(today.getDate()).padStart(2, '0');
+    }
 }
 

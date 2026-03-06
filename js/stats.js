@@ -5,14 +5,9 @@
 function renderStats() {
     const now = new Date();
     const thisMonth = expenses.filter(expense => {
-        if (!expense.createdAt) return false;
-        try {
-            const expenseDate = expense.createdAt.toDate ? expense.createdAt.toDate() : new Date(expense.createdAt);
-            return expenseDate.getMonth() === now.getMonth() && 
-                   expenseDate.getFullYear() === now.getFullYear();
-        } catch (e) {
-            return false;
-        }
+        const expenseDate = getExpenseDate(expense);
+        return expenseDate.getMonth() === now.getMonth() && 
+               expenseDate.getFullYear() === now.getFullYear();
     });
     
     const totalSpent = thisMonth.reduce((sum, e) => sum + e.amount, 0);
@@ -37,6 +32,7 @@ function renderStats() {
     if (sortedCategories.length === 0) {
         breakdownContainer.innerHTML = '<div class="empty-state"><p>No expenses this month</p></div>';
         if (pieChartContainer) pieChartContainer.innerHTML = '';
+        renderMonthlyTrends();
         return;
     }
     
@@ -98,4 +94,51 @@ function renderStats() {
             </div>
         </div>
     `}).join('');
+    
+    renderMonthlyTrends();
+}
+
+function renderMonthlyTrends() {
+    const container = document.getElementById('monthly-trends-chart');
+    if (!container) return;
+    
+    // Group expenses by month
+    const monthlyTotals = {};
+    expenses.forEach(expense => {
+        const date = getExpenseDate(expense);
+        const key = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+        monthlyTotals[key] = (monthlyTotals[key] || 0) + expense.amount;
+    });
+    
+    const sortedMonths = Object.keys(monthlyTotals).sort();
+    // Show last 6 months max
+    const recentMonths = sortedMonths.slice(-6);
+    
+    if (recentMonths.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No data for trends</p></div>';
+        return;
+    }
+    
+    const maxAmount = Math.max(...recentMonths.map(m => monthlyTotals[m]));
+    
+    const bars = recentMonths.map(monthKey => {
+        const amount = monthlyTotals[monthKey];
+        const heightPct = maxAmount > 0 ? (amount / maxAmount) * 100 : 0;
+        const [y, mo] = monthKey.split('-');
+        const d = new Date(parseInt(y), parseInt(mo) - 1, 1);
+        const label = d.toLocaleDateString('en-US', { month: 'short' });
+        
+        return `
+            <div class="trend-bar-group">
+                <div class="trend-bar-wrapper">
+                    <div class="trend-bar" style="height: ${Math.max(heightPct, 4)}%">
+                        <span class="trend-bar-value">₹${amount >= 1000 ? (amount / 1000).toFixed(1) + 'k' : amount.toFixed(0)}</span>
+                    </div>
+                </div>
+                <span class="trend-bar-label">${label}</span>
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = `<div class="trend-bars-container">${bars}</div>`;
 }

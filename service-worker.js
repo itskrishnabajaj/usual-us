@@ -1,4 +1,4 @@
-const CACHE_NAME = 'usual-us-v5';
+const CACHE_NAME = 'usual-us-v7';
 
 const urlsToCache = [
     '/',
@@ -52,6 +52,26 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // Network-first for same-origin navigation & script requests (avoids stale cached app)
+    if (reqUrl.origin === self.location.origin && 
+        (event.request.destination === 'document' || event.request.destination === 'script' || event.request.destination === 'style')) {
+        event.respondWith(
+            fetch(event.request)
+                .then((response) => {
+                    if (response && response.status === 200) {
+                        const responseToCache = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(event.request, responseToCache);
+                        });
+                    }
+                    return response;
+                })
+                .catch(() => caches.match(event.request))
+        );
+        return;
+    }
+
+    // Cache-first for everything else (images, fonts, etc.)
     event.respondWith(
         caches.match(event.request)
             .then((response) => {

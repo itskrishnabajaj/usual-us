@@ -13,6 +13,7 @@ async function loadExpenses() {
         renderAllExpenses();
         updateBudgetProgress();
         renderStats();
+        populateMonthFilter();
     } catch (error) {
         console.error('❌ Error loading expenses:', error);
     }
@@ -30,11 +31,26 @@ async function handleExpenseSubmit(e) {
     balanceBeforeAction = calculateCurrentBalance();
     
     const amount = parseFloat(document.getElementById('amount').value);
+    if (!amount || isNaN(amount) || amount <= 0) {
+        showError('Please enter a valid amount greater than 0');
+        isSubmitting = false;
+        return;
+    }
     const paidByValue = document.querySelector('input[name="paidBy"]:checked').value;
     const splitType = document.querySelector('input[name="splitType"]:checked').value;
     const category = document.querySelector('input[name="category"]:checked').value;
     const note = document.getElementById('note').value.trim();
     const countTowardsBudget = document.getElementById('count-towards-budget').checked;
+    
+    // Read expense date (defaults to today if not set)
+    const expenseDateInput = document.getElementById('expense-date').value;
+    let expenseDate;
+    if (expenseDateInput) {
+        const [y, m, d] = expenseDateInput.split('-').map(Number);
+        expenseDate = firebase.firestore.Timestamp.fromDate(new Date(y, m - 1, d, 12, 0, 0));
+    } else {
+        expenseDate = firebase.firestore.Timestamp.fromDate(new Date());
+    }
     
     const paidBy = paidByValue === 'me' ? currentUserProfile.role : getPartnerRole();
     
@@ -45,6 +61,11 @@ async function handleExpenseSubmit(e) {
         rashiShare = amount / 2;
     } else {
         const myShare = parseFloat(document.getElementById('my-share').value);
+        if (isNaN(myShare) || myShare < 0 || myShare > amount) {
+            showError('Custom share must be between 0 and the total amount');
+            isSubmitting = false;
+            return;
+        }
         if (currentUserProfile.role === 'krishna') {
             krishnaShare = myShare;
             rashiShare = amount - myShare;
@@ -61,6 +82,7 @@ async function handleExpenseSubmit(e) {
         category: category,
         note: note,
         countTowardsBudget: countTowardsBudget,
+        expenseDate: expenseDate,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         createdBy: currentUserProfile.role
     };
@@ -74,6 +96,11 @@ async function handleExpenseSubmit(e) {
         document.getElementById('expense-form').reset();
         document.getElementById('custom-split').classList.add('hidden');
         document.getElementById('count-towards-budget').checked = true;
+        // Reset expense date to today
+        const today = new Date();
+        document.getElementById('expense-date').value = today.getFullYear() + '-' + 
+            String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(today.getDate()).padStart(2, '0');
         
         switchTab('home');
         
@@ -99,10 +126,35 @@ async function handleExpenseEdit(e) {
     const amount = parseFloat(document.getElementById('edit-amount').value);
     const note = document.getElementById('edit-note').value.trim();
     
+    if (!amount || isNaN(amount) || amount <= 0) {
+        showError('Please enter a valid amount greater than 0');
+        return;
+    }
+    
     const expense = expenses.find(e => e.id === expenseId);
     if (!expense || !expense.shares) return;
     
-    const ratio = amount / expense.amount;
+    // Read edited paid-by
+    const editPaidByValue = document.querySelector('input[name="editPaidBy"]:checked').value;
+    const newPaidBy = editPaidByValue === 'me' ? currentUserProfile.role : getPartnerRole();
+    
+    // Read edited category
+    const editCategoryEl = document.querySelector('input[name="editCategory"]:checked');
+    const newCategory = editCategoryEl ? editCategoryEl.value : expense.category;
+    
+    // Read edited expense date
+    const editDateInput = document.getElementById('edit-expense-date').value;
+    let newExpenseDate;
+    if (editDateInput) {
+        const [y, m, d] = editDateInput.split('-').map(Number);
+        newExpenseDate = firebase.firestore.Timestamp.fromDate(new Date(y, m - 1, d, 12, 0, 0));
+    } else {
+        newExpenseDate = expense.expenseDate || expense.createdAt;
+    }
+    
+    // Recalculate shares proportionally (guard against division by zero)
+    const oldAmount = expense.amount || 1;
+    const ratio = amount / oldAmount;
     const newShares = {
         krishna: expense.shares.krishna * ratio,
         rashi: expense.shares.rashi * ratio
@@ -114,7 +166,10 @@ async function handleExpenseEdit(e) {
         await expensesCollection.doc(expenseId).update({
             amount: amount,
             shares: newShares,
-            note: note
+            note: note,
+            paidBy: newPaidBy,
+            category: newCategory,
+            expenseDate: newExpenseDate
         });
         
         console.log('✅ Expense updated:', expenseId);
@@ -135,6 +190,27 @@ function showEditExpense(expenseId) {
     document.getElementById('edit-expense-id').value = expenseId;
     document.getElementById('edit-amount').value = expense.amount;
     document.getElementById('edit-note').value = expense.note || '';
+    
+    // Set paid by
+    const isPaidByMe = expense.paidBy === currentUserProfile.role;
+    const editPaidByRadio = document.querySelector(`input[name="editPaidBy"][value="${isPaidByMe ? 'me' : 'partner'}"]`);
+    if (editPaidByRadio) editPaidByRadio.checked = true;
+    
+    // Set labels
+    document.getElementById('edit-my-name-label').textContent = currentUserProfile.name;
+    document.getElementById('edit-partner-name-label').textContent = getPartnerName();
+    
+    // Set category
+    const editCatRadio = document.querySelector(`input[name="editCategory"][value="${expense.category}"]`);
+    if (editCatRadio) editCatRadio.checked = true;
+    
+    // Set expense date
+    const expDate = getExpenseDate(expense);
+    const dateStr = expDate.getFullYear() + '-' + 
+                    String(expDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                    String(expDate.getDate()).padStart(2, '0');
+    document.getElementById('edit-expense-date').value = dateStr;
+    
     document.getElementById('edit-expense-modal').classList.remove('hidden');
 }
 
@@ -189,6 +265,11 @@ async function handleSettle() {
     const settleAmountInput = document.getElementById('settle-amount');
     let settleAmount = parseFloat(settleAmountInput.value) || Math.abs(currentBalance);
     
+    if (isNaN(settleAmount) || settleAmount <= 0) {
+        showError('Please enter a valid settlement amount');
+        return;
+    }
+    
     if (settleAmount > Math.abs(currentBalance)) {
         settleAmount = Math.abs(currentBalance);
     }
@@ -210,6 +291,7 @@ async function handleSettle() {
         note: settlementNote,
         isSettlement: true,
         countTowardsBudget: false,
+        expenseDate: firebase.firestore.Timestamp.fromDate(new Date()),
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         createdBy: currentUserProfile.role
     };
@@ -290,16 +372,16 @@ function renderRecentExpenses() {
     }
     
     container.innerHTML = recentExpenses.map(expense => {
-        const date = expense.createdAt ? expense.createdAt.toDate() : new Date();
+        const date = getExpenseDate(expense);
         const formattedDate = formatDate(date);
         const paidByText = expense.paidBy === currentUserProfile.role ? 'you' : getPartnerName();
         
         return `
             <div class="expense-item">
                 <div class="expense-details">
-                    <div class="expense-category">${categoryEmojis[expense.category]}</div>
-                    ${expense.note ? `<div class="expense-note">${expense.note}</div>` : ''}
-                    <div class="expense-meta">${formattedDate} • Paid by ${paidByText}</div>
+                    <div class="expense-category">${categoryEmojis[expense.category] || '📦'}</div>
+                    ${expense.note ? `<div class="expense-note">${escapeHTML(expense.note)}</div>` : ''}
+                    <div class="expense-meta">${formattedDate} • Paid by ${escapeHTML(paidByText)}</div>
                 </div>
                 <div class="expense-amount">₹${expense.amount.toFixed(2)}</div>
             </div>
@@ -307,18 +389,73 @@ function renderRecentExpenses() {
     }).join('');
 }
 
+function getFilteredExpenses() {
+    return expenses.filter(expense => {
+        // Text search
+        if (expenseFilters.search) {
+            const searchLower = expenseFilters.search.toLowerCase();
+            const noteMatch = (expense.note || '').toLowerCase().includes(searchLower);
+            const catMatch = (expense.category || '').toLowerCase().includes(searchLower);
+            if (!noteMatch && !catMatch) return false;
+        }
+        
+        // Paid by filter
+        if (expenseFilters.paidBy !== 'all') {
+            if (expenseFilters.paidBy === 'me' && expense.paidBy !== currentUserProfile.role) return false;
+            if (expenseFilters.paidBy === 'partner' && expense.paidBy === currentUserProfile.role) return false;
+        }
+        
+        // Month filter
+        if (expenseFilters.month !== 'all') {
+            const date = getExpenseDate(expense);
+            const monthKey = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+            if (monthKey !== expenseFilters.month) return false;
+        }
+        
+        return true;
+    });
+}
+
+function populateMonthFilter() {
+    const select = document.getElementById('filter-month');
+    if (!select) return;
+    
+    const months = new Set();
+    expenses.forEach(expense => {
+        const date = getExpenseDate(expense);
+        const key = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+        months.add(key);
+    });
+    
+    const sorted = Array.from(months).sort().reverse();
+    const currentVal = select.value;
+    
+    select.innerHTML = '<option value="all">All Months</option>' + sorted.map(m => {
+        const [y, mo] = m.split('-');
+        const d = new Date(parseInt(y), parseInt(mo) - 1, 1);
+        const label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        return `<option value="${m}">${label}</option>`;
+    }).join('');
+    
+    // Restore selection if still valid
+    if (currentVal && select.querySelector(`option[value="${currentVal}"]`)) {
+        select.value = currentVal;
+    }
+}
+
 function renderAllExpenses() {
     const container = document.getElementById('expenses-list');
+    const filtered = getFilteredExpenses();
     
-    if (expenses.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><p>No expenses yet</p></div>';
+    if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><p>No expenses found</p></div>';
         return;
     }
     
     const partnerName = getPartnerName();
     
-    container.innerHTML = expenses.map(expense => {
-        const date = expense.createdAt ? expense.createdAt.toDate() : new Date();
+    container.innerHTML = filtered.map(expense => {
+        const date = getExpenseDate(expense);
         const formattedDate = formatDate(date);
         const paidByText = expense.paidBy === currentUserProfile.role ? 'you' : partnerName;
         
@@ -338,15 +475,15 @@ function renderAllExpenses() {
             <div class="expense-item-full">
                 <div class="expense-header">
                     <div class="expense-info">
-                        <div class="expense-title">${categoryEmojis[expense.category]} ${expense.note || expense.category}</div>
+                        <div class="expense-title">${categoryEmojis[expense.category] || '📦'} ${escapeHTML(expense.note || expense.category)}</div>
                         <div class="expense-subtitle">${formattedDate}</div>
                     </div>
                     <div class="expense-price">₹${expense.amount.toFixed(2)}</div>
                 </div>
                 <div class="expense-split-info">
-                    Paid by ${paidByText} • 
+                    Paid by ${escapeHTML(paidByText)} • 
                     Your share: ₹${myShare.toFixed(2)} • 
-                    ${partnerName}'s share: ₹${partnerShare.toFixed(2)}
+                    ${escapeHTML(partnerName)}'s share: ₹${partnerShare.toFixed(2)}
                 </div>
                 <div class="expense-budget-tag ${expense.countTowardsBudget ? 'in-budget' : 'not-in-budget'}">
                     ${expense.countTowardsBudget ? '📊 Counted in budget' : '── Not in budget'}
@@ -368,20 +505,21 @@ function calculateCurrentBalance() {
     expenses.forEach(expense => {
         if (expense.shares) {
             if (expense.paidBy === myRole) {
-                const partnerOwes = expense.shares[partnerRole] || 0;
+                const partnerOwes = parseFloat(expense.shares[partnerRole]) || 0;
                 balance += partnerOwes;
             } else {
-                const iOwe = expense.shares[myRole] || 0;
+                const iOwe = parseFloat(expense.shares[myRole]) || 0;
                 balance -= iOwe;
             }
         } else if (expense.myShare !== undefined) {
             if (expense.paidBy === myRole) {
-                balance += (expense.partnerShare || 0);
+                balance += (parseFloat(expense.partnerShare) || 0);
             } else {
-                balance -= (expense.myShare || 0);
+                balance -= (parseFloat(expense.myShare) || 0);
             }
         }
     });
     
-    return balance;
+    // Round to 2 decimal places to avoid floating point drift
+    return Math.round(balance * 100) / 100;
 }
