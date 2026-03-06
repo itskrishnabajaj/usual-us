@@ -118,6 +118,9 @@ function switchTab(tabName) {
     if (tabName === 'us') {
         if (musicWasPlaying && musicPlayer.paused) {
             musicPlayer.play().catch(() => {});
+        } else if (musicPlayer.paused) {
+            // Auto-play a random song when entering Us tab
+            playRandomSong();
         }
         initializeUsTab();
     } else {

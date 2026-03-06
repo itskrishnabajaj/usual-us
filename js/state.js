@@ -24,9 +24,27 @@ let currentMood = null;
 let isPullingToRefresh = false;
 let currentSongIdx = -1;
 
+// Expense filter state
+let expenseFilters = {
+    search: '',
+    paidBy: 'all',
+    month: 'all'
+};
+
 // ============================================
 // Helper Functions
 // ============================================
+
+// Returns the effective date for an expense (prefers expenseDate over createdAt)
+function getExpenseDate(expense) {
+    if (expense.expenseDate) {
+        return expense.expenseDate.toDate ? expense.expenseDate.toDate() : new Date(expense.expenseDate);
+    }
+    if (expense.createdAt) {
+        return expense.createdAt.toDate ? expense.createdAt.toDate() : new Date(expense.createdAt);
+    }
+    return new Date();
+}
 
 function getPartnerRole() {
     return currentUserProfile.role === 'krishna' ? 'rashi' : 'krishna';

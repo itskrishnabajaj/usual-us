@@ -13,6 +13,7 @@ async function loadExpenses() {
         renderAllExpenses();
         updateBudgetProgress();
         renderStats();
+        populateMonthFilter();
     } catch (error) {
         console.error('❌ Error loading expenses:', error);
     }
@@ -35,6 +36,16 @@ async function handleExpenseSubmit(e) {
     const category = document.querySelector('input[name="category"]:checked').value;
     const note = document.getElementById('note').value.trim();
     const countTowardsBudget = document.getElementById('count-towards-budget').checked;
+    
+    // Read expense date (defaults to today if not set)
+    const expenseDateInput = document.getElementById('expense-date').value;
+    let expenseDate;
+    if (expenseDateInput) {
+        const [y, m, d] = expenseDateInput.split('-').map(Number);
+        expenseDate = firebase.firestore.Timestamp.fromDate(new Date(y, m - 1, d, 12, 0, 0));
+    } else {
+        expenseDate = firebase.firestore.Timestamp.fromDate(new Date());
+    }
     
     const paidBy = paidByValue === 'me' ? currentUserProfile.role : getPartnerRole();
     
@@ -61,6 +72,7 @@ async function handleExpenseSubmit(e) {
         category: category,
         note: note,
         countTowardsBudget: countTowardsBudget,
+        expenseDate: expenseDate,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         createdBy: currentUserProfile.role
     };
@@ -74,6 +86,8 @@ async function handleExpenseSubmit(e) {
         document.getElementById('expense-form').reset();
         document.getElementById('custom-split').classList.add('hidden');
         document.getElementById('count-towards-budget').checked = true;
+        // Reset expense date to today
+        document.getElementById('expense-date').valueAsDate = new Date();
         
         switchTab('home');
         
@@ -102,6 +116,25 @@ async function handleExpenseEdit(e) {
     const expense = expenses.find(e => e.id === expenseId);
     if (!expense || !expense.shares) return;
     
+    // Read edited paid-by
+    const editPaidByValue = document.querySelector('input[name="editPaidBy"]:checked').value;
+    const newPaidBy = editPaidByValue === 'me' ? currentUserProfile.role : getPartnerRole();
+    
+    // Read edited category
+    const editCategoryEl = document.querySelector('input[name="editCategory"]:checked');
+    const newCategory = editCategoryEl ? editCategoryEl.value : expense.category;
+    
+    // Read edited expense date
+    const editDateInput = document.getElementById('edit-expense-date').value;
+    let newExpenseDate;
+    if (editDateInput) {
+        const [y, m, d] = editDateInput.split('-').map(Number);
+        newExpenseDate = firebase.firestore.Timestamp.fromDate(new Date(y, m - 1, d, 12, 0, 0));
+    } else {
+        newExpenseDate = expense.expenseDate || expense.createdAt;
+    }
+    
+    // Recalculate shares proportionally
     const ratio = amount / expense.amount;
     const newShares = {
         krishna: expense.shares.krishna * ratio,
@@ -114,7 +147,10 @@ async function handleExpenseEdit(e) {
         await expensesCollection.doc(expenseId).update({
             amount: amount,
             shares: newShares,
-            note: note
+            note: note,
+            paidBy: newPaidBy,
+            category: newCategory,
+            expenseDate: newExpenseDate
         });
         
         console.log('✅ Expense updated:', expenseId);
@@ -135,6 +171,27 @@ function showEditExpense(expenseId) {
     document.getElementById('edit-expense-id').value = expenseId;
     document.getElementById('edit-amount').value = expense.amount;
     document.getElementById('edit-note').value = expense.note || '';
+    
+    // Set paid by
+    const isPaidByMe = expense.paidBy === currentUserProfile.role;
+    const editPaidByRadio = document.querySelector(`input[name="editPaidBy"][value="${isPaidByMe ? 'me' : 'partner'}"]`);
+    if (editPaidByRadio) editPaidByRadio.checked = true;
+    
+    // Set labels
+    document.getElementById('edit-my-name-label').textContent = currentUserProfile.name;
+    document.getElementById('edit-partner-name-label').textContent = getPartnerName();
+    
+    // Set category
+    const editCatRadio = document.querySelector(`input[name="editCategory"][value="${expense.category}"]`);
+    if (editCatRadio) editCatRadio.checked = true;
+    
+    // Set expense date
+    const expDate = getExpenseDate(expense);
+    const dateStr = expDate.getFullYear() + '-' + 
+                    String(expDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                    String(expDate.getDate()).padStart(2, '0');
+    document.getElementById('edit-expense-date').value = dateStr;
+    
     document.getElementById('edit-expense-modal').classList.remove('hidden');
 }
 
@@ -210,6 +267,7 @@ async function handleSettle() {
         note: settlementNote,
         isSettlement: true,
         countTowardsBudget: false,
+        expenseDate: firebase.firestore.Timestamp.fromDate(new Date()),
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         createdBy: currentUserProfile.role
     };
@@ -290,7 +348,7 @@ function renderRecentExpenses() {
     }
     
     container.innerHTML = recentExpenses.map(expense => {
-        const date = expense.createdAt ? expense.createdAt.toDate() : new Date();
+        const date = getExpenseDate(expense);
         const formattedDate = formatDate(date);
         const paidByText = expense.paidBy === currentUserProfile.role ? 'you' : getPartnerName();
         
@@ -307,18 +365,73 @@ function renderRecentExpenses() {
     }).join('');
 }
 
+function getFilteredExpenses() {
+    return expenses.filter(expense => {
+        // Text search
+        if (expenseFilters.search) {
+            const searchLower = expenseFilters.search.toLowerCase();
+            const noteMatch = (expense.note || '').toLowerCase().includes(searchLower);
+            const catMatch = (expense.category || '').toLowerCase().includes(searchLower);
+            if (!noteMatch && !catMatch) return false;
+        }
+        
+        // Paid by filter
+        if (expenseFilters.paidBy !== 'all') {
+            if (expenseFilters.paidBy === 'me' && expense.paidBy !== currentUserProfile.role) return false;
+            if (expenseFilters.paidBy === 'partner' && expense.paidBy === currentUserProfile.role) return false;
+        }
+        
+        // Month filter
+        if (expenseFilters.month !== 'all') {
+            const date = getExpenseDate(expense);
+            const monthKey = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+            if (monthKey !== expenseFilters.month) return false;
+        }
+        
+        return true;
+    });
+}
+
+function populateMonthFilter() {
+    const select = document.getElementById('filter-month');
+    if (!select) return;
+    
+    const months = new Set();
+    expenses.forEach(expense => {
+        const date = getExpenseDate(expense);
+        const key = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+        months.add(key);
+    });
+    
+    const sorted = Array.from(months).sort().reverse();
+    const currentVal = select.value;
+    
+    select.innerHTML = '<option value="all">All Months</option>' + sorted.map(m => {
+        const [y, mo] = m.split('-');
+        const d = new Date(parseInt(y), parseInt(mo) - 1, 1);
+        const label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        return `<option value="${m}">${label}</option>`;
+    }).join('');
+    
+    // Restore selection if still valid
+    if (currentVal && select.querySelector(`option[value="${currentVal}"]`)) {
+        select.value = currentVal;
+    }
+}
+
 function renderAllExpenses() {
     const container = document.getElementById('expenses-list');
+    const filtered = getFilteredExpenses();
     
-    if (expenses.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><p>No expenses yet</p></div>';
+    if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><p>No expenses found</p></div>';
         return;
     }
     
     const partnerName = getPartnerName();
     
-    container.innerHTML = expenses.map(expense => {
-        const date = expense.createdAt ? expense.createdAt.toDate() : new Date();
+    container.innerHTML = filtered.map(expense => {
+        const date = getExpenseDate(expense);
         const formattedDate = formatDate(date);
         const paidByText = expense.paidBy === currentUserProfile.role ? 'you' : partnerName;
         

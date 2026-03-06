@@ -118,8 +118,8 @@ function updateBudgetProgress() {
     
     const now = new Date();
     const budgetExpenses = expenses.filter(e => {
-        if (!e.createdAt || !e.countTowardsBudget) return false;
-        const expenseDate = e.createdAt.toDate();
+        if (!e.countTowardsBudget) return false;
+        const expenseDate = getExpenseDate(e);
         return expenseDate.getMonth() === now.getMonth() && 
                expenseDate.getFullYear() === now.getFullYear();
     });

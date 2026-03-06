@@ -47,6 +47,27 @@ function initializeMusicPlayer() {
     }
 }
 
+function playRandomSong() {
+    if (!musicPlayer || PLAYLIST.length === 0) return;
+    
+    // If already playing, don't restart
+    if (!musicPlayer.paused && currentSongIdx >= 0) return;
+    
+    // Pick a random index different from current if possible
+    let idx = Math.floor(Math.random() * PLAYLIST.length);
+    if (PLAYLIST.length > 1 && idx === currentSongIdx) {
+        idx = (idx + 1) % PLAYLIST.length;
+    }
+    
+    selectSong(idx);
+    musicPlayer.play().then(() => {
+        document.getElementById('play-pause-btn').textContent = '⏸';
+        addToRecentlyPlayed(idx);
+    }).catch(err => {
+        console.warn('⚠️ Auto-play blocked by browser:', err.message);
+    });
+}
+
 function selectSong(index) {
     if (index < 0 || index >= PLAYLIST.length) return;
     

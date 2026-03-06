@@ -354,5 +354,36 @@ function setupEventListeners() {
     
     // NEW: Pull to Refresh
     setupPullToRefresh();
+    
+    // Expense history filters
+    const expenseSearch = document.getElementById('expense-search');
+    if (expenseSearch) {
+        expenseSearch.addEventListener('input', (e) => {
+            expenseFilters.search = e.target.value;
+            renderAllExpenses();
+        });
+    }
+    
+    const filterPaidBy = document.getElementById('filter-paid-by');
+    if (filterPaidBy) {
+        filterPaidBy.addEventListener('change', (e) => {
+            expenseFilters.paidBy = e.target.value;
+            renderAllExpenses();
+        });
+    }
+    
+    const filterMonth = document.getElementById('filter-month');
+    if (filterMonth) {
+        filterMonth.addEventListener('change', (e) => {
+            expenseFilters.month = e.target.value;
+            renderAllExpenses();
+        });
+    }
+    
+    // Set expense date default to today
+    const expenseDateInput = document.getElementById('expense-date');
+    if (expenseDateInput) {
+        expenseDateInput.valueAsDate = new Date();
+    }
 }
 
