@@ -421,15 +421,20 @@ function checkMemoryHighlights() {
     
     const highlights = memories.filter(memory => {
         if (!memory.memoryDate) return false;
-        const memDate = memory.memoryDate.toDate();
-        return memDate.getMonth() === todayMonth && 
-               memDate.getDate() === todayDay &&
-               memDate.getFullYear() < todayYear;
+        try {
+            const memDate = memory.memoryDate.toDate ? memory.memoryDate.toDate() : new Date(memory.memoryDate);
+            return memDate.getMonth() === todayMonth && 
+                   memDate.getDate() === todayDay &&
+                   memDate.getFullYear() < todayYear;
+        } catch (e) {
+            return false;
+        }
     });
     
     if (highlights.length > 0) {
         const memory = highlights[0];
-        const yearsAgo = todayYear - memory.memoryDate.toDate().getFullYear();
+        const memDate = memory.memoryDate.toDate ? memory.memoryDate.toDate() : new Date(memory.memoryDate);
+        const yearsAgo = todayYear - memDate.getFullYear();
         showMemoryHighlight(memory, yearsAgo);
     }
 }
@@ -459,7 +464,12 @@ function checkDailyMemoryReminder() {
     const today = new Date().toDateString();
     const todayMemories = memories.filter(m => {
         if (!m.memoryDate) return false;
-        return m.memoryDate.toDate().toDateString() === today;
+        try {
+            const memDate = m.memoryDate.toDate ? m.memoryDate.toDate() : new Date(m.memoryDate);
+            return memDate.toDateString() === today;
+        } catch (e) {
+            return false;
+        }
     });
     
     if (todayMemories.length === 0) {

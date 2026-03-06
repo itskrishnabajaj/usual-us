@@ -34,6 +34,8 @@ function initializeMusicPlayer() {
     });
     musicPlayer.addEventListener('ended', () => {
         document.getElementById('play-pause-btn').textContent = '▶';
+        // Auto-advance to next random song
+        playRandomSong(true);
     });
     
     const stored = localStorage.getItem('recentlyPlayed');
@@ -47,11 +49,11 @@ function initializeMusicPlayer() {
     }
 }
 
-function playRandomSong() {
+function playRandomSong(forcePlay) {
     if (!musicPlayer || PLAYLIST.length === 0) return;
     
-    // If already playing, don't restart
-    if (!musicPlayer.paused && currentSongIdx >= 0) return;
+    // If already playing, don't restart (unless forced e.g. after song ends)
+    if (!forcePlay && !musicPlayer.paused && currentSongIdx >= 0) return;
     
     // Pick a random index different from current if possible
     let idx = Math.floor(Math.random() * PLAYLIST.length);
@@ -64,7 +66,7 @@ function playRandomSong() {
         document.getElementById('play-pause-btn').textContent = '⏸';
         addToRecentlyPlayed(idx);
     }).catch(err => {
-        console.warn('⚠️ Auto-play blocked by browser:', err.message);
+        console.warn('Auto-play blocked by browser:', err.message);
     });
 }
 

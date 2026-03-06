@@ -73,3 +73,22 @@ function isLateNight() {
     const hour = new Date().getHours();
     return hour >= 23 || hour < 6;
 }
+
+// Escape HTML entities to prevent XSS when inserting user content into innerHTML
+function escapeHTML(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+}
+
+// Debounce utility — delays fn execution until after wait ms of inactivity
+function debounce(fn, wait) {
+    let timer;
+    return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), wait);
+    };
+}

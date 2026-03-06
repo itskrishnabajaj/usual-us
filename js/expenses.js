@@ -31,6 +31,11 @@ async function handleExpenseSubmit(e) {
     balanceBeforeAction = calculateCurrentBalance();
     
     const amount = parseFloat(document.getElementById('amount').value);
+    if (!amount || isNaN(amount) || amount <= 0) {
+        showError('Please enter a valid amount greater than 0');
+        isSubmitting = false;
+        return;
+    }
     const paidByValue = document.querySelector('input[name="paidBy"]:checked').value;
     const splitType = document.querySelector('input[name="splitType"]:checked').value;
     const category = document.querySelector('input[name="category"]:checked').value;
@@ -56,6 +61,11 @@ async function handleExpenseSubmit(e) {
         rashiShare = amount / 2;
     } else {
         const myShare = parseFloat(document.getElementById('my-share').value);
+        if (isNaN(myShare) || myShare < 0 || myShare > amount) {
+            showError('Custom share must be between 0 and the total amount');
+            isSubmitting = false;
+            return;
+        }
         if (currentUserProfile.role === 'krishna') {
             krishnaShare = myShare;
             rashiShare = amount - myShare;
@@ -116,6 +126,11 @@ async function handleExpenseEdit(e) {
     const amount = parseFloat(document.getElementById('edit-amount').value);
     const note = document.getElementById('edit-note').value.trim();
     
+    if (!amount || isNaN(amount) || amount <= 0) {
+        showError('Please enter a valid amount greater than 0');
+        return;
+    }
+    
     const expense = expenses.find(e => e.id === expenseId);
     if (!expense || !expense.shares) return;
     
@@ -137,8 +152,9 @@ async function handleExpenseEdit(e) {
         newExpenseDate = expense.expenseDate || expense.createdAt;
     }
     
-    // Recalculate shares proportionally
-    const ratio = amount / expense.amount;
+    // Recalculate shares proportionally (guard against division by zero)
+    const oldAmount = expense.amount || 1;
+    const ratio = amount / oldAmount;
     const newShares = {
         krishna: expense.shares.krishna * ratio,
         rashi: expense.shares.rashi * ratio
@@ -249,6 +265,11 @@ async function handleSettle() {
     const settleAmountInput = document.getElementById('settle-amount');
     let settleAmount = parseFloat(settleAmountInput.value) || Math.abs(currentBalance);
     
+    if (isNaN(settleAmount) || settleAmount <= 0) {
+        showError('Please enter a valid settlement amount');
+        return;
+    }
+    
     if (settleAmount > Math.abs(currentBalance)) {
         settleAmount = Math.abs(currentBalance);
     }
@@ -358,9 +379,9 @@ function renderRecentExpenses() {
         return `
             <div class="expense-item">
                 <div class="expense-details">
-                    <div class="expense-category">${categoryEmojis[expense.category]}</div>
-                    ${expense.note ? `<div class="expense-note">${expense.note}</div>` : ''}
-                    <div class="expense-meta">${formattedDate} • Paid by ${paidByText}</div>
+                    <div class="expense-category">${categoryEmojis[expense.category] || '📦'}</div>
+                    ${expense.note ? `<div class="expense-note">${escapeHTML(expense.note)}</div>` : ''}
+                    <div class="expense-meta">${formattedDate} • Paid by ${escapeHTML(paidByText)}</div>
                 </div>
                 <div class="expense-amount">₹${expense.amount.toFixed(2)}</div>
             </div>
@@ -454,15 +475,15 @@ function renderAllExpenses() {
             <div class="expense-item-full">
                 <div class="expense-header">
                     <div class="expense-info">
-                        <div class="expense-title">${categoryEmojis[expense.category]} ${expense.note || expense.category}</div>
+                        <div class="expense-title">${categoryEmojis[expense.category] || '📦'} ${escapeHTML(expense.note || expense.category)}</div>
                         <div class="expense-subtitle">${formattedDate}</div>
                     </div>
                     <div class="expense-price">₹${expense.amount.toFixed(2)}</div>
                 </div>
                 <div class="expense-split-info">
-                    Paid by ${paidByText} • 
+                    Paid by ${escapeHTML(paidByText)} • 
                     Your share: ₹${myShare.toFixed(2)} • 
-                    ${partnerName}'s share: ₹${partnerShare.toFixed(2)}
+                    ${escapeHTML(partnerName)}'s share: ₹${partnerShare.toFixed(2)}
                 </div>
                 <div class="expense-budget-tag ${expense.countTowardsBudget ? 'in-budget' : 'not-in-budget'}">
                     ${expense.countTowardsBudget ? '📊 Counted in budget' : '── Not in budget'}
@@ -484,20 +505,21 @@ function calculateCurrentBalance() {
     expenses.forEach(expense => {
         if (expense.shares) {
             if (expense.paidBy === myRole) {
-                const partnerOwes = expense.shares[partnerRole] || 0;
+                const partnerOwes = parseFloat(expense.shares[partnerRole]) || 0;
                 balance += partnerOwes;
             } else {
-                const iOwe = expense.shares[myRole] || 0;
+                const iOwe = parseFloat(expense.shares[myRole]) || 0;
                 balance -= iOwe;
             }
         } else if (expense.myShare !== undefined) {
             if (expense.paidBy === myRole) {
-                balance += (expense.partnerShare || 0);
+                balance += (parseFloat(expense.partnerShare) || 0);
             } else {
-                balance -= (expense.myShare || 0);
+                balance -= (parseFloat(expense.myShare) || 0);
             }
         }
     });
     
-    return balance;
+    // Round to 2 decimal places to avoid floating point drift
+    return Math.round(balance * 100) / 100;
 }
