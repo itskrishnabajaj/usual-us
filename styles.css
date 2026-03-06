@@ -1709,6 +1709,10 @@ textarea {
     transition: all var(--transition-normal);
     min-width: 48px;
     min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
 }
 
 .mood-option:active {
@@ -3166,6 +3170,11 @@ textarea {
 
 .nav-icon {
     font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
 }
 
 .nav-label {
@@ -4010,6 +4019,85 @@ select:focus {
     color: var(--text-secondary);
     margin-top: 6px;
     font-weight: 500;
+}
+
+/* ============================================
+   SVG ICON STYLES
+   ============================================ */
+
+/* Tab navigation icons */
+.icon-tab {
+    width: 24px;
+    height: 24px;
+    display: block;
+    object-fit: contain;
+}
+
+/* Category icons (expense forms, history, stats) */
+.icon-category {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+    object-fit: contain;
+}
+
+/* Category icons in the category-option labels need alignment */
+.category-option .icon-category {
+    width: 22px;
+    height: 22px;
+    margin-right: 2px;
+}
+
+/* Category icon in expense item (recent expenses) */
+.expense-category .icon-category {
+    width: 26px;
+    height: 26px;
+}
+
+/* Category icon in stats breakdown */
+.category-emoji .icon-category {
+    width: 26px;
+    height: 26px;
+}
+
+/* Mood icons */
+.icon-mood {
+    width: 32px;
+    height: 32px;
+    display: block;
+    object-fit: contain;
+}
+
+/* Mood icons inside mood buttons */
+.mood-option .icon-mood {
+    width: 36px;
+    height: 36px;
+    margin: auto;
+}
+
+/* Mood icons in text displays */
+.current-mood-display .icon-mood,
+.partner-mood-display .icon-mood {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Who pays next icon */
+.icon-whopays {
+    width: 48px;
+    height: 48px;
+    display: block;
+    margin: 0 auto;
+    object-fit: contain;
+}
+
+/* Legend item icons in stats pie chart */
+.legend-item .icon-category {
+    width: 16px;
+    height: 16px;
 }
 
 /* ============================================
