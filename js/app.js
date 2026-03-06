@@ -11,7 +11,8 @@ async function loadData() {
             loadNotes(),
             loadSecretNotes(),
             loadBudget(),
-            loadTodaysMood()
+            loadTodaysMood(),
+            loadMoments()
         ]);
     } catch (error) {
         console.error('❌ Error loading data:', error);
@@ -32,7 +33,9 @@ const MODAL_IDS = [
     'edit-expense-modal',
     'budget-modal',
     'note-modal',
-    'secret-note-modal'
+    'secret-note-modal',
+    'moments-modal',
+    'moment-form-modal'
 ];
 
 // Push a history entry so the back button has something to pop instead of exiting

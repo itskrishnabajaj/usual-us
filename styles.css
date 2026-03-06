@@ -4105,5 +4105,347 @@ select:focus {
 }
 
 /* ============================================
+   Moments Preview Widget (Us Tab - Lightweight)
+   ============================================ */
+
+.moments-preview {
+    margin: 16px;
+    padding: 14px 16px;
+    background: rgba(194, 24, 91, 0.06);
+    border: 1px solid rgba(194, 24, 91, 0.15);
+    border-radius: 16px;
+}
+
+.moments-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 8px;
+}
+
+.moments-preview-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #c2185b;
+}
+
+.moments-preview-arrow {
+    font-size: 20px;
+    color: #c2185b;
+    line-height: 1;
+}
+
+.moments-preview-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    cursor: pointer;
+    border-top: 1px solid rgba(194, 24, 91, 0.08);
+}
+
+.moments-preview-emoji {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.moments-preview-text {
+    flex: 1;
+    font-size: 13px;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.moments-preview-date {
+    font-size: 11px;
+    color: #999;
+    flex-shrink: 0;
+}
+
+.moments-preview-empty {
+    font-size: 12px;
+    color: #aaa;
+    margin: 4px 0;
+}
+
+.moments-preview-add {
+    background: none;
+    border: none;
+    color: #c2185b;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 0;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Late-night theme overrides for moments preview */
+.us-tab.late-night .moments-preview {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+.us-tab.late-night .moments-preview-title {
+    color: var(--accent);
+}
+.us-tab.late-night .moments-preview-arrow {
+    color: var(--accent);
+}
+.us-tab.late-night .moments-preview-text {
+    color: var(--text-primary);
+}
+.us-tab.late-night .moments-preview-date {
+    color: var(--text-tertiary);
+}
+.us-tab.late-night .moments-preview-empty {
+    color: var(--text-tertiary);
+}
+.us-tab.late-night .moments-preview-add {
+    color: var(--accent);
+}
+
+/* ============================================
+   Moments Full View Modal
+   ============================================ */
+
+.moments-modal-content {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-primary);
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 20px 16px 80px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.moments-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.moments-modal-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--text-primary);
+}
+
+.moments-modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+}
+
+.moments-modal-add-btn {
+    width: 100%;
+    padding: 12px;
+    background: rgba(194, 24, 91, 0.12);
+    border: 1px dashed rgba(194, 24, 91, 0.3);
+    border-radius: 12px;
+    color: #c2185b;
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    font-family: 'Inter', sans-serif;
+}
+
+.moments-section-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin: 20px 0 10px;
+}
+
+.moments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.moments-empty-msg {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    padding: 8px 0;
+}
+
+/* ---- Moment Card ---- */
+
+.moment-card {
+    background: var(--bg-secondary);
+    border-radius: 14px;
+    padding: 14px;
+    border: 1px solid var(--border-color);
+}
+
+.moment-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.moment-card-emoji {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.moment-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.moment-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.moment-card-date {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+}
+
+.moment-card-mood {
+    flex-shrink: 0;
+}
+.moment-card-mood img {
+    width: 22px;
+    height: 22px;
+}
+
+.moment-card-notes {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    line-height: 1.4;
+}
+
+.moment-card-meta {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.moment-card-meta-item {
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(194, 24, 91, 0.08);
+    padding: 3px 8px;
+    border-radius: 8px;
+}
+
+.moment-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    justify-content: flex-end;
+}
+
+.moment-btn-edit,
+.moment-btn-delete {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+}
+
+.moment-btn-edit {
+    color: var(--text-secondary);
+}
+
+.moment-btn-delete {
+    color: var(--error);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* ============================================
+   Moment Create / Edit Form Modal
+   ============================================ */
+
+.moment-form-content {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-primary);
+    z-index: 1010;
+    overflow-y: auto;
+    padding: 24px 20px 80px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.moment-form-content h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+.moment-form-label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+    font-family: 'Inter', sans-serif;
+}
+
+.moment-form-input {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    padding: 10px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+}
+
+.moment-form-textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.moment-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.moment-form-cancel,
+.moment-form-save {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    border: none;
+}
+
+.moment-form-cancel {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+.moment-form-save {
+    background: #c2185b;
+    color: #fff;
+}
+
+/* ============================================
    END OF STYLES
    ============================================ */

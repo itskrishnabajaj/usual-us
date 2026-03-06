@@ -4,6 +4,36 @@
 
 const MUSIC_AUTOPLAY_DELAY_MS = 12000;
 
+// Cached DOM references for frequently accessed elements (avoids repeated queries)
+let _cachedNavItems = null;
+let _cachedTabContents = null;
+let _cachedMusicToggle = null;
+let _cachedAppHeader = null;
+let _cachedBottomNav = null;
+let _cachedAppEl = null;
+
+function getCachedElements() {
+    if (!_cachedNavItems) {
+        _cachedNavItems = document.querySelectorAll('.nav-item');
+        _cachedTabContents = document.querySelectorAll('.tab-content');
+        _cachedMusicToggle = document.getElementById('music-player-toggle');
+        _cachedAppHeader = document.getElementById('app-header');
+        _cachedBottomNav = document.getElementById('bottom-nav');
+        _cachedAppEl = document.getElementById('app');
+    }
+    return {
+        navItems: _cachedNavItems,
+        tabContents: _cachedTabContents,
+        musicToggle: _cachedMusicToggle,
+        appHeader: _cachedAppHeader,
+        bottomNav: _cachedBottomNav,
+        appEl: _cachedAppEl
+    };
+}
+
+// Track last rendered milestones day to avoid unnecessary rebuilds
+let _lastMilestonesDay = -1;
+
 function setupPullToRefresh() {
     const usTab = document.getElementById('us-tab');
     if (!usTab) return;
@@ -71,12 +101,12 @@ function switchTab(tabName) {
     
     requestAnimationFrame(() => {
         setTimeout(() => {
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => item.classList.remove('active'));
+            const els = getCachedElements();
+            els.navItems.forEach(item => item.classList.remove('active'));
             const activeNavItem = document.querySelector(`[data-tab="${tabName}"]`);
             if (activeNavItem) activeNavItem.classList.add('active');
             
-            document.querySelectorAll('.tab-content').forEach(content => {
+            els.tabContents.forEach(content => {
                 content.classList.remove('active');
                 content.style.opacity = '0';
                 content.style.transform = 'translateY(6px)';
@@ -95,10 +125,7 @@ function switchTab(tabName) {
     });
     
     // Show/hide music player toggle - only visible on Us tab
-    const musicToggle = document.getElementById('music-player-toggle');
-    const appHeader = document.getElementById('app-header');
-    const bottomNav = document.getElementById('bottom-nav');
-    const appEl = document.getElementById('app');
+    const { musicToggle, appHeader, bottomNav, appEl } = getCachedElements();
     if (musicToggle) {
         if (tabName === 'us') {
             musicToggle.classList.add('visible');
@@ -232,13 +259,16 @@ async function initializeUsTab() {
     // NEW: Update last seen
     await updateLastSeen();
     
-    // NEW: Load mood
-    loadTodaysMood();
+    // Re-render mood indicator (mood data already loaded at startup by loadData)
+    renderMoodIndicator();
     
     // Stars, floating hearts, milestones
     createUsTabStars();
     createFloatingHearts();
     renderMilestones();
+
+    // Lightweight moments preview (all logic in moments.js)
+    if (typeof renderMomentsPreview === 'function') renderMomentsPreview();
 }
 
 function createUsTabStars() {
@@ -359,6 +389,11 @@ function renderMilestones() {
     if (!container) return;
     
     const days = getDaysTogether();
+
+    // Skip rebuild if milestones were already rendered for the same day count
+    if (_lastMilestonesDay === days) return;
+    _lastMilestonesDay = days;
+    
     const startDate = new Date(RELATIONSHIP_START);
     
     const milestones = [
@@ -466,6 +501,9 @@ function checkMemoryHighlights() {
         const memDate = memory.memoryDate.toDate ? memory.memoryDate.toDate() : new Date(memory.memoryDate);
         const yearsAgo = todayYear - memDate.getFullYear();
         showMemoryHighlight(memory, yearsAgo);
+    } else {
+        const container = document.getElementById('memory-highlight');
+        if (container) container.classList.add('hidden');
     }
 }
 

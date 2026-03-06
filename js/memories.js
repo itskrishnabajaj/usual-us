@@ -13,6 +13,23 @@ async function loadMemories() {
         console.error('❌ Error loading memories:', error);
     }
 }
+// Track Object URLs created for previews so they can be revoked to prevent memory leaks
+let _previewObjectURLs = [];
+
+function revokePreviewObjectURLs() {
+    _previewObjectURLs.forEach(url => {
+        // URL may already have been revoked; revoking twice is a harmless no-op
+        try { URL.revokeObjectURL(url); } catch (e) { /* safe to ignore */ }
+    });
+    _previewObjectURLs = [];
+}
+
+function trackObjectURL(file) {
+    const url = URL.createObjectURL(file);
+    _previewObjectURLs.push(url);
+    return url;
+}
+
 async function handlePhotoSelect(e) {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
@@ -43,6 +60,9 @@ async function handlePhotoSelect(e) {
     
     selectedPhotos = files;
     
+    // Revoke any previously created Object URLs before creating new ones
+    revokePreviewObjectURLs();
+    
     document.getElementById('photo-selection').classList.add('hidden');
     document.getElementById('memory-form').classList.remove('hidden');
     
@@ -57,7 +77,7 @@ async function handlePhotoSelect(e) {
             const preview = document.createElement('div');
             preview.className = 'photo-preview-item video-preview-item';
             preview.dataset.zoom = '1';
-            const videoUrl = URL.createObjectURL(file);
+            const videoUrl = trackObjectURL(file);
             preview.innerHTML = `
                 <video src="${videoUrl}" muted playsinline autoplay loop></video>
                 <div class="video-badge">🎬 Video</div>
@@ -68,7 +88,7 @@ async function handlePhotoSelect(e) {
             const preview = document.createElement('div');
             preview.className = 'photo-preview-item audio-preview-item';
             preview.dataset.zoom = '1';
-            const audioUrl = URL.createObjectURL(file);
+            const audioUrl = trackObjectURL(file);
             preview.innerHTML = `
                 <div class="audio-preview-placeholder">🎵</div>
                 <audio src="${audioUrl}" controls></audio>
@@ -105,6 +125,9 @@ function removePhoto(index) {
 }
 
 function rerenderPhotoPreviews() {
+    // Revoke old preview URLs before creating new ones
+    revokePreviewObjectURLs();
+    
     const previewContainer = document.getElementById('photos-preview');
     previewContainer.innerHTML = '';
     
@@ -116,7 +139,7 @@ function rerenderPhotoPreviews() {
             const preview = document.createElement('div');
             preview.className = 'photo-preview-item video-preview-item';
             preview.dataset.zoom = '1';
-            const videoUrl = URL.createObjectURL(file);
+            const videoUrl = trackObjectURL(file);
             preview.innerHTML = `
                 <video src="${videoUrl}" muted playsinline autoplay loop></video>
                 <div class="video-badge">🎬 Video</div>
@@ -127,7 +150,7 @@ function rerenderPhotoPreviews() {
             const preview = document.createElement('div');
             preview.className = 'photo-preview-item audio-preview-item';
             preview.dataset.zoom = '1';
-            const audioUrl = URL.createObjectURL(file);
+            const audioUrl = trackObjectURL(file);
             preview.innerHTML = `
                 <div class="audio-preview-placeholder">🎵</div>
                 <audio src="${audioUrl}" controls></audio>
@@ -337,6 +360,7 @@ async function handleMemoryUpload(e) {
 }
 
 function resetMemoryForm() {
+    revokePreviewObjectURLs();
     selectedPhotos = [];
     document.getElementById('memory-form').reset();
     document.getElementById('photos-preview').innerHTML = '';
