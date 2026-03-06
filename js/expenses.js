@@ -12,8 +12,11 @@ async function loadExpenses() {
         renderRecentExpenses();
         renderAllExpenses();
         updateBudgetProgress();
-        renderStats();
         populateMonthFilter();
+
+        // Only re-render stats when the stats tab is actually visible
+        const statsActive = document.querySelector('#stats-tab.active');
+        if (statsActive) renderStats();
     } catch (error) {
         console.error('❌ Error loading expenses:', error);
     }

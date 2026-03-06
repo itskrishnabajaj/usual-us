@@ -71,14 +71,12 @@ function showBudgetPrompt() {
         </div>
     `;
     
-    setTimeout(() => {
-        const btn = document.getElementById('set-budget-btn');
-        if (btn) {
-            btn.addEventListener('click', () => {
-                document.getElementById('budget-modal').classList.remove('hidden');
-            });
-        }
-    }, 100);
+    const btn = document.getElementById('set-budget-btn');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            document.getElementById('budget-modal').classList.remove('hidden');
+        });
+    }
 }
 
 async function handleBudgetSubmit(e) {
