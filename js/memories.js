@@ -519,8 +519,8 @@ window.startImageAdjust = function(memoryId, imageIndex) {
     // Prevent ALL touch-move on the modal to stop background scrolling,
     // but allow default behavior on range inputs for slider dragging
     modal.addEventListener('touchmove', function(e) {
-        // Allow range sliders to work normally
-        if (e.target.type === 'range') {
+        // Allow range sliders and their labels to work normally
+        if (e.target.type === 'range' || e.target.closest('.adjust-controls')) {
             e.stopPropagation();
             return;
         }

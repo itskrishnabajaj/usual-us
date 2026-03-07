@@ -504,15 +504,13 @@ body.us-active.late-night {
     display: none;
     opacity: 0;
     transform: translateY(6px);
-    transition: opacity var(--transition-normal), transform var(--transition-normal);
-    will-change: opacity, transform;
 }
 
 .tab-content.active {
     display: block;
     opacity: 1;
     transform: translateY(0);
-    animation: tabSlideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation: tabSlideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 @keyframes tabSlideIn {
@@ -2406,6 +2404,7 @@ textarea {
     --us-text: #ffffff;
     --us-text-secondary: #a0a0a0;
     --us-text-muted: #707070;
+    --us-tab-bg: #0f0f1e;
     --us-card-bg: rgba(26, 26, 26, 0.8);
     --us-card-border: rgba(255, 255, 255, 0.1);
     --us-accent: #ffc6d9;

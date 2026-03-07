@@ -110,16 +110,15 @@ function switchTab(tabName) {
         
         els.tabContents.forEach(content => {
             content.classList.remove('active');
-            content.style.opacity = '0';
-            content.style.transform = 'translateY(6px)';
+            content.style.opacity = '';
+            content.style.transform = '';
         });
         
         if (newTab) {
             newTab.classList.add('active');
-            requestAnimationFrame(() => {
-                newTab.style.opacity = '1';
-                newTab.style.transform = 'translateY(0)';
-            });
+            // Clear inline styles so CSS animation takes over
+            newTab.style.opacity = '';
+            newTab.style.transform = '';
         }
     }
 
@@ -128,9 +127,8 @@ function switchTab(tabName) {
     } else {
         if (currentActive) {
             currentActive.style.opacity = '0';
-            currentActive.style.transform = 'translateY(6px)';
         }
-        requestAnimationFrame(() => { setTimeout(doSwap, 120); });
+        requestAnimationFrame(() => { setTimeout(doSwap, 100); });
     }
     
     // Show/hide music player toggle - only visible on Us tab
