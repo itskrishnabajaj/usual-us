@@ -34,9 +34,13 @@ function getCachedElements() {
 // Track last rendered milestones day to avoid unnecessary rebuilds
 let _lastMilestonesDay = -1;
 
+let _pullToRefreshSetup = false;
+
 function setupPullToRefresh() {
+    if (_pullToRefreshSetup) return;
     const usTab = document.getElementById('us-tab');
     if (!usTab) return;
+    _pullToRefreshSetup = true;
     
     let startY = 0;
     let currentY = 0;
@@ -74,7 +78,7 @@ async function refreshUsTab() {
     showLoading(true);
     // Notify listeners (extensibility hook for future modules)
     EventBus.emit('us:refresh');
-    await Promise.all([
+    await Promise.allSettled([
         loadMemories(),
         loadNotes(),
         loadSecretNotes(),

@@ -2,7 +2,11 @@
 // Expenses
 // ============================================
 
+let _expensesLoading = false;
+
 async function loadExpenses() {
+    if (_expensesLoading) return;
+    _expensesLoading = true;
     try {
         const snapshot = await expensesCollection.orderBy('createdAt', 'desc').get();
         expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -18,6 +22,8 @@ async function loadExpenses() {
         EventBus.emit('expenses:loaded');
     } catch (error) {
         console.error('❌ Error loading expenses:', error);
+    } finally {
+        _expensesLoading = false;
     }
 }
 
