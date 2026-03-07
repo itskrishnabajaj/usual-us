@@ -5,15 +5,19 @@
 async function loadData() {
     showLoading(true);
     try {
+        // Load critical data for the home tab first
         await Promise.all([
             loadExpenses(),
+            loadBudget()
+        ]);
+        // Load remaining modules in background after initial render
+        Promise.all([
             loadMemories(),
             loadNotes(),
             loadSecretNotes(),
-            loadBudget(),
             loadTodaysMood(),
             loadMoments()
-        ]);
+        ]).catch(err => console.warn('⚠️ Background data load error:', err));
     } catch (error) {
         console.error('❌ Error loading data:', error);
     }

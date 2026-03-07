@@ -6,6 +6,7 @@ async function loadExpenses() {
     try {
         const snapshot = await expensesCollection.orderBy('createdAt', 'desc').get();
         expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        invalidateBalanceCache();
         console.log('📊 Loaded', expenses.length, 'expenses');
         
         renderBalance();
@@ -503,7 +504,12 @@ function renderAllExpenses() {
     }).join('');
 }
 
+// Cached balance value – invalidated whenever expenses array changes
+let _cachedBalance = null;
+
 function calculateCurrentBalance() {
+    if (_cachedBalance !== null) return _cachedBalance;
+    
     let balance = 0;
     const myRole = currentUserProfile.role;
     const partnerRole = getPartnerRole();
@@ -527,5 +533,10 @@ function calculateCurrentBalance() {
     });
     
     // Round to 2 decimal places to avoid floating point drift
-    return Math.round(balance * 100) / 100;
+    _cachedBalance = Math.round(balance * 100) / 100;
+    return _cachedBalance;
+}
+
+function invalidateBalanceCache() {
+    _cachedBalance = null;
 }

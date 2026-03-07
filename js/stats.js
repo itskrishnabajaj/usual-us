@@ -4,26 +4,32 @@
 
 function renderStats() {
     const now = new Date();
-    const thisMonth = expenses.filter(expense => {
-        const expenseDate = getExpenseDate(expense);
-        return expenseDate.getMonth() === now.getMonth() && 
-               expenseDate.getFullYear() === now.getFullYear();
-    });
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
     
-    const totalSpent = thisMonth.reduce((sum, e) => sum + e.amount, 0);
-    const myContribution = thisMonth.reduce((sum, e) => 
-        sum + (e.paidBy === currentUserProfile.role ? e.amount : 0), 0);
-    const partnerContribution = thisMonth.reduce((sum, e) => 
-        sum + (e.paidBy !== currentUserProfile.role ? e.amount : 0), 0);
+    // Single-pass computation: filter + aggregate in one loop
+    let totalSpent = 0;
+    let myContribution = 0;
+    let partnerContribution = 0;
+    const categoryTotals = {};
+    
+    for (let i = 0; i < expenses.length; i++) {
+        const expense = expenses[i];
+        const expenseDate = getExpenseDate(expense);
+        if (expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear) {
+            totalSpent += expense.amount;
+            if (expense.paidBy === currentUserProfile.role) {
+                myContribution += expense.amount;
+            } else {
+                partnerContribution += expense.amount;
+            }
+            categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + expense.amount;
+        }
+    }
     
     document.getElementById('total-spent').textContent = `₹${totalSpent.toFixed(2)}`;
     document.getElementById('my-contribution').textContent = `₹${myContribution.toFixed(2)}`;
     document.getElementById('partner-contribution').textContent = `₹${partnerContribution.toFixed(2)}`;
-    
-    const categoryTotals = {};
-    thisMonth.forEach(expense => {
-        categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + expense.amount;
-    });
     
     const breakdownContainer = document.getElementById('category-breakdown');
     const pieChartContainer = document.getElementById('pie-chart-container');
