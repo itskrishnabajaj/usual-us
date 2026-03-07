@@ -10,6 +10,7 @@
   "theme_color": "#0a0a0a",
   "orientation": "portrait",
   "categories": ["lifestyle"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icon-192.png",
@@ -34,6 +35,36 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/home.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Home Dashboard"
+    },
+    {
+      "src": "screenshots/expenses.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Expense Tracking"
+    },
+    {
+      "src": "screenshots/memories.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Memories Timeline"
+    },
+    {
+      "src": "screenshots/moments.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Special Moments"
     }
   ]
 }

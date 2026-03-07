@@ -1,4 +1,4 @@
-const CACHE_NAME = 'usual-us-v23';
+const CACHE_NAME = 'usual-us-v24';
 
 const urlsToCache = [
     '/',
@@ -28,6 +28,10 @@ const urlsToCache = [
     '/manifest.json',
     '/icon-192.png',
     '/icon-512.png',
+    '/screenshots/home.png',
+    '/screenshots/expenses.png',
+    '/screenshots/memories.png',
+    '/screenshots/moments.png',
     '/sounds/tabswitching.mp3',
     '/sounds/expadded.mp3',
     '/sounds/expdel.mp3',
@@ -92,9 +96,10 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Network-first for same-origin navigation & script requests (avoids stale cached app)
+    // Network-first for same-origin navigation, scripts, styles, and manifest (avoids stale cached app)
+    const isManifest = reqUrl.pathname.endsWith('/manifest.json');
     if (reqUrl.origin === self.location.origin && 
-        (event.request.destination === 'document' || event.request.destination === 'script' || event.request.destination === 'style')) {
+        (event.request.destination === 'document' || event.request.destination === 'script' || event.request.destination === 'style' || isManifest)) {
         event.respondWith(
             fetch(event.request)
                 .then((response) => {
