@@ -2389,6 +2389,14 @@ textarea {
     width: 100%;
     height: 100%;
     z-index: 1000;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease-out;
 }
 
 .modal-content {
@@ -4312,6 +4320,19 @@ select:focus {
     overflow-y: auto;
     padding: 20px 16px 80px;
     -webkit-overflow-scrolling: touch;
+    animation: slideUp 0.3s ease-out;
+}
+
+.moments-modal-content::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(180deg, rgba(194, 24, 91, 0.06) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 1001;
 }
 
 .moments-modal-header {
@@ -4339,15 +4360,22 @@ select:focus {
 
 .moments-modal-add-btn {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     background: rgba(194, 24, 91, 0.12);
     border: 1px dashed rgba(194, 24, 91, 0.3);
-    border-radius: 12px;
+    border-radius: 14px;
     color: #c2185b;
     font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     font-family: 'Inter', sans-serif;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.moments-modal-add-btn:active {
+    background: rgba(194, 24, 91, 0.2);
+    border-color: rgba(194, 24, 91, 0.5);
 }
 
 .moments-section-heading {
