@@ -101,6 +101,7 @@ async function handleExpenseSubmit(e) {
         const docRef = await expensesCollection.add(expense);
         console.log('✅ Expense added successfully:', docRef.id);
         EventBus.emit('expense:created', { id: docRef.id });
+        invalidateBalanceCache();
         
         document.getElementById('expense-form').reset();
         document.getElementById('custom-split').classList.add('hidden');
@@ -183,6 +184,7 @@ async function handleExpenseEdit(e) {
         
         console.log('✅ Expense updated:', expenseId);
         EventBus.emit('expense:edited', { id: expenseId });
+        invalidateBalanceCache();
         document.getElementById('edit-expense-modal').classList.add('hidden');
         await loadExpenses();
     } catch (error) {
@@ -235,6 +237,7 @@ async function deleteExpense(expenseId) {
         await expensesCollection.doc(expenseId).delete();
         console.log('✅ Expense deleted');
         EventBus.emit('expense:deleted', { id: expenseId });
+        invalidateBalanceCache();
         await loadExpenses();
     } catch (error) {
         console.error('❌ Delete failed:', error);
@@ -316,6 +319,7 @@ async function handleSettle() {
         await expensesCollection.add(settlement);
         console.log('✅ Settlement completed');
         EventBus.emit('expense:settled');
+        invalidateBalanceCache();
         document.getElementById('settle-modal').classList.add('hidden');
         settleAmountInput.value = '';
         await loadExpenses();
