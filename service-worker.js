@@ -1,14 +1,18 @@
-const CACHE_NAME = 'usual-us-v20';
+const CACHE_NAME = 'usual-us-v21';
 
 const urlsToCache = [
     '/',
     '/index.html',
     '/styles.css',
     '/firebase.js',
+    '/lib/gsap.min.js',
+    '/lib/lenis.min.js',
+    '/lib/hammer.min.js',
     '/js/config.js',
     '/js/state.js',
     '/js/event-bus.js',
     '/js/sounds.js',
+    '/js/animations.js',
     '/js/ui.js',
     '/js/stats.js',
     '/js/us-tab.js',
