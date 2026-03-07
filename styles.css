@@ -1867,7 +1867,7 @@ textarea {
 .polaroid-connector {
     width: 2px;
     height: 40px;
-    margin: 0 auto 8px;
+    margin: 4px auto 8px;
     position: relative;
     background: linear-gradient(180deg, 
         transparent 0%, 
@@ -1876,6 +1876,7 @@ textarea {
         rgba(194, 24, 91, 0.22) 85%, 
         transparent 100%);
     border-radius: 1px;
+    flex-shrink: 0;
 }
 
 .polaroid-connector::after {
@@ -2289,7 +2290,8 @@ textarea {
     color: #ffffff;
 }
 
-.us-tab.late-night .polaroid-string::after {
+.us-tab.late-night .polaroid-string::after,
+.us-tab.late-night .polaroid-connector::after {
     background: #0f0f1e;
 }
 
