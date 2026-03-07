@@ -190,6 +190,10 @@ function openMomentsFullView() {
     const modal = document.getElementById('moments-modal');
     if (!modal) return;
     modal.classList.remove('hidden');
+    // Animate the modal content in with GSAP
+    if (typeof animateModalIn === 'function') {
+        animateModalIn(modal.querySelector('.moments-modal-content'));
+    }
     renderMomentsFullView();
 }
 

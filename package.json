@@ -1,0 +1,42 @@
+{
+  "name": "usual-us",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Our private space — a couple dashboard PWA",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint js/ firebase.js service-worker.js",
+    "lint:fix": "eslint --fix js/ firebase.js service-worker.js",
+    "format": "prettier --write \"**/*.{js,css,html,json}\"",
+    "optimize:svg": "svgo --multipass -r icons/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itskrishnabajaj/usual-us.git"
+  },
+  "keywords": [
+    "pwa",
+    "couple",
+    "dashboard",
+    "twa"
+  ],
+  "author": "Krishna Bajaj",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/itskrishnabajaj/usual-us/issues"
+  },
+  "homepage": "https://github.com/itskrishnabajaj/usual-us#readme",
+  "devDependencies": {
+    "eslint": "^10.0.3",
+    "prettier": "^3.8.1",
+    "svgo": "^3.3.3",
+    "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "gsap": "^3.14.2",
+    "hammerjs": "^2.0.8",
+    "lenis": "^1.3.18"
+  }
+}

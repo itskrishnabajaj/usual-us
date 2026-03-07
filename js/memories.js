@@ -454,6 +454,11 @@ function renderMemoriesTimeline() {
 
     // Set up IntersectionObserver for lazy video playback
     observeTimelineVideos();
+
+    // GSAP entrance animation for memory cards
+    if (typeof animateCardsIn === 'function') {
+        animateCardsIn('.polaroid-wrapper', container);
+    }
 }
 
 // NEW: Image Adjustment Feature
@@ -479,6 +484,7 @@ window.startImageAdjust = function(memoryId, imageIndex) {
     modal.innerHTML = `
         <div class="image-adjust-content">
             <h3>Adjust Image Position</h3>
+            <p class="adjust-hint">Drag the image or use sliders below</p>
             <div class="image-adjust-preview">
                 <img src="${memory.images[imageIndex]}" id="adjust-preview-img" style="object-fit: cover; object-position: ${currentPos.x}% ${currentPos.y}%; transform: scale(${currentZoom}); transform-origin: ${currentPos.x}% ${currentPos.y}%;">
             </div>
@@ -504,11 +510,30 @@ window.startImageAdjust = function(memoryId, imageIndex) {
     `;
     
     document.body.appendChild(modal);
+
+    // Animate modal in
+    if (typeof animateModalIn === 'function') {
+        animateModalIn(modal.querySelector('.image-adjust-content'));
+    }
+    
+    // Prevent ALL touch-move on the modal to stop background scrolling,
+    // but allow default behavior on range inputs for slider dragging
+    modal.addEventListener('touchmove', function(e) {
+        // Allow range sliders to work normally
+        if (e.target.type === 'range') {
+            e.stopPropagation();
+            return;
+        }
+        // Block everything else (prevents page scrolling under modal)
+        e.preventDefault();
+        e.stopPropagation();
+    }, { passive: false });
     
     const img = document.getElementById('adjust-preview-img');
     const xSlider = document.getElementById('adjust-x');
     const ySlider = document.getElementById('adjust-y');
     const zoomSlider = document.getElementById('adjust-zoom');
+    const previewEl = modal.querySelector('.image-adjust-preview');
     
     function updatePreview() {
         // x and y are integer percentages (0-100) used directly in CSS strings
@@ -525,6 +550,11 @@ window.startImageAdjust = function(memoryId, imageIndex) {
     xSlider.addEventListener('input', updatePreview);
     ySlider.addEventListener('input', updatePreview);
     zoomSlider.addEventListener('input', updatePreview);
+
+    // Attach Hammer.js pan gestures to the preview for drag-to-position
+    if (typeof attachImageAdjustGestures === 'function') {
+        window._adjustHammer = attachImageAdjustGestures(previewEl, xSlider, ySlider, updatePreview);
+    }
 };
 
 window.saveImagePosition = async function(memoryId) {
@@ -552,6 +582,11 @@ window.saveImagePosition = async function(memoryId) {
 };
 
 window.closeImageAdjust = function() {
+    // Clean up Hammer.js gesture handler if active
+    if (window._adjustHammer && typeof window._adjustHammer.destroy === 'function') {
+        window._adjustHammer.destroy();
+        window._adjustHammer = null;
+    }
     const modal = document.querySelector('.image-adjust-modal');
     if (modal) modal.remove();
 };

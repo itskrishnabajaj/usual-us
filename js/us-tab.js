@@ -34,9 +34,13 @@ function getCachedElements() {
 // Track last rendered milestones day to avoid unnecessary rebuilds
 let _lastMilestonesDay = -1;
 
+let _pullToRefreshSetup = false;
+
 function setupPullToRefresh() {
+    if (_pullToRefreshSetup) return;
     const usTab = document.getElementById('us-tab');
     if (!usTab) return;
+    _pullToRefreshSetup = true;
     
     let startY = 0;
     let currentY = 0;
@@ -74,7 +78,7 @@ async function refreshUsTab() {
     showLoading(true);
     // Notify listeners (extensibility hook for future modules)
     EventBus.emit('us:refresh');
-    await Promise.all([
+    await Promise.allSettled([
         loadMemories(),
         loadNotes(),
         loadSecretNotes(),
@@ -94,37 +98,40 @@ function switchTab(tabName) {
     }
     cancelMusicFade();
 
-    // Smooth fade-out then swap
+    // Smooth fade-out then swap — GSAP enhanced with CSS fallback
     const currentActive = document.querySelector('.tab-content.active');
-    if (currentActive) {
-        currentActive.style.opacity = '0';
-        currentActive.style.transform = 'translateY(6px)';
-    }
-    
-    requestAnimationFrame(() => {
-        setTimeout(() => {
-            const els = getCachedElements();
-            els.navItems.forEach(item => item.classList.remove('active'));
-            const activeNavItem = document.querySelector(`[data-tab="${tabName}"]`);
-            if (activeNavItem) activeNavItem.classList.add('active');
-            
-            els.tabContents.forEach(content => {
-                content.classList.remove('active');
-                content.style.opacity = '0';
-                content.style.transform = 'translateY(6px)';
+    const newTab = document.getElementById(`${tabName}-tab`);
+
+    function doSwap() {
+        const els = getCachedElements();
+        els.navItems.forEach(item => item.classList.remove('active'));
+        const activeNavItem = document.querySelector(`[data-tab="${tabName}"]`);
+        if (activeNavItem) activeNavItem.classList.add('active');
+        
+        els.tabContents.forEach(content => {
+            content.classList.remove('active');
+            content.style.opacity = '0';
+            content.style.transform = 'translateY(6px)';
+        });
+        
+        if (newTab) {
+            newTab.classList.add('active');
+            requestAnimationFrame(() => {
+                newTab.style.opacity = '1';
+                newTab.style.transform = 'translateY(0)';
             });
-            
-            const newTab = document.getElementById(`${tabName}-tab`);
-            if (newTab) {
-                newTab.classList.add('active');
-                // Allow a frame for display:block to take effect before animating
-                requestAnimationFrame(() => {
-                    newTab.style.opacity = '1';
-                    newTab.style.transform = 'translateY(0)';
-                });
-            }
-        }, 120);
-    });
+        }
+    }
+
+    if (typeof animateTabSwitch === 'function') {
+        animateTabSwitch(currentActive, newTab, doSwap);
+    } else {
+        if (currentActive) {
+            currentActive.style.opacity = '0';
+            currentActive.style.transform = 'translateY(6px)';
+        }
+        requestAnimationFrame(() => { setTimeout(doSwap, 120); });
+    }
     
     // Show/hide music player toggle - only visible on Us tab
     const { musicToggle, appHeader, bottomNav, appEl } = getCachedElements();

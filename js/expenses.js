@@ -2,10 +2,15 @@
 // Expenses
 // ============================================
 
+let _expensesLoading = false;
+
 async function loadExpenses() {
+    if (_expensesLoading) return;
+    _expensesLoading = true;
     try {
         const snapshot = await expensesCollection.orderBy('createdAt', 'desc').get();
         expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        invalidateBalanceCache();
         console.log('📊 Loaded', expenses.length, 'expenses');
         
         renderBalance();
@@ -17,6 +22,8 @@ async function loadExpenses() {
         EventBus.emit('expenses:loaded');
     } catch (error) {
         console.error('❌ Error loading expenses:', error);
+    } finally {
+        _expensesLoading = false;
     }
 }
 
@@ -94,6 +101,7 @@ async function handleExpenseSubmit(e) {
         const docRef = await expensesCollection.add(expense);
         console.log('✅ Expense added successfully:', docRef.id);
         EventBus.emit('expense:created', { id: docRef.id });
+        invalidateBalanceCache();
         
         document.getElementById('expense-form').reset();
         document.getElementById('custom-split').classList.add('hidden');
@@ -176,6 +184,7 @@ async function handleExpenseEdit(e) {
         
         console.log('✅ Expense updated:', expenseId);
         EventBus.emit('expense:edited', { id: expenseId });
+        invalidateBalanceCache();
         document.getElementById('edit-expense-modal').classList.add('hidden');
         await loadExpenses();
     } catch (error) {
@@ -228,6 +237,7 @@ async function deleteExpense(expenseId) {
         await expensesCollection.doc(expenseId).delete();
         console.log('✅ Expense deleted');
         EventBus.emit('expense:deleted', { id: expenseId });
+        invalidateBalanceCache();
         await loadExpenses();
     } catch (error) {
         console.error('❌ Delete failed:', error);
@@ -309,6 +319,7 @@ async function handleSettle() {
         await expensesCollection.add(settlement);
         console.log('✅ Settlement completed');
         EventBus.emit('expense:settled');
+        invalidateBalanceCache();
         document.getElementById('settle-modal').classList.add('hidden');
         settleAmountInput.value = '';
         await loadExpenses();
@@ -393,6 +404,11 @@ function renderRecentExpenses() {
             </div>
         `;
     }).join('');
+
+    // Animate expense items in
+    if (typeof animateCardsIn === 'function') {
+        animateCardsIn('.expense-item', container);
+    }
 }
 
 function getFilteredExpenses() {
@@ -503,7 +519,12 @@ function renderAllExpenses() {
     }).join('');
 }
 
+// Cached balance value – invalidated whenever expenses array changes
+let _cachedBalance = null;
+
 function calculateCurrentBalance() {
+    if (_cachedBalance !== null) return _cachedBalance;
+    
     let balance = 0;
     const myRole = currentUserProfile.role;
     const partnerRole = getPartnerRole();
@@ -527,5 +548,10 @@ function calculateCurrentBalance() {
     });
     
     // Round to 2 decimal places to avoid floating point drift
-    return Math.round(balance * 100) / 100;
+    _cachedBalance = Math.round(balance * 100) / 100;
+    return _cachedBalance;
+}
+
+function invalidateBalanceCache() {
+    _cachedBalance = null;
 }
