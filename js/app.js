@@ -2,6 +2,27 @@
 // USUAL US - Main Application Entry Point
 // ============================================
 
+// ---- Splash Screen Controller ----
+// The splash animation runs ~1.8s, then a 0.4s exit = ~2.2s total.
+// App initialization is delayed until the splash completes.
+const SPLASH_DISPLAY_MS = 1800;  // Time before starting exit
+const SPLASH_EXIT_MS    = 400;   // Exit animation duration
+
+function dismissSplash() {
+    return new Promise(resolve => {
+        const splash = document.getElementById('splash-screen');
+        if (!splash || splash.classList.contains('splash-done')) {
+            resolve();
+            return;
+        }
+        splash.classList.add('splash-exit');
+        setTimeout(() => {
+            splash.classList.add('splash-done');
+            resolve();
+        }, SPLASH_EXIT_MS);
+    });
+}
+
 async function loadData() {
     showLoading(true);
     try {
@@ -93,16 +114,20 @@ window.addEventListener('popstate', () => {
     pushBackState();
 });
 
-// Initialize app
+// Initialize app — waits for splash to finish first
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 usual us - Initializing...');
     // Seed the history stack so back button doesn't immediately exit
     history.replaceState({ app: true }, '');
     pushBackState();
 
-    initializeAuth();
-    initializeMusicPlayer();
-    setupEventListeners();
+    // Wait for splash animation before showing any UI
+    setTimeout(async () => {
+        await dismissSplash();
+        initializeAuth();
+        initializeMusicPlayer();
+        setupEventListeners();
+    }, SPLASH_DISPLAY_MS);
 });
 
 // Global Function Exports - Required for HTML onclick handlers

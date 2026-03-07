@@ -4,6 +4,8 @@
 
 This guide will walk you through **every single step** to set up and run the "Usual Us" app on your Windows PC. Written in plain English. No coding knowledge needed — just follow each step exactly.
 
+> 📌 **Starting Point:** This guide assumes you're starting from **PR #21** or later. Everything in the project (splash screen, animations, all features) is already built. You just need to set up your PC to run it and make future changes.
+
 ---
 
 ## 📋 Table of Contents
@@ -20,9 +22,10 @@ This guide will walk you through **every single step** to set up and run the "Us
 10. [Step 9: Build for Production](#10-step-9-build-for-production)
 11. [Step 10: Deploy to GitHub Pages](#11-step-10-deploy-to-github-pages)
 12. [Step 11: Generate an Android APK (TWA)](#12-step-11-generate-an-android-apk-twa)
-13. [Everyday Commands Cheat Sheet](#13-everyday-commands-cheat-sheet)
-14. [Troubleshooting Common Problems](#14-troubleshooting-common-problems)
-15. [Glossary (What These Words Mean)](#15-glossary)
+13. [Understanding the Splash Screen](#13-understanding-the-splash-screen)
+14. [Everyday Commands Cheat Sheet](#14-everyday-commands-cheat-sheet)
+15. [Troubleshooting Common Problems](#15-troubleshooting-common-problems)
+16. [Glossary (What These Words Mean)](#16-glossary)
 
 ---
 
@@ -406,7 +409,72 @@ For TWA to work properly (no browser bar showing), you need to verify your domai
 
 ---
 
-## 13. Everyday Commands Cheat Sheet
+## 13. Understanding the Splash Screen
+
+When the app opens, you'll see a **cinematic splash screen** that plays a short animation (~2.2 seconds) before the login screen appears. Here's how it works, in plain English:
+
+### What Happens When the App Opens:
+
+1. **Dark screen appears** with a soft pinkish glow fading in
+2. **A heart emoji (💖)** appears in the center and gently pulses
+3. **"Krishna & Rashi"** fades in below the heart
+4. **"usual us"** (the app name) slides up and appears
+5. The whole splash **dissolves away** and the login screen shows
+
+This all happens automatically. You don't need to tap or do anything.
+
+### How to Change the Names on the Splash:
+
+The names "Krishna & Rashi" are in the `index.html` file. To change them:
+
+1. Open `index.html` in VS Code
+2. Find this line (near the top, around line 28):
+   ```html
+   <div class="splash-names">Krishna &amp; Rashi</div>
+   ```
+3. Change `Krishna &amp; Rashi` to whatever names you want
+   - **Important:** The `&amp;` is how you write `&` in HTML. Don't change it to just `&`.
+4. Save the file (Ctrl + S)
+
+### How to Change the Splash Timing:
+
+The timing is controlled in `js/app.js`. Look for these lines near the top:
+
+```javascript
+const SPLASH_DISPLAY_MS = 1800;  // How long the animation plays (milliseconds)
+const SPLASH_EXIT_MS    = 400;   // How long the fade-out takes
+```
+
+- `1800` means 1.8 seconds of animation before fading out
+- `400` means the fade-out takes 0.4 seconds
+- Total: ~2.2 seconds
+
+To make it faster, lower `SPLASH_DISPLAY_MS` (e.g., `1200` for a quicker splash).
+To make it slower, raise it (e.g., `2500` for a longer splash).
+
+### How to Change the Splash Colors:
+
+The splash colors are in `styles.css`. Search for `.splash-bg` to find the gradient:
+
+```css
+background: radial-gradient(ellipse at 50% 40%, #2d1520 0%, #1a0a12 40%, #0a0a0a 100%);
+```
+
+- `#2d1520` = the pinkish-dark color in the center
+- `#1a0a12` = the darker surrounding color
+- `#0a0a0a` = the very dark edges
+
+You can change these hex color codes to any colors you like. Use a color picker website like https://htmlcolorcodes.com to find colors you like.
+
+### How to Remove the Splash Screen:
+
+If you ever want to skip the splash entirely:
+1. In `index.html`, delete the splash `<div>` block (lines 20-30)
+2. In `js/app.js`, remove the `setTimeout` wrapper and just call the functions directly
+
+---
+
+## 14. Everyday Commands Cheat Sheet
 
 Copy-paste these whenever you need them:
 
@@ -441,7 +509,7 @@ Copy-paste these whenever you need them:
 
 ---
 
-## 14. Troubleshooting Common Problems
+## 15. Troubleshooting Common Problems
 
 ### "npm is not recognized"
 - **Cause:** Node.js isn't installed properly or PATH wasn't set
@@ -492,7 +560,7 @@ Copy-paste these whenever you need them:
 
 ---
 
-## 15. Glossary
+## 16. Glossary
 
 | Term | What It Means |
 |------|--------------|

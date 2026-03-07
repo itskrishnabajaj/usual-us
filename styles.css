@@ -25,6 +25,128 @@
     --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ============================================
+   Cinematic Splash Screen
+   Multi-stage animation ~2.2s total
+   ============================================ */
+
+.splash-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #0a0a0a;
+}
+
+/* Stage 1 — Gradient background reveal (0 → 0.6s) */
+.splash-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 40%, #2d1520 0%, #1a0a12 40%, #0a0a0a 100%);
+    opacity: 0;
+    animation: splashBgIn 0.6s ease-out forwards;
+}
+
+@keyframes splashBgIn {
+    to { opacity: 1; }
+}
+
+/* Soft glow behind heart */
+.splash-glow {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,182,193,0.35) 0%, rgba(255,105,135,0.12) 50%, transparent 70%);
+    filter: blur(30px);
+    opacity: 0;
+    animation: splashGlowIn 0.5s 0.3s ease-out forwards;
+}
+
+@keyframes splashGlowIn {
+    to { opacity: 1; }
+}
+
+/* Stage 2 — Heart reveal with pulse (0.3s → 1.4s) */
+.splash-heart {
+    position: relative;
+    font-size: 56px;
+    opacity: 0;
+    transform: scale(0.5);
+    animation: splashHeartIn 0.6s 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+               splashHeartPulse 0.8s 0.9s ease-in-out 1;
+    z-index: 1;
+}
+
+@keyframes splashHeartIn {
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes splashHeartPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+/* Stage 3 — Names reveal (0.7s → 1.4s) */
+.splash-names {
+    position: relative;
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-style: italic;
+    color: rgba(255, 198, 217, 0.8);
+    letter-spacing: 2px;
+    margin-top: 14px;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: splashTextIn 0.5s 0.7s ease-out forwards;
+    z-index: 1;
+}
+
+/* Stage 4 — Title reveal (1.0s → 1.7s) */
+.splash-title {
+    position: relative;
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 4px;
+    margin-top: 10px;
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    animation: splashTitleIn 0.6s 1.0s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    z-index: 1;
+}
+
+@keyframes splashTextIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes splashTitleIn {
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Stage 5 — Exit: dissolve upward (1.8s → 2.2s) */
+.splash-screen.splash-exit {
+    animation: splashExit 0.4s 0s ease-in forwards;
+    pointer-events: none;
+}
+
+@keyframes splashExit {
+    to {
+        opacity: 0;
+        transform: translateY(-20px) scale(1.02);
+    }
+}
+
+/* Hide splash after exit completes */
+.splash-screen.splash-done {
+    display: none;
+}
+
 * {
     margin: 0;
     padding: 0;
