@@ -921,7 +921,7 @@ textarea {
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: 16px;
-    padding: 20px;
+    padding: 24px 20px;
     margin-bottom: 20px;
     text-align: center;
 }
@@ -929,7 +929,7 @@ textarea {
 .who-pays-label {
     font-size: 14px;
     color: var(--text-secondary);
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .who-pays-indicator {
@@ -1171,6 +1171,7 @@ textarea {
     --us-card-bg: rgba(255, 255, 255, 0.55);
     --us-card-border: rgba(194, 24, 91, 0.15);
     --us-accent: #c2185b;
+    --us-tab-bg: #fdf2f0;
     color: var(--us-text);
     contain: layout style;
 }
@@ -1887,8 +1888,9 @@ textarea {
     color: var(--us-accent, var(--accent));
     opacity: 0.55;
     background: var(--us-tab-bg, #fdf2f0);
-    padding: 2px;
+    padding: 3px 4px;
     line-height: 1;
+    border-radius: 50%;
 }
 
 /* Legacy class - maps to new connector style */
@@ -1916,8 +1918,9 @@ textarea {
     color: var(--us-accent, var(--accent));
     opacity: 0.55;
     background: var(--us-tab-bg, #fdf2f0);
-    padding: 2px;
+    padding: 3px 4px;
     line-height: 1;
+    border-radius: 50%;
 }
 
 .polaroid {
@@ -2671,6 +2674,7 @@ textarea {
     flex-direction: column;
     gap: 16px;
     margin-bottom: 20px;
+    touch-action: manipulation;
 }
 
 .adjust-controls label {
@@ -2679,6 +2683,7 @@ textarea {
     gap: 8px;
     position: relative;
     z-index: 10001;
+    touch-action: pan-x;
 }
 
 .adjust-controls span {
@@ -2694,29 +2699,35 @@ textarea {
     border-radius: 3px;
     outline: none;
     border: none;
-    padding: 0;
+    padding: 12px 0;
+    margin: 0;
+    box-sizing: content-box;
     touch-action: pan-x;
     -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .adjust-controls input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     background: var(--accent);
     border-radius: 50%;
     cursor: pointer;
     position: relative;
     z-index: 10002;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .adjust-controls input[type="range"]::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     background: var(--accent);
     border-radius: 50%;
     cursor: pointer;
     border: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .adjust-buttons {
@@ -4119,8 +4130,8 @@ select:focus {
 
 /* Who pays next icon */
 .icon-whopays {
-    width: 80px;
-    height: 80px;
+    width: 110px;
+    height: 110px;
     display: block;
     margin: 0 auto;
     object-fit: contain;
@@ -4495,6 +4506,17 @@ select:focus {
     animation: momentFormSlideIn 0.3s ease-out;
 }
 
+.moment-form-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: linear-gradient(180deg, rgba(194, 24, 91, 0.08) 0%, transparent 100%);
+    pointer-events: none;
+}
+
 @keyframes momentFormSlideIn {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
@@ -4502,10 +4524,12 @@ select:focus {
 
 .moment-form-content h2 {
     font-family: 'Playfair Display', serif;
-    font-size: 24px;
+    font-size: 26px;
     color: var(--text-primary);
-    margin: 32px 0 8px;
+    margin: 40px 0 8px;
     text-align: center;
+    position: relative;
+    z-index: 1;
 }
 
 .moment-form-content .moment-form-subtitle {
@@ -4513,6 +4537,9 @@ select:focus {
     color: var(--text-tertiary);
     text-align: center;
     margin-bottom: 28px;
+    font-style: italic;
+    position: relative;
+    z-index: 1;
 }
 
 .moment-form-card {
@@ -4542,13 +4569,14 @@ select:focus {
     font-size: 15px;
     font-family: 'Inter', sans-serif;
     box-sizing: border-box;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .moment-form-input:focus {
     outline: none;
-    border-color: rgba(194, 24, 91, 0.4);
-    box-shadow: 0 0 0 3px rgba(194, 24, 91, 0.08);
+    border-color: rgba(194, 24, 91, 0.45);
+    box-shadow: 0 0 0 3px rgba(194, 24, 91, 0.1);
+    background: var(--bg-tertiary);
 }
 
 .moment-form-textarea {
@@ -4584,10 +4612,13 @@ select:focus {
     background: linear-gradient(135deg, #c2185b, #e91e63);
     color: #fff;
     box-shadow: 0 4px 16px rgba(194, 24, 91, 0.25);
+    transition: opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
 }
 
 .moment-form-save:active {
-    opacity: 0.85;
+    opacity: 0.9;
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px rgba(194, 24, 91, 0.2);
 }
 
 /* ============================================

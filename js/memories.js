@@ -505,6 +505,13 @@ window.startImageAdjust = function(memoryId, imageIndex) {
     
     document.body.appendChild(modal);
     
+    // Prevent background scrolling when interacting with sliders
+    modal.addEventListener('touchmove', function(e) {
+        if (e.target.type === 'range') {
+            e.stopPropagation();
+        }
+    }, { passive: false });
+    
     const img = document.getElementById('adjust-preview-img');
     const xSlider = document.getElementById('adjust-x');
     const ySlider = document.getElementById('adjust-y');
