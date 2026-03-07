@@ -404,6 +404,11 @@ function renderRecentExpenses() {
             </div>
         `;
     }).join('');
+
+    // Animate expense items in
+    if (typeof animateCardsIn === 'function') {
+        animateCardsIn('.expense-item', container);
+    }
 }
 
 function getFilteredExpenses() {

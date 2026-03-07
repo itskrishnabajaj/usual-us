@@ -454,6 +454,11 @@ function renderMemoriesTimeline() {
 
     // Set up IntersectionObserver for lazy video playback
     observeTimelineVideos();
+
+    // GSAP entrance animation for memory cards
+    if (typeof animateCardsIn === 'function') {
+        animateCardsIn('.polaroid-wrapper', container);
+    }
 }
 
 // NEW: Image Adjustment Feature

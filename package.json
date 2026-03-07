@@ -1,6 +1,7 @@
 {
   "name": "usual-us",
   "version": "1.0.0",
+  "type": "module",
   "description": "Our private space — a couple dashboard PWA",
   "scripts": {
     "dev": "vite",
