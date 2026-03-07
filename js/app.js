@@ -58,6 +58,7 @@ async function loadDeferredModules() {
             loadMoments()
         ]);
     } catch (err) {
+        _deferredLoaded = false;
         console.warn('⚠️ Background data load error:', err);
     }
 }

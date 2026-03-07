@@ -125,9 +125,6 @@ function switchTab(tabName) {
     if (typeof animateTabSwitch === 'function') {
         animateTabSwitch(currentActive, newTab, doSwap);
     } else {
-        if (currentActive) {
-            currentActive.style.opacity = '0';
-        }
         requestAnimationFrame(() => { setTimeout(doSwap, 100); });
     }
     
