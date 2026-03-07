@@ -24,9 +24,15 @@ function initializeFirebase() {
         firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
         
-        db.enablePersistence()
+        db.enablePersistence({ synchronizeTabs: true })
             .catch((err) => {
-                console.error("Persistence error:", err);
+                if (err.code === 'failed-precondition') {
+                    // Multiple tabs open - persistence can only be enabled in one tab at a time
+                    console.warn('Firestore persistence unavailable: multiple tabs open');
+                } else if (err.code === 'unimplemented') {
+                    // Browser doesn't support persistence
+                    console.warn('Firestore persistence not supported in this browser');
+                }
             });
         
         usersCollection = db.collection('users');

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'usual-us-v19';
+const CACHE_NAME = 'usual-us-v20';
 
 const urlsToCache = [
     '/',
@@ -22,6 +22,8 @@ const urlsToCache = [
     '/js/auth.js',
     '/js/app.js',
     '/manifest.json',
+    '/icon-192.png',
+    '/icon-512.png',
     '/sounds/tabswitching.mp3',
     '/sounds/expadded.mp3',
     '/sounds/expdel.mp3',
@@ -62,15 +64,20 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
-                cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
-                    }
-                })
+                cacheNames
+                    .filter((cacheName) => cacheName !== CACHE_NAME)
+                    .map((cacheName) => caches.delete(cacheName))
             );
         })
     );
     self.clients.claim();
+});
+
+// Notify all clients when a new version is activated
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
 });
 
 self.addEventListener('fetch', (event) => {
