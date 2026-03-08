@@ -919,6 +919,8 @@ body.us-active.late-night {
     padding: 20px;
     max-width: 600px;
     margin: 0 auto;
+    /* TWA: Contain overscroll so nested scrollers don't trigger browser navigation */
+    overscroll-behavior: contain;
 }
 
 /* Tab transitions with fade effect */
@@ -4833,11 +4835,14 @@ select:focus {
     background: rgba(194, 24, 91, 0.04);
     border-radius: 14px;
     margin-top: 10px;
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.25s ease;
 }
 
+/* Phase 4: Touch depth — scale + shadow on press */
 .moments-preview-item:active {
     background: rgba(194, 24, 91, 0.10);
+    transform: scale(0.975) translateZ(0);
+    box-shadow: 0 1px 8px rgba(194, 24, 91, 0.10);
 }
 
 .moments-preview-emoji {
@@ -5044,6 +5049,12 @@ select:focus {
     border: 1px solid var(--border-color);
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
     transition: box-shadow 0.25s ease, transform 0.2s ease;
+}
+
+/* Phase 4: Touch depth — scale down with deeper shadow on press */
+.moment-card:active {
+    transform: scale(0.975) translateZ(0);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
 }
 
 .moment-card + .moment-card {
