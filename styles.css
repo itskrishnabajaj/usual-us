@@ -167,7 +167,7 @@
 .splash-p1 {
     background: radial-gradient(circle, rgba(255,182,193,0.9) 0%, rgba(255,105,135,0.3) 70%, transparent 100%);
     box-shadow: 0 0 20px rgba(255,182,193,0.6), 0 0 40px rgba(255,105,135,0.25);
-    animation: splashP1 2s 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: splashP1 2s 2s var(--ease) forwards;
 }
 
 @keyframes splashP1 {
@@ -180,7 +180,7 @@
 .splash-p2 {
     background: radial-gradient(circle, rgba(255,198,217,0.9) 0%, rgba(255,150,180,0.3) 70%, transparent 100%);
     box-shadow: 0 0 20px rgba(255,198,217,0.6), 0 0 40px rgba(255,150,180,0.25);
-    animation: splashP2 1.8s 2.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: splashP2 1.8s 2.2s var(--ease) forwards;
 }
 
 @keyframes splashP2 {
@@ -232,7 +232,7 @@
     filter: drop-shadow(0 0 20px rgba(255,105,135,0.6));
     will-change: transform, opacity;
     animation:
-        splashHeartMorph 1s 4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+        splashHeartMorph 1s 4s var(--ease-bounce) forwards,
         splashHeartPulse 1.2s 5.2s ease-in-out 2,
         splashHeartDissolve 1.2s 8.3s ease-in forwards;
 }
@@ -345,7 +345,7 @@
     opacity: 0;
     transform: translateY(12px) scale(0.95);
     z-index: 3;
-    animation: splashTitleIn 0.6s 8.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    animation: splashTitleIn 0.6s 8.8s var(--ease) forwards;
 }
 
 @keyframes splashFadeUp {
@@ -441,7 +441,7 @@
 }
 
 .splash-screen.splash-exit .splash-bridge {
-    animation: splashBridgeExpand 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: splashBridgeExpand 1s var(--ease) forwards;
 }
 
 /* The container itself fades after bridge peaks */
@@ -473,7 +473,7 @@
 }
 
 .splash-screen.splash-skip .splash-bridge {
-    animation: splashBridgeExpand 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: splashBridgeExpand 0.4s var(--ease) forwards;
 }
 
 .splash-screen.splash-skip {
@@ -493,11 +493,11 @@
 
 /* ---- Login screen entrance — continues the splash visual language ---- */
 .login-screen.splash-reveal {
-    animation: loginReveal 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    animation: loginReveal 0.7s var(--ease) both;
 }
 
 .login-screen.splash-reveal .login-container {
-    animation: loginContainerReveal 0.6s 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation: loginContainerReveal 0.6s 0.15s var(--ease-bounce) both;
 }
 
 @keyframes loginReveal {
@@ -561,7 +561,11 @@ body.us-active {
 .modal-content,
 .music-player-panel,
 .success-toast,
-.error-toast {
+.error-toast,
+.modal-overlay,
+.mood-tracker,
+.milestone-card,
+.moments-preview-item {
     will-change: transform, opacity;
     backface-visibility: hidden;
 }
@@ -763,7 +767,7 @@ body.us-active {
     border-radius: 50%;
     border: 2px solid rgba(255, 198, 217, 0.3);
     background: transparent;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 0.3s var(--ease-bounce), background 0.3s var(--ease-bounce), border-color 0.3s var(--ease-bounce);
 }
 
 .pin-dot.filled {
@@ -793,7 +797,7 @@ body.us-active {
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
     box-shadow: 0 4px 16px rgba(255, 198, 217, 0.3);
 }
 
@@ -810,7 +814,7 @@ body.us-active {
     border-radius: 12px;
     font-size: 14px;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-switch-user:active {
@@ -844,7 +848,7 @@ body.us-active {
     font-size: 24px;
     font-weight: 300;
     cursor: pointer;
-    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     display: flex;
@@ -946,7 +950,7 @@ body.us-active.late-night {
     display: block;
     opacity: 1;
     transform: translateY(0);
-    animation: tabSlideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation: tabSlideIn 0.2s var(--ease) both;
 }
 
 @keyframes tabSlideIn {
@@ -995,7 +999,7 @@ select {
     color: var(--text-primary);
     font-size: 16px;
     font-family: inherit;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 input:focus,
@@ -1157,7 +1161,7 @@ textarea {
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
     box-shadow: 0 4px 20px rgba(255, 198, 217, 0.35);
     letter-spacing: 0.3px;
 }
@@ -1185,7 +1189,7 @@ textarea {
     border-radius: 12px;
     text-align: center;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
     user-select: none;
 }
 
@@ -1221,7 +1225,7 @@ textarea {
     border-radius: 12px;
     text-align: center;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
     font-size: 15px;
 }
 
@@ -1272,7 +1276,7 @@ textarea {
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
     box-shadow: 0 4px 16px rgba(255, 198, 217, 0.3);
 }
 
@@ -1290,7 +1294,7 @@ textarea {
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-secondary:active {
@@ -1305,7 +1309,7 @@ textarea {
     border: none;
     cursor: pointer;
     font-weight: 500;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-small.edit {
@@ -1434,7 +1438,7 @@ textarea {
     font-weight: 600;
     cursor: pointer;
     box-shadow: 0 4px 16px rgba(255, 198, 217, 0.35);
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-set-budget:active {
@@ -1508,7 +1512,7 @@ textarea {
     cursor: pointer;
     margin-bottom: 32px;
     box-shadow: 0 4px 16px rgba(255, 198, 217, 0.3);
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-settle:active {
@@ -1534,7 +1538,7 @@ textarea {
     border: 1px solid var(--border-color);
     border-radius: 12px;
     margin-bottom: 12px;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .expense-item:active {
@@ -1779,7 +1783,7 @@ textarea {
     visibility: hidden;
     pointer-events: none;
     transform: scale(0.6);
-    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.3s;
+    transition: opacity 0.3s var(--ease), transform 0.3s var(--ease-bounce), visibility 0.3s;
 }
 
 .music-player-toggle.visible {
@@ -1818,7 +1822,7 @@ textarea {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    transition: opacity 0.3s var(--ease), transform 0.3s var(--ease), visibility 0.3s;
 }
 
 .music-player-panel.active {
@@ -1839,7 +1843,7 @@ textarea {
     backdrop-filter: blur(4px);
     z-index: 899;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s var(--ease);
 }
 
 .music-panel-backdrop.active {
@@ -1868,7 +1872,7 @@ textarea {
     font-size: 24px;
     color: rgba(255, 255, 255, 0.8);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-close-music:active {
@@ -1951,7 +1955,7 @@ textarea {
     font-size: 20px;
     color: rgba(255, 255, 255, 0.95);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
     box-shadow: 0 4px 16px rgba(255, 198, 217, 0.3);
 }
 
@@ -2065,7 +2069,7 @@ textarea {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .recent-song:active {
@@ -2208,7 +2212,7 @@ textarea {
     position: relative;
     animation: breathe 6s ease-in-out infinite;
     /* Phase 4: Touch depth transition */
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
 }
 
 /* Phase 4: Touch depth for ritual card */
@@ -2260,7 +2264,7 @@ textarea {
     backdrop-filter: blur(8px);
     box-shadow: 0 4px 16px rgba(194, 24, 91, 0.05);
     /* Phase 4: Touch depth transition */
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
 }
 
 /* Phase 4: Touch depth for mood tracker */
@@ -2289,7 +2293,7 @@ textarea {
     border: 2px solid var(--us-card-border, var(--border-color));
     font-size: 28px;
     cursor: pointer;
-    transition: all var(--transition-normal);
+    transition: transform var(--transition-normal), opacity var(--transition-normal), background var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
     min-width: 48px;
     min-height: 48px;
     display: flex;
@@ -2383,7 +2387,7 @@ textarea {
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
     backdrop-filter: blur(8px);
     box-shadow: 0 4px 16px rgba(194, 24, 91, 0.06);
 }
@@ -2402,7 +2406,7 @@ textarea {
     color: var(--us-accent, var(--accent));
     font-size: 16px;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
     backdrop-filter: blur(8px);
     box-shadow: 0 4px 16px rgba(194, 24, 91, 0.06);
     display: flex;
@@ -2511,7 +2515,7 @@ textarea {
         0 6px 20px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     /* Phase 4: Smooth transition for touch depth */
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
     width: 300px;
     position: relative;
     /* Phase 3: Subtle glow pulse */
@@ -2713,7 +2717,7 @@ textarea {
         0 1px 4px rgba(0, 0, 0, 0.04);
     min-height: auto;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
     position: relative;
     flex-shrink: 0;
 }
@@ -2761,7 +2765,7 @@ textarea {
     color: var(--us-accent, var(--accent));
     font-size: 14px;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-add-note:active {
@@ -2846,7 +2850,7 @@ textarea {
     color: var(--us-accent, var(--accent));
     font-size: 14px;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-add-secret-note:active {
@@ -3019,7 +3023,7 @@ textarea {
     font-size: 24px;
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-close-modal:active {
@@ -3070,7 +3074,7 @@ textarea {
     border: 2px dashed var(--border-color);
     border-radius: 16px;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-photo-source:active {
@@ -3347,7 +3351,7 @@ textarea {
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-save-adjust {
@@ -3386,7 +3390,7 @@ textarea {
     font-size: 24px;
     cursor: pointer;
     z-index: 1001;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-close-viewer {
@@ -3498,7 +3502,7 @@ textarea {
     color: white;
     font-size: 18px;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-nav-photo:active {
@@ -3660,7 +3664,7 @@ textarea {
     font-weight: 500;
     z-index: 10000;
     opacity: 0;
-    transition: all var(--transition-normal);
+    transition: transform var(--transition-normal), opacity var(--transition-normal), background var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
     box-shadow: 0 8px 32px rgba(74, 222, 128, 0.4);
     border: 1px solid rgba(74, 222, 128, 0.3);
 }
@@ -3684,7 +3688,7 @@ textarea {
     font-weight: 500;
     z-index: 10000;
     opacity: 0;
-    transition: all var(--transition-normal);
+    transition: transform var(--transition-normal), opacity var(--transition-normal), background var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
     box-shadow: 0 8px 32px rgba(239, 68, 68, 0.4);
     border: 1px solid rgba(239, 68, 68, 0.3);
 }
@@ -3763,7 +3767,7 @@ textarea {
     color: var(--text-secondary);
     cursor: pointer;
     transition: color var(--transition-fast), transform var(--transition-fast),
-                flex 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                flex 0.5s var(--ease);
     position: relative;
     overflow: hidden;
     min-width: 0;
@@ -3776,10 +3780,10 @@ textarea {
     padding: 0;
     opacity: 0;
     pointer-events: none;
-    transition: flex 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-                width 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-                padding 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.15s;
+    transition: flex 0.5s var(--ease),
+                width 0.5s var(--ease),
+                padding 0.5s var(--ease),
+                opacity 0.45s var(--ease) 0.15s;
 }
 
 .nav-item[data-tab="us"].revealed {
@@ -4117,7 +4121,7 @@ textarea {
     backdrop-filter: blur(10px);
     animation: fadeInUp 0.5s ease-out both;
     /* Phase 4: Touch depth transition */
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
 }
 
 /* Phase 4: Touch depth for milestone cards */
@@ -4240,7 +4244,7 @@ textarea {
     font-size: 14px;
     opacity: 0;
     will-change: transform, opacity;
-    animation: momentSparkle 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: momentSparkle 0.45s var(--ease) forwards;
 }
 
 /* Enhanced animations */
@@ -4383,7 +4387,7 @@ textarea {
 
 /* Modal entrance animation */
 .modal:not(.hidden) .modal-content {
-    animation: modalSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation: modalSlideIn 0.35s var(--ease-bounce) both;
 }
 
 @keyframes modalSlideIn {
@@ -4416,7 +4420,7 @@ textarea {
 
 /* Settle button pulse on hover */
 .btn-settle {
-    transition: all var(--transition-fast), box-shadow var(--transition-normal);
+    transition: transform var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-normal), border-color var(--transition-fast);
 }
 
 .btn-settle:active {
@@ -4434,7 +4438,7 @@ textarea {
 
 /* Smooth loading overlay transition */
 .loading {
-    transition: opacity 0.25s ease;
+    transition: opacity 0.25s var(--ease);
 }
 
 .loading.hidden {
@@ -4444,7 +4448,7 @@ textarea {
 
 /* Polaroid hover/touch */
 .polaroid {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
 }
 
 /* Toast entrance */
@@ -4460,7 +4464,7 @@ textarea {
 
 /* Mood option bounce on select */
 .mood-option.selected {
-    animation: moodBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), glow 2s ease-in-out infinite 0.4s;
+    animation: moodBounce 0.4s var(--ease-bounce), glow 2s ease-in-out infinite 0.4s;
 }
 
 @keyframes moodBounce {
@@ -4480,7 +4484,7 @@ textarea {
 
 /* Celebration confetti effect */
 .balance-celebration:not(.hidden) .celebration-content {
-    animation: celebrationPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation: celebrationPop 0.5s var(--ease-bounce) both;
 }
 
 @keyframes celebrationPop {
@@ -4490,7 +4494,7 @@ textarea {
 
 /* Sticky note subtle hover */
 .sticky-note {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
 }
 
 /* Secret note reveal */
@@ -4519,11 +4523,11 @@ select:focus {
 
 /* Radio/category option selection pop */
 .radio-option:has(input:checked) {
-    animation: selectPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: selectPop 0.25s var(--ease-bounce);
 }
 
 .category-option.selected {
-    animation: selectPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: selectPop 0.25s var(--ease-bounce);
 }
 
 @keyframes selectPop {
@@ -4553,7 +4557,7 @@ select:focus {
 
 /* Balance amount smooth transition */
 .balance-amount {
-    transition: transform 0.2s ease;
+    transition: transform 0.2s var(--ease);
 }
 
 /* Milestones section entrance */
@@ -4596,7 +4600,7 @@ select:focus {
 
 /* Pin dot fill animation */
 .pin-dot.filled {
-    animation: pinDotFill 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: pinDotFill 0.2s var(--ease-bounce);
 }
 
 @keyframes pinDotFill {
@@ -4815,7 +4819,7 @@ select:focus {
     backdrop-filter: blur(10px);
     box-shadow: 0 2px 16px rgba(194, 24, 91, 0.08);
     /* Phase 4: Touch depth transition */
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
 }
 
 /* Phase 4: Touch depth for moments preview */
@@ -4854,7 +4858,7 @@ select:focus {
     background: rgba(194, 24, 91, 0.04);
     border-radius: 14px;
     margin-top: 10px;
-    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.25s ease;
+    transition: background 0.2s var(--ease), transform 0.2s var(--ease), box-shadow 0.25s var(--ease);
 }
 
 /* Phase 4: Touch depth — scale + shadow on press */
@@ -4930,7 +4934,7 @@ select:focus {
     margin-top: 12px;
     border-radius: 12px;
     font-family: 'Inter', sans-serif;
-    transition: background 0.2s ease;
+    transition: background 0.2s var(--ease);
 }
 
 .moments-preview-add:active {
@@ -5032,7 +5036,7 @@ select:focus {
     cursor: pointer;
     margin-bottom: 24px;
     font-family: 'Inter', sans-serif;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition: background 0.2s var(--ease), border-color 0.2s var(--ease);
 }
 
 .moments-modal-add-btn:active {
@@ -5067,7 +5071,7 @@ select:focus {
     padding: 22px 22px;
     border: 1px solid var(--border-color);
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-    transition: box-shadow 0.25s ease, transform 0.2s ease;
+    transition: box-shadow 0.25s var(--ease), transform 0.2s var(--ease);
 }
 
 /* Phase 4: Touch depth — scale down with deeper shadow on press */
@@ -5169,7 +5173,7 @@ select:focus {
     cursor: pointer;
     font-family: 'Inter', sans-serif;
     font-weight: 500;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition: background 0.2s var(--ease), border-color 0.2s var(--ease);
 }
 
 .moment-btn-edit {
@@ -5204,7 +5208,7 @@ select:focus {
     display: flex;
     flex-direction: column;
     align-items: center;
-    animation: momentFormSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: momentFormSlideIn 0.4s var(--ease);
 }
 
 .moment-form-content::before {
@@ -5285,7 +5289,7 @@ select:focus {
     font-size: 15px;
     font-family: 'Inter', sans-serif;
     box-sizing: border-box;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease);
 }
 
 .moment-form-input:focus {
@@ -5316,7 +5320,7 @@ select:focus {
     cursor: pointer;
     font-family: 'Inter', sans-serif;
     border: none;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.2s var(--ease);
 }
 
 .moment-form-cancel {
@@ -5328,7 +5332,7 @@ select:focus {
     background: linear-gradient(135deg, #c2185b, #e91e63);
     color: #fff;
     box-shadow: 0 4px 16px rgba(194, 24, 91, 0.25);
-    transition: opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    transition: opacity 0.2s var(--ease), transform 0.15s var(--ease), box-shadow 0.2s var(--ease);
 }
 
 .moment-form-save:active {
