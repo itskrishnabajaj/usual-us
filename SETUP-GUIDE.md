@@ -387,8 +387,8 @@ Here's what every file and folder in the project does:
 | `icons/` | All the SVG icons — mood faces, expense categories, tab icons, who-pays indicators. |
 | `sounds/` | Sound effect MP3 files. |
 | `lib/` | Third-party libraries (GSAP, Lenis, Hammer.js) — copied here so they work offline. |
-| `icon-192.png` | App icon (small size — used for Android home screen). |
-| `icon-512.png` | App icon (large size — used for install splash). |
+| `icon-192.svg` | App icon (SVG — scales to any size, used for browser tabs and PWA). |
+| `icon-512.svg` | App icon (SVG — used for install splash and maskable icon). |
 
 ### Files and folders you should **never** edit:
 
