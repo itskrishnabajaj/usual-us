@@ -439,6 +439,12 @@
     display: none;                   /* Chrome, Safari, Android */
 }
 
+/* Global scroll + TWA native-app hardening */
+html {
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: var(--bg-primary);
@@ -446,6 +452,7 @@ body {
     line-height: 1.6;
     overflow-x: hidden;
     overscroll-behavior: none;
+    text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background var(--transition-normal);
@@ -1729,12 +1736,10 @@ textarea {
 .song-list {
     max-height: 200px;
     overflow-y: auto;
-    overflow-y: overlay;
     margin-bottom: 20px;
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     min-height: 0;
 }
@@ -3819,19 +3824,6 @@ textarea {
     }
 }
 
-/* Smooth scrolling + TWA native-app hardening */
-html {
-    scroll-behavior: smooth;
-    overscroll-behavior: none;
-}
-
-/* Better text rendering */
-body {
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
 /* Print styles */
 @media print {
     #bottom-nav,
@@ -4743,7 +4735,6 @@ select:focus {
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 20px 16px 80px;
-    -webkit-overflow-scrolling: touch;
     animation: slideUp 0.3s ease-out;
 }
 
@@ -4958,7 +4949,6 @@ select:focus {
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 0;
-    -webkit-overflow-scrolling: touch;
     display: flex;
     flex-direction: column;
     align-items: center;
