@@ -430,6 +430,7 @@
     padding: 0;
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;      /* Remove 300ms tap delay, disable double-tap zoom */
     scrollbar-width: none;           /* Firefox */
     -ms-overflow-style: none;        /* IE/Edge */
 }
@@ -444,7 +445,7 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
-    overscroll-behavior-x: none;
+    overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background var(--transition-normal);
@@ -517,6 +518,7 @@ body.us-active {
     animation: scaleIn 0.6s ease-out;
     position: relative;
     overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .login-title {
@@ -2818,6 +2820,7 @@ textarea {
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
+    overscroll-behavior: contain;
     position: relative;
     box-shadow: var(--shadow-lg);
     animation: slideUp 0.3s ease-out;
@@ -3816,10 +3819,10 @@ textarea {
     }
 }
 
-/* Smooth scrolling + disable Chrome horizontal overscroll navigation (TWA) */
+/* Smooth scrolling + TWA native-app hardening */
 html {
     scroll-behavior: smooth;
-    overscroll-behavior-x: none;
+    overscroll-behavior: none;
 }
 
 /* Better text rendering */
@@ -4738,6 +4741,7 @@ select:focus {
     background: var(--bg-primary);
     z-index: 1000;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 20px 16px 80px;
     -webkit-overflow-scrolling: touch;
     animation: slideUp 0.3s ease-out;
@@ -4952,6 +4956,7 @@ select:focus {
     background: var(--bg-primary);
     z-index: 1010;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 0;
     -webkit-overflow-scrolling: touch;
     display: flex;

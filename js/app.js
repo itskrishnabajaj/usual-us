@@ -223,12 +223,19 @@ if ('serviceWorker' in navigator) {
 }
 
 // ============================================
-// Block Chrome Horizontal Overscroll Navigation (TWA)
+// TWA Native-App Behavior Hardening
 // ============================================
-// Chrome interprets left-edge horizontal swipes as browser back navigation.
-// CSS overscroll-behavior-x: none handles most cases; this JS guard adds
-// defense-in-depth by intercepting touch moves that start within the edge
-// zone and travel horizontally, which would otherwise trigger the gesture.
+// Ensures the PWA feels indistinguishable from a native Android app
+// when running inside a Trusted Web Activity.
+
+// 1. Prevent Chrome scroll restoration artifacts during navigation
+if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+}
+
+// 2. Block Chrome horizontal overscroll navigation (edge-swipe)
+// CSS overscroll-behavior: none handles most cases; this JS guard adds
+// defense-in-depth by intercepting horizontal touch moves from screen edges.
 (function blockEdgeSwipe() {
     const EDGE_ZONE = 30; // px from screen edge that triggers Chrome gesture
     let _edgeTouch = false;
