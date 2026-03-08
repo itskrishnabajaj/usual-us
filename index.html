@@ -9,8 +9,8 @@
     <title>usual us</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="icon-192.svg">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,8 +24,8 @@
          Stage 1: Quiet beginning — gradient + first particle
          Stage 2: Two lights — second particle, both converge
          Stage 3: Heart creation — merge + pulse
-         Stage 4: Personal reveal — names + subtitle
-         Stage 5: App transformation — title, dissolve, exit
+         Stage 4: Subtitle + title reveal
+         Stage 5: Dissolve, exit
          ============================================ -->
     <div id="splash-screen" class="splash-screen">
         <div class="splash-bg"></div>
@@ -33,7 +33,6 @@
         <div class="splash-particle splash-p2"></div>
         <div class="splash-glow"></div>
         <div class="splash-heart">💖</div>
-        <div class="splash-names">Susu ❤️ Gugu</div>
         <div class="splash-subtitle">Our little universe</div>
         <div class="splash-title">usual us</div>
         <div class="splash-dissolve">
@@ -64,7 +63,7 @@
             <!-- Returning User Login -->
             <form id="returning-login-form" class="login-form hidden">
                 <div class="returning-hero">
-                    <div class="returning-avatar">💝</div>
+                    <div class="returning-avatar"><img src="icons/welcomeback.svg" alt="" class="returning-avatar-icon"></div>
                     <p class="returning-name-display">Welcome back, <span id="returning-name"></span></p>
                 </div>
                 <input type="password" id="returning-pin-input" maxlength="4" required readonly inputmode="none" class="returning-pin-hidden">
