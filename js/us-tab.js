@@ -35,47 +35,104 @@ function getCachedElements() {
 let _lastMilestonesDay = -1;
 
 let _pullToRefreshSetup = false;
+let _ptrRefreshing = false;
 
 function setupPullToRefresh() {
     if (_pullToRefreshSetup) return;
     const usTab = document.getElementById('us-tab');
-    if (!usTab) return;
+    const indicator = document.getElementById('ptr-indicator');
+    if (!usTab || !indicator) return;
     _pullToRefreshSetup = true;
-    
+
+    const THRESHOLD = 80;      // px to trigger refresh
+    const MAX_PULL = 130;      // visual cap for elastic feel
     let startY = 0;
-    let currentY = 0;
     let pulling = false;
-    
+
+    function isAtTop() {
+        return (window.scrollY || document.documentElement.scrollTop) <= 0;
+    }
+
     usTab.addEventListener('touchstart', (e) => {
-        if (usTab.scrollTop === 0) {
+        if (_ptrRefreshing) return;
+        if (isAtTop()) {
             startY = e.touches[0].pageY;
             pulling = true;
         }
     }, { passive: true });
-    
+
     usTab.addEventListener('touchmove', (e) => {
-        if (!pulling) return;
-        currentY = e.touches[0].pageY;
-    }, { passive: true });
-    
-    usTab.addEventListener('touchend', async () => {
-        if (!pulling) return;
-        
-        const pullDistance = currentY - startY;
-        
-        if (pullDistance > 80) {
-            await refreshUsTab();
+        if (!pulling || _ptrRefreshing) return;
+        // Cancel if user scrolled away from top
+        if (!isAtTop()) {
+            pulling = false;
+            indicator.style.height = '';
+            indicator.classList.remove('pulling');
+            return;
         }
-        
+        const diff = e.touches[0].pageY - startY;
+        if (diff <= 0) {
+            // Scrolling up — reset
+            indicator.style.height = '';
+            indicator.classList.remove('pulling');
+            return;
+        }
+        // Elastic damping: progress decelerates past threshold
+        const clamped = Math.min(diff, MAX_PULL);
+        const height = clamped * 0.55;
+        indicator.style.height = height + 'px';
+        indicator.classList.add('pulling');
+        // Rotate spinner proportionally to pull distance
+        const spinner = indicator.firstElementChild;
+        if (spinner) {
+            const rotation = (clamped / MAX_PULL) * 360;
+            spinner.style.transform = `scale(${Math.min(clamped / THRESHOLD, 1)}) rotate(${rotation}deg)`;
+        }
+    }, { passive: true });
+
+    usTab.addEventListener('touchend', async () => {
+        if (!pulling || _ptrRefreshing) { pulling = false; return; }
+        const indicatorH = parseFloat(indicator.style.height) || 0;
+        const reachedThreshold = indicatorH >= THRESHOLD * 0.55;
+
+        if (reachedThreshold) {
+            await triggerPtrRefresh(indicator);
+        } else {
+            resetPtrIndicator(indicator);
+        }
         pulling = false;
-        startY = 0;
-        currentY = 0;
     });
+}
+
+function resetPtrIndicator(indicator) {
+    indicator.classList.remove('pulling', 'refreshing');
+    indicator.classList.add('completing');
+    const spinner = indicator.firstElementChild;
+    if (spinner) spinner.style.transform = '';
+    setTimeout(() => {
+        indicator.style.height = '';
+        indicator.classList.remove('completing');
+    }, 300);
+}
+
+async function triggerPtrRefresh(indicator) {
+    _ptrRefreshing = true;
+    indicator.classList.remove('pulling');
+    indicator.classList.add('refreshing');
+    indicator.style.height = '48px';
+    const spinner = indicator.firstElementChild;
+    if (spinner) spinner.style.transform = '';
+
+    try {
+        await refreshUsTab();
+    } finally {
+        resetPtrIndicator(indicator);
+        _ptrRefreshing = false;
+    }
 }
 
 async function refreshUsTab() {
     console.log('🔄 Refreshing Us tab...');
-    showLoading(true);
     // Notify listeners (extensibility hook for future modules)
     EventBus.emit('us:refresh');
     await Promise.allSettled([
@@ -84,7 +141,6 @@ async function refreshUsTab() {
         loadSecretNotes(),
         updateLastSeen()
     ]);
-    showLoading(false);
 }
 
 function switchTab(tabName) {
