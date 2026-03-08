@@ -444,6 +444,7 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
+    overscroll-behavior-x: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background var(--transition-normal);
@@ -3815,9 +3816,10 @@ textarea {
     }
 }
 
-/* Smooth scrolling */
+/* Smooth scrolling + disable Chrome horizontal overscroll navigation (TWA) */
 html {
     scroll-behavior: smooth;
+    overscroll-behavior-x: none;
 }
 
 /* Better text rendering */

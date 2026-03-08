@@ -222,4 +222,50 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+// ============================================
+// Block Chrome Horizontal Overscroll Navigation (TWA)
+// ============================================
+// Chrome interprets left-edge horizontal swipes as browser back navigation.
+// CSS overscroll-behavior-x: none handles most cases; this JS guard adds
+// defense-in-depth by intercepting touch moves that start within the edge
+// zone and travel horizontally, which would otherwise trigger the gesture.
+(function blockEdgeSwipe() {
+    const EDGE_ZONE = 30; // px from screen edge that triggers Chrome gesture
+    let _edgeTouch = false;
+    let _startX = 0;
+    let _startY = 0;
+    let _decided = false;
+    let _blocking = false;
+
+    document.addEventListener('touchstart', (e) => {
+        const x = e.touches[0].clientX;
+        _edgeTouch = x < EDGE_ZONE || x > window.innerWidth - EDGE_ZONE;
+        _startX = x;
+        _startY = e.touches[0].clientY;
+        _decided = false;
+        _blocking = false;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+        if (!_edgeTouch || !e.cancelable) return;
+        // Determine swipe direction once after enough movement
+        if (!_decided) {
+            const dx = Math.abs(e.touches[0].clientX - _startX);
+            const dy = Math.abs(e.touches[0].clientY - _startY);
+            if (dx + dy < 10) return; // wait for meaningful movement
+            _decided = true;
+            _blocking = dx > dy; // horizontal swipe from edge → block
+        }
+        if (_blocking) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    document.addEventListener('touchend', () => {
+        _edgeTouch = false;
+        _decided = false;
+        _blocking = false;
+    }, { passive: true });
+})();
+
 console.log('✨ usual us - Complete rebuild ready for your love story');
