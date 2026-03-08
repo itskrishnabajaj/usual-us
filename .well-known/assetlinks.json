@@ -1,12 +1,8 @@
-[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "us.usual.twa",
-      "sha256_cert_fingerprints": [
-        "TODO:REPLACE_WITH_YOUR_SIGNING_KEY_SHA256_FINGERPRINT"
-      ]
-    }
-  }
-]
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "us.usual.twa",
+        "sha256_cert_fingerprints": ["C4:FA:4A:5C:14:34:3D:42:F4:BE:3E:97:09:E0:E7:C0:4C:F6:2A:90:4F:60:66:A4:AA:70:77:55:13:7C:81:D1"]
+      }
+    }]
