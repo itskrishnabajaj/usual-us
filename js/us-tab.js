@@ -87,6 +87,7 @@ function setupPullToRefresh() {
         }
         // Elastic damping — decelerates as you pull further
         pullDistance = Math.min(diff, MAX_PULL);
+        // Quadratic resistance: factor of 3 keeps damping gentle (higher = less resistance)
         const damped = pullDistance * (1 - pullDistance / (MAX_PULL * 3));
         const height = damped * 0.6;
         indicator.style.height = height + 'px';
