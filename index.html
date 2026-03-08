@@ -9,8 +9,8 @@
     <title>usual us</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="icon-192.svg">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,26 +20,36 @@
 <body>
     <!-- ============================================
          Cinematic Splash Screen
-         5-stage emotional animation ~5s total
-         Stage 1: Quiet beginning — gradient + first particle
-         Stage 2: Two lights — second particle, both converge
-         Stage 3: Heart creation — merge + pulse
-         Stage 4: Personal reveal — names + subtitle
-         Stage 5: App transformation — title, dissolve, exit
+         5-stage emotional animation ~10s total
+         Stage 1 (0–2s):  Ambient awakening — gradient + floating particles
+         Stage 2 (2–4s):  Two lights converge from opposite sides
+         Stage 3 (4–6s):  Heart formation — glow burst + pulse
+         Stage 4 (6–8s):  Shared memories orbit around heart
+         Stage 5 (8–10s): Universe reveal — dissolve, title, transition
          ============================================ -->
     <div id="splash-screen" class="splash-screen">
         <div class="splash-bg"></div>
+        <div class="splash-ambient">
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+        </div>
         <div class="splash-particle splash-p1"></div>
         <div class="splash-particle splash-p2"></div>
         <div class="splash-glow"></div>
         <div class="splash-heart">💖</div>
-        <div class="splash-names">Susu ❤️ Gugu</div>
+        <div class="splash-orbit">
+            <img src="icons/2flovely.svg" class="splash-orbit-icon splash-oi1" alt="" width="22" height="22">
+            <img src="icons/c2dates.svg" class="splash-orbit-icon splash-oi2" alt="" width="22" height="22">
+            <img src="icons/c4gifts.svg" class="splash-orbit-icon splash-oi3" alt="" width="22" height="22">
+            <img src="icons/tabs/ustab.svg" class="splash-orbit-icon splash-oi4" alt="" width="22" height="22">
+        </div>
         <div class="splash-subtitle">Our little universe</div>
         <div class="splash-title">usual us</div>
         <div class="splash-dissolve">
             <span></span><span></span><span></span><span></span>
             <span></span><span></span><span></span><span></span>
         </div>
+        <div class="splash-skip-hint">Tap three times to skip</div>
     </div>
 
     <!-- Login Screen -->
@@ -64,7 +74,7 @@
             <!-- Returning User Login -->
             <form id="returning-login-form" class="login-form hidden">
                 <div class="returning-hero">
-                    <div class="returning-avatar">💝</div>
+                    <div class="returning-avatar"><img src="icons/welcomeback.svg" alt="" class="returning-avatar-icon"></div>
                     <p class="returning-name-display">Welcome back, <span id="returning-name"></span></p>
                 </div>
                 <input type="password" id="returning-pin-input" maxlength="4" required readonly inputmode="none" class="returning-pin-hidden">

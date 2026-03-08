@@ -27,12 +27,12 @@
 
 /* ============================================
    Cinematic Splash Screen
-   5-stage emotional story ~5s total
-   Stage 1 (0–1s):    Quiet beginning — gradient + first particle
-   Stage 2 (1–2.2s):  Two lights converge toward center
-   Stage 3 (2.2–3s):  Heart creation — merge + pulse
-   Stage 4 (3–4s):    Personal reveal — names + subtitle
-   Stage 5 (4–5s):    App transformation — title, dissolve, exit
+   5-stage emotional story ~10s total
+   Stage 1 (0–2s):   Cosmic awakening — gradient + floating particles
+   Stage 2 (2–4s):   Two lights converge from opposite sides
+   Stage 3 (4–6s):   Morphing heart creation — glow burst + pulse
+   Stage 4 (6–8s):   Shared memories orbit around heart
+   Stage 5 (8–10s):  Universe expansion — dissolve, title, transition
    ============================================ */
 
 .splash-screen {
@@ -47,20 +47,109 @@
     background: #0a0a0a;
 }
 
-/* Stage 1 — Dark romantic gradient fades in */
+/* ---- Stage 1: Cosmic Awakening (0–2s) ---- */
+
 .splash-bg {
     position: absolute;
     inset: 0;
     background: radial-gradient(ellipse at 50% 40%, #2d1520 0%, #1a0a12 40%, #0a0a0a 100%);
     opacity: 0;
-    animation: splashBgIn 1.2s ease-out forwards;
+    animation: splashBgIn 2s ease-out forwards;
 }
 
 @keyframes splashBgIn {
     to { opacity: 1; }
 }
 
-/* Stage 1-2 — Converging light particles */
+/* Ambient floating particles — dreamy cosmic atmosphere */
+.splash-ambient {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.splash-ambient span {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0;
+    will-change: transform, opacity;
+}
+
+@keyframes splashAmbIn {
+    to { opacity: 1; }
+}
+
+@keyframes splashAmbA {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(15px, -25px); }
+    50% { transform: translate(-10px, -40px); }
+    75% { transform: translate(20px, -15px); }
+}
+
+@keyframes splashAmbB {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-20px, 18px); }
+    50% { transform: translate(12px, 30px); }
+    75% { transform: translate(-15px, 10px); }
+}
+
+@keyframes splashAmbC {
+    0%, 100% { transform: translate(0, 0); }
+    33% { transform: translate(22px, -18px); }
+    66% { transform: translate(-18px, 22px); }
+}
+
+.splash-ambient span:nth-child(1) {
+    width: 4px; height: 4px;
+    top: 20%; left: 15%;
+    background: rgba(255,182,193,0.5);
+    box-shadow: 0 0 8px rgba(255,182,193,0.3);
+    animation: splashAmbIn 1.5s 0.3s forwards, splashAmbA 8s 0.3s ease-in-out infinite;
+}
+
+.splash-ambient span:nth-child(2) {
+    width: 3px; height: 3px;
+    top: 65%; left: 80%;
+    background: rgba(255,198,217,0.4);
+    box-shadow: 0 0 6px rgba(255,198,217,0.3);
+    animation: splashAmbIn 1.5s 0.8s forwards, splashAmbB 9s 0.8s ease-in-out infinite;
+}
+
+.splash-ambient span:nth-child(3) {
+    width: 5px; height: 5px;
+    top: 35%; left: 72%;
+    background: rgba(255,182,193,0.3);
+    box-shadow: 0 0 10px rgba(255,182,193,0.25);
+    animation: splashAmbIn 1.5s 1.2s forwards, splashAmbC 7s 1.2s ease-in-out infinite;
+}
+
+.splash-ambient span:nth-child(4) {
+    width: 3px; height: 3px;
+    top: 75%; left: 25%;
+    background: rgba(255,198,217,0.45);
+    box-shadow: 0 0 6px rgba(255,198,217,0.3);
+    animation: splashAmbIn 1.5s 0.6s forwards, splashAmbA 10s 0.6s ease-in-out infinite;
+}
+
+.splash-ambient span:nth-child(5) {
+    width: 4px; height: 4px;
+    top: 15%; left: 55%;
+    background: rgba(255,182,193,0.35);
+    box-shadow: 0 0 8px rgba(255,182,193,0.3);
+    animation: splashAmbIn 1.5s 1.0s forwards, splashAmbB 8.5s 1.0s ease-in-out infinite;
+}
+
+.splash-ambient span:nth-child(6) {
+    width: 3px; height: 3px;
+    top: 50%; left: 88%;
+    background: rgba(255,198,217,0.4);
+    box-shadow: 0 0 6px rgba(255,198,217,0.25);
+    animation: splashAmbIn 1.5s 1.4s forwards, splashAmbC 9.5s 1.4s ease-in-out infinite;
+}
+
+/* ---- Stage 2: Two Lights Converge (2–4s) ---- */
+
 .splash-particle {
     position: absolute;
     top: 50%;
@@ -70,48 +159,51 @@
     border-radius: 50%;
     z-index: 2;
     opacity: 0;
+    will-change: transform, opacity;
 }
 
-/* Particle 1 — drifts in from the left */
 .splash-p1 {
     background: radial-gradient(circle, rgba(255,182,193,0.9) 0%, rgba(255,105,135,0.3) 70%, transparent 100%);
     box-shadow: 0 0 20px rgba(255,182,193,0.6), 0 0 40px rgba(255,105,135,0.25);
-    animation: splashP1 1.8s 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: splashP1 2s 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes splashP1 {
-    0%   { opacity: 0; transform: translate(-120px, 20px) scale(0.3); }
-    20%  { opacity: 1; transform: translate(-90px, 12px) scale(1); }
-    85%  { opacity: 0.5; transform: translate(-8px, 2px) scale(0.5); }
+    0%   { opacity: 0; transform: translate(-140px, 20px) scale(0.3); }
+    15%  { opacity: 1; transform: translate(-110px, 14px) scale(1); }
+    85%  { opacity: 0.6; transform: translate(-10px, 2px) scale(0.6); }
     100% { opacity: 0; transform: translate(0, 0) scale(0); }
 }
 
-/* Particle 2 — drifts in from the right */
 .splash-p2 {
     background: radial-gradient(circle, rgba(255,198,217,0.9) 0%, rgba(255,150,180,0.3) 70%, transparent 100%);
     box-shadow: 0 0 20px rgba(255,198,217,0.6), 0 0 40px rgba(255,150,180,0.25);
-    animation: splashP2 1.3s 1.0s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: splashP2 1.8s 2.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes splashP2 {
-    0%   { opacity: 0; transform: translate(120px, -20px) scale(0.3); }
-    20%  { opacity: 1; transform: translate(90px, -12px) scale(1); }
-    85%  { opacity: 0.5; transform: translate(8px, -2px) scale(0.5); }
+    0%   { opacity: 0; transform: translate(140px, -20px) scale(0.3); }
+    15%  { opacity: 1; transform: translate(110px, -14px) scale(1); }
+    85%  { opacity: 0.6; transform: translate(10px, -2px) scale(0.6); }
     100% { opacity: 0; transform: translate(0, 0) scale(0); }
 }
 
-/* Glow behind heart — intensifies as particles merge */
+/* ---- Stage 3: Morphing Heart Creation (4–6s) ---- */
+
+/* Glow burst as particles merge */
 .splash-glow {
     position: absolute;
     width: 200px;
     height: 200px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,182,193,0.35) 0%, rgba(255,105,135,0.12) 50%, transparent 70%);
+    background: radial-gradient(circle, rgba(255,182,193,0.4) 0%, rgba(255,105,135,0.15) 50%, transparent 70%);
     filter: blur(35px);
     opacity: 0;
-    animation: splashGlowIn 0.8s 2.0s ease-out forwards,
-               splashGlowPulse 2s 2.8s ease-in-out 2;
     z-index: 0;
+    animation:
+        splashGlowIn 0.5s 3.8s ease-out forwards,
+        splashGlowPulse 2s 5s ease-in-out 3,
+        splashGlowOut 1s 8.3s ease-in forwards;
 }
 
 @keyframes splashGlowIn {
@@ -120,26 +212,35 @@
 
 @keyframes splashGlowPulse {
     0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.15); opacity: 0.7; }
+    50% { transform: scale(1.2); opacity: 0.6; }
 }
 
-/* Stage 3 — Heart creation from merged particles */
+@keyframes splashGlowOut {
+    to { opacity: 0; transform: scale(1.5); }
+}
+
+/* Heart morphs from merged energy — organic scale-up with bounce */
 .splash-heart {
     position: relative;
     font-size: 58px;
     opacity: 0;
     transform: scale(0);
     z-index: 3;
-    filter: drop-shadow(0 0 12px rgba(255,105,135,0.4));
+    filter: drop-shadow(0 0 15px rgba(255,105,135,0.5));
+    will-change: transform, opacity;
     animation:
-        splashHeartIn 0.7s 2.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
-        splashHeartPulse 1.2s 3.0s ease-in-out 1;
+        splashHeartMorph 1s 4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+        splashHeartPulse 1.2s 5.2s ease-in-out 2,
+        splashHeartDissolve 1.2s 8.3s ease-in forwards;
 }
 
-@keyframes splashHeartIn {
-    0%   { opacity: 0; transform: scale(0); }
-    60%  { opacity: 1; transform: scale(1.1); }
-    100% { opacity: 1; transform: scale(1); }
+/* Morph: blob → heart with organic overshoot */
+@keyframes splashHeartMorph {
+    0%   { opacity: 0; transform: scale(0) rotate(-10deg); filter: drop-shadow(0 0 30px rgba(255,105,135,0.8)) blur(8px); }
+    25%  { opacity: 1; transform: scale(0.6) rotate(-5deg); filter: drop-shadow(0 0 25px rgba(255,105,135,0.7)) blur(4px); }
+    50%  { opacity: 1; transform: scale(1.2) rotate(3deg); filter: drop-shadow(0 0 20px rgba(255,105,135,0.6)) blur(1px); }
+    75%  { opacity: 1; transform: scale(0.95) rotate(-1deg); filter: drop-shadow(0 0 15px rgba(255,105,135,0.5)) blur(0); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 15px rgba(255,105,135,0.5)) blur(0); }
 }
 
 @keyframes splashHeartPulse {
@@ -147,22 +248,68 @@
     50% { transform: scale(1.12); }
 }
 
-/* Stage 4 — Names reveal */
-.splash-names {
-    position: relative;
-    font-family: 'Playfair Display', serif;
-    font-size: 16px;
-    font-style: italic;
-    color: rgba(255, 198, 217, 0.9);
-    letter-spacing: 2.5px;
-    margin-top: 18px;
-    opacity: 0;
-    transform: translateY(10px);
-    animation: splashFadeUp 0.6s 3.2s ease-out forwards;
-    z-index: 3;
+/* Stage 5 dissolve: heart glows brighter then fades */
+@keyframes splashHeartDissolve {
+    0%   { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 15px rgba(255,105,135,0.5)); }
+    30%  { opacity: 1; transform: scale(1.15); filter: drop-shadow(0 0 30px rgba(255,105,135,0.8)); }
+    100% { opacity: 0; transform: scale(1.6); filter: drop-shadow(0 0 40px rgba(255,105,135,0.3)); }
 }
 
-/* Subtitle tagline */
+/* ---- Stage 4: Shared Memories Orbit (6–8s) ---- */
+
+.splash-orbit {
+    position: absolute;
+    top: calc(50% - 40px);
+    left: 50%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.splash-orbit-icon {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    margin: -11px;
+    opacity: 0;
+    filter: drop-shadow(0 0 6px rgba(255,182,193,0.5));
+    will-change: transform, opacity;
+}
+
+.splash-oi1 { animation: splashOrbit0 2.5s 6s ease-in-out forwards; }
+.splash-oi2 { animation: splashOrbit90 2.5s 6.15s ease-in-out forwards; }
+.splash-oi3 { animation: splashOrbit180 2.5s 6.3s ease-in-out forwards; }
+.splash-oi4 { animation: splashOrbit270 2.5s 6.45s ease-in-out forwards; }
+
+@keyframes splashOrbit0 {
+    0%   { opacity: 0; transform: rotate(0deg) translateY(-80px) rotate(0deg) scale(0.3); }
+    12%  { opacity: 0.7; transform: rotate(7deg) translateY(-80px) rotate(-7deg) scale(1); }
+    88%  { opacity: 0.7; transform: rotate(53deg) translateY(-80px) rotate(-53deg) scale(1); }
+    100% { opacity: 0; transform: rotate(60deg) translateY(-80px) rotate(-60deg) scale(0.3); }
+}
+
+@keyframes splashOrbit90 {
+    0%   { opacity: 0; transform: rotate(90deg) translateY(-80px) rotate(-90deg) scale(0.3); }
+    12%  { opacity: 0.7; transform: rotate(97deg) translateY(-80px) rotate(-97deg) scale(1); }
+    88%  { opacity: 0.7; transform: rotate(143deg) translateY(-80px) rotate(-143deg) scale(1); }
+    100% { opacity: 0; transform: rotate(150deg) translateY(-80px) rotate(-150deg) scale(0.3); }
+}
+
+@keyframes splashOrbit180 {
+    0%   { opacity: 0; transform: rotate(180deg) translateY(-80px) rotate(-180deg) scale(0.3); }
+    12%  { opacity: 0.7; transform: rotate(187deg) translateY(-80px) rotate(-187deg) scale(1); }
+    88%  { opacity: 0.7; transform: rotate(233deg) translateY(-80px) rotate(-233deg) scale(1); }
+    100% { opacity: 0; transform: rotate(240deg) translateY(-80px) rotate(-240deg) scale(0.3); }
+}
+
+@keyframes splashOrbit270 {
+    0%   { opacity: 0; transform: rotate(270deg) translateY(-80px) rotate(-270deg) scale(0.3); }
+    12%  { opacity: 0.7; transform: rotate(277deg) translateY(-80px) rotate(-277deg) scale(1); }
+    88%  { opacity: 0.7; transform: rotate(323deg) translateY(-80px) rotate(-323deg) scale(1); }
+    100% { opacity: 0; transform: rotate(330deg) translateY(-80px) rotate(-330deg) scale(0.3); }
+}
+
+/* ---- Stage 5: Universe Expansion & App Reveal (8–10s) ---- */
+
 .splash-subtitle {
     position: relative;
     font-family: 'Playfair Display', serif;
@@ -170,14 +317,13 @@
     color: rgba(255, 198, 217, 0.4);
     letter-spacing: 4px;
     text-transform: uppercase;
-    margin-top: 8px;
+    margin-top: 18px;
     opacity: 0;
     transform: translateY(8px);
-    animation: splashFadeUp 0.5s 3.6s ease-out forwards;
     z-index: 3;
+    animation: splashFadeUp 0.6s 8.5s ease-out forwards;
 }
 
-/* Stage 5 — App title reveals */
 .splash-title {
     position: relative;
     font-family: 'Playfair Display', serif;
@@ -185,11 +331,11 @@
     font-weight: 600;
     color: #ffffff;
     letter-spacing: 5px;
-    margin-top: 14px;
+    margin-top: 12px;
     opacity: 0;
     transform: translateY(12px) scale(0.95);
-    animation: splashTitleIn 0.5s 3.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
     z-index: 3;
+    animation: splashTitleIn 0.6s 8.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 @keyframes splashFadeUp {
@@ -200,10 +346,10 @@
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Dissolve particles — hidden until exit, offset to align with heart center */
+/* Dissolve particles — scatter from heart at Stage 5 */
 .splash-dissolve {
     position: absolute;
-    top: calc(50% - 40px); /* Vertically aligns scatter origin with heart position */
+    top: calc(50% - 40px);
     left: 50%;
     z-index: 4;
     pointer-events: none;
@@ -217,78 +363,64 @@
     background: rgba(255, 198, 217, 0.8);
     box-shadow: 0 0 6px rgba(255, 182, 193, 0.6);
     opacity: 0;
+    animation: splashScatter 0.8s ease-out forwards;
 }
 
-/* Scatter directions for dissolve particles */
-.splash-dissolve span:nth-child(1) { --dx: -60px; --dy: -80px; }
-.splash-dissolve span:nth-child(2) { --dx: 55px;  --dy: -70px; }
-.splash-dissolve span:nth-child(3) { --dx: -75px; --dy: 25px; }
-.splash-dissolve span:nth-child(4) { --dx: 65px;  --dy: 35px; }
-.splash-dissolve span:nth-child(5) { --dx: -30px; --dy: -95px; }
-.splash-dissolve span:nth-child(6) { --dx: 20px;  --dy: 80px; }
-.splash-dissolve span:nth-child(7) { --dx: -85px; --dy: -15px; }
-.splash-dissolve span:nth-child(8) { --dx: 80px;  --dy: -25px; }
-
-/* ---- Exit: Continuity dissolve into app ---- */
-
-/* Heart expands and fades */
-.splash-screen.splash-exit .splash-heart {
-    animation: splashHeartDissolve 0.45s ease-in forwards;
-}
-
-@keyframes splashHeartDissolve {
-    0%   { opacity: 1; transform: scale(1); }
-    100% { opacity: 0; transform: scale(1.5); }
-}
-
-/* Particles scatter outward from heart center */
-.splash-screen.splash-exit .splash-dissolve span {
-    animation: splashScatter 0.5s ease-out forwards;
-}
-
-.splash-screen.splash-exit .splash-dissolve span:nth-child(2) { animation-delay: 0.03s; }
-.splash-screen.splash-exit .splash-dissolve span:nth-child(3) { animation-delay: 0.05s; }
-.splash-screen.splash-exit .splash-dissolve span:nth-child(4) { animation-delay: 0.07s; }
-.splash-screen.splash-exit .splash-dissolve span:nth-child(5) { animation-delay: 0.04s; }
-.splash-screen.splash-exit .splash-dissolve span:nth-child(6) { animation-delay: 0.06s; }
-.splash-screen.splash-exit .splash-dissolve span:nth-child(7) { animation-delay: 0.02s; }
-.splash-screen.splash-exit .splash-dissolve span:nth-child(8) { animation-delay: 0.08s; }
+.splash-dissolve span:nth-child(1) { --dx: -60px; --dy: -80px; animation-delay: 8.5s; }
+.splash-dissolve span:nth-child(2) { --dx: 55px;  --dy: -70px; animation-delay: 8.53s; }
+.splash-dissolve span:nth-child(3) { --dx: -75px; --dy: 25px;  animation-delay: 8.55s; }
+.splash-dissolve span:nth-child(4) { --dx: 65px;  --dy: 35px;  animation-delay: 8.57s; }
+.splash-dissolve span:nth-child(5) { --dx: -30px; --dy: -95px; animation-delay: 8.54s; }
+.splash-dissolve span:nth-child(6) { --dx: 20px;  --dy: 80px;  animation-delay: 8.56s; }
+.splash-dissolve span:nth-child(7) { --dx: -85px; --dy: -15px; animation-delay: 8.52s; }
+.splash-dissolve span:nth-child(8) { --dx: 80px;  --dy: -25px; animation-delay: 8.58s; }
 
 @keyframes splashScatter {
     0%   { opacity: 0.9; transform: translate(0, 0) scale(1.2); }
     100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
 }
 
-/* Text + glow fade out */
-.splash-screen.splash-exit .splash-names,
-.splash-screen.splash-exit .splash-subtitle,
-.splash-screen.splash-exit .splash-title {
-    animation: splashTextOut 0.35s ease-in forwards;
+/* Skip hint — subtle, appears at 3s, fades by 7s */
+.splash-skip-hint {
+    position: absolute;
+    bottom: 60px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: rgba(255, 198, 217, 0.35);
+    letter-spacing: 1.5px;
+    z-index: 5;
+    opacity: 0;
+    animation: splashHintShow 4s 3s ease-in-out forwards;
 }
 
-.splash-screen.splash-exit .splash-glow {
-    animation: splashTextOut 0.4s ease-in forwards;
+@keyframes splashHintShow {
+    0% { opacity: 0; }
+    15% { opacity: 0.5; }
+    75% { opacity: 0.5; }
+    100% { opacity: 0; }
 }
 
-@keyframes splashTextOut {
-    from { opacity: 1; transform: translateY(0); }
-    to   { opacity: 0; transform: translateY(-8px); }
-}
-
-/* Entire splash container fades — continuity into app */
+/* ---- Normal exit (at ~9.4s) ---- */
 .splash-screen.splash-exit {
-    animation: splashContainerExit 0.6s 0.1s ease-in forwards;
+    animation: splashContainerExit 0.6s ease-in forwards;
     pointer-events: none;
 }
 
 @keyframes splashContainerExit {
-    to {
-        opacity: 0;
-        transform: scale(1.03);
-    }
+    to { opacity: 0; transform: scale(1.02); }
 }
 
-/* Hide splash after exit completes */
+/* ---- Skip exit (triple-tap, fast 300ms) ---- */
+.splash-screen.splash-skip {
+    animation: splashSkipOut 0.3s ease-in forwards;
+    pointer-events: none;
+}
+
+@keyframes splashSkipOut {
+    to { opacity: 0; transform: scale(1.04); }
+}
+
+/* ---- Hide after exit completes ---- */
 .splash-screen.splash-done {
     display: none;
 }
@@ -298,6 +430,7 @@
     padding: 0;
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;      /* Remove 300ms tap delay, disable double-tap zoom */
     scrollbar-width: none;           /* Firefox */
     -ms-overflow-style: none;        /* IE/Edge */
 }
@@ -306,12 +439,20 @@
     display: none;                   /* Chrome, Safari, Android */
 }
 
+/* Global scroll + TWA native-app hardening */
+html {
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
+    overscroll-behavior: none;
+    text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background var(--transition-normal);
@@ -384,6 +525,7 @@ body.us-active {
     animation: scaleIn 0.6s ease-out;
     position: relative;
     overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .login-title {
@@ -423,9 +565,17 @@ body.us-active {
 }
 
 .returning-avatar {
-    font-size: 48px;
     margin-bottom: 10px;
+    line-height: 1;
     animation: heartbeat 2s ease-in-out infinite;
+}
+
+.returning-avatar-icon {
+    width: 48px;
+    height: 48px;
+    display: block;
+    margin: 0 auto;
+    object-fit: contain;
 }
 
 .returning-welcome {
@@ -1586,12 +1736,10 @@ textarea {
 .song-list {
     max-height: 200px;
     overflow-y: auto;
-    overflow-y: overlay;
     margin-bottom: 20px;
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     min-height: 0;
 }
@@ -2677,6 +2825,7 @@ textarea {
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
+    overscroll-behavior: contain;
     position: relative;
     box-shadow: var(--shadow-lg);
     animation: slideUp 0.3s ease-out;
@@ -3675,18 +3824,6 @@ textarea {
     }
 }
 
-/* Smooth scrolling */
-html {
-    scroll-behavior: smooth;
-}
-
-/* Better text rendering */
-body {
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
 /* Print styles */
 @media print {
     #bottom-nav,
@@ -4596,8 +4733,8 @@ select:focus {
     background: var(--bg-primary);
     z-index: 1000;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 20px 16px 80px;
-    -webkit-overflow-scrolling: touch;
     animation: slideUp 0.3s ease-out;
 }
 
@@ -4810,8 +4947,8 @@ select:focus {
     background: var(--bg-primary);
     z-index: 1010;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 0;
-    -webkit-overflow-scrolling: touch;
     display: flex;
     flex-direction: column;
     align-items: center;
