@@ -44,9 +44,11 @@ function setupPullToRefresh() {
     if (!usTab || !indicator) return;
     _pullToRefreshSetup = true;
 
+    const spinner = indicator.firstElementChild;
     const THRESHOLD = 80;      // px to trigger refresh
     const MAX_PULL = 130;      // visual cap for elastic feel
     let startY = 0;
+    let pullDistance = 0;
     let pulling = false;
 
     function isAtTop() {
@@ -57,6 +59,7 @@ function setupPullToRefresh() {
         if (_ptrRefreshing) return;
         if (isAtTop()) {
             startY = e.touches[0].pageY;
+            pullDistance = 0;
             pulling = true;
         }
     }, { passive: true });
@@ -66,6 +69,7 @@ function setupPullToRefresh() {
         // Cancel if user scrolled away from top
         if (!isAtTop()) {
             pulling = false;
+            pullDistance = 0;
             indicator.style.height = '';
             indicator.classList.remove('pulling');
             return;
@@ -73,41 +77,40 @@ function setupPullToRefresh() {
         const diff = e.touches[0].pageY - startY;
         if (diff <= 0) {
             // Scrolling up — reset
+            pullDistance = 0;
             indicator.style.height = '';
             indicator.classList.remove('pulling');
             return;
         }
         // Elastic damping: progress decelerates past threshold
-        const clamped = Math.min(diff, MAX_PULL);
-        const height = clamped * 0.55;
+        pullDistance = Math.min(diff, MAX_PULL);
+        const height = pullDistance * 0.55;
         indicator.style.height = height + 'px';
         indicator.classList.add('pulling');
         // Rotate spinner proportionally to pull distance
-        const spinner = indicator.firstElementChild;
         if (spinner) {
-            const rotation = (clamped / MAX_PULL) * 360;
-            spinner.style.transform = `scale(${Math.min(clamped / THRESHOLD, 1)}) rotate(${rotation}deg)`;
+            const rotation = (pullDistance / MAX_PULL) * 360;
+            spinner.style.transform = `scale(${Math.min(pullDistance / THRESHOLD, 1)}) rotate(${rotation}deg)`;
         }
     }, { passive: true });
 
     usTab.addEventListener('touchend', async () => {
         if (!pulling || _ptrRefreshing) { pulling = false; return; }
-        const indicatorH = parseFloat(indicator.style.height) || 0;
-        const reachedThreshold = indicatorH >= THRESHOLD * 0.55;
+        const reachedThreshold = pullDistance >= THRESHOLD;
 
         if (reachedThreshold) {
-            await triggerPtrRefresh(indicator);
+            await triggerPtrRefresh(indicator, spinner);
         } else {
-            resetPtrIndicator(indicator);
+            resetPtrIndicator(indicator, spinner);
         }
         pulling = false;
+        pullDistance = 0;
     });
 }
 
-function resetPtrIndicator(indicator) {
+function resetPtrIndicator(indicator, spinner) {
     indicator.classList.remove('pulling', 'refreshing');
     indicator.classList.add('completing');
-    const spinner = indicator.firstElementChild;
     if (spinner) spinner.style.transform = '';
     setTimeout(() => {
         indicator.style.height = '';
@@ -115,18 +118,17 @@ function resetPtrIndicator(indicator) {
     }, 300);
 }
 
-async function triggerPtrRefresh(indicator) {
+async function triggerPtrRefresh(indicator, spinner) {
     _ptrRefreshing = true;
     indicator.classList.remove('pulling');
     indicator.classList.add('refreshing');
     indicator.style.height = '48px';
-    const spinner = indicator.firstElementChild;
     if (spinner) spinner.style.transform = '';
 
     try {
         await refreshUsTab();
     } finally {
-        resetPtrIndicator(indicator);
+        resetPtrIndicator(indicator, spinner);
         _ptrRefreshing = false;
     }
 }
