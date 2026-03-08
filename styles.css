@@ -109,7 +109,7 @@
     background: radial-gradient(circle, rgba(255,182,193,0.35) 0%, rgba(255,105,135,0.12) 50%, transparent 70%);
     filter: blur(35px);
     opacity: 0;
-    animation: splashGlowIn 0.8s 1.8s ease-out forwards,
+    animation: splashGlowIn 0.8s 2.0s ease-out forwards,
                splashGlowPulse 2s 2.8s ease-in-out 2;
     z-index: 0;
 }
@@ -200,10 +200,10 @@
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Dissolve particles — hidden until exit */
+/* Dissolve particles — hidden until exit, offset to align with heart center */
 .splash-dissolve {
     position: absolute;
-    top: calc(50% - 40px);
+    top: calc(50% - 40px); /* Vertically aligns scatter origin with heart position */
     left: 50%;
     z-index: 4;
     pointer-events: none;
