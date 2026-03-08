@@ -408,29 +408,104 @@
     100% { opacity: 0; }
 }
 
-/* ---- Normal exit (at ~9.4s) ---- */
-.splash-screen.splash-exit {
-    animation: splashContainerExit 0.6s ease-in forwards;
+/* ---- Cinematic bridge glow — expands to fill screen during exit ---- */
+.splash-bridge {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+        rgba(255, 182, 193, 0.6) 0%,
+        rgba(194, 24, 91, 0.2) 40%,
+        transparent 70%
+    );
+    opacity: 0;
+    z-index: 6;
     pointer-events: none;
+    will-change: transform, opacity;
+}
+
+/* ---- Normal exit (at ~9.4s) — cinematic dissolve into login ---- */
+.splash-screen.splash-exit {
+    pointer-events: none;
+}
+
+.splash-screen.splash-exit .splash-bg,
+.splash-screen.splash-exit .splash-ambient,
+.splash-screen.splash-exit .splash-subtitle,
+.splash-screen.splash-exit .splash-title,
+.splash-screen.splash-exit .splash-skip-hint {
+    animation: splashElementFade 0.8s ease-in forwards;
+}
+
+.splash-screen.splash-exit .splash-bridge {
+    animation: splashBridgeExpand 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* The container itself fades after bridge peaks */
+.splash-screen.splash-exit {
+    animation: splashContainerExit 1s ease-in forwards;
+}
+
+@keyframes splashElementFade {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes splashBridgeExpand {
+    0%   { opacity: 0; transform: scale(1); }
+    20%  { opacity: 0.8; transform: scale(2); }
+    60%  { opacity: 0.5; transform: scale(8); }
+    100% { opacity: 0; transform: scale(16); }
 }
 
 @keyframes splashContainerExit {
-    to { opacity: 0; transform: scale(1.02); }
+    0%   { opacity: 1; }
+    70%  { opacity: 1; }
+    100% { opacity: 0; }
 }
 
-/* ---- Skip exit (triple-tap, fast 300ms) ---- */
+/* ---- Skip exit (triple-tap, fast 400ms) ---- */
 .splash-screen.splash-skip {
-    animation: splashSkipOut 0.3s ease-in forwards;
     pointer-events: none;
 }
 
+.splash-screen.splash-skip .splash-bridge {
+    animation: splashBridgeExpand 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.splash-screen.splash-skip {
+    animation: splashSkipOut 0.4s ease-in forwards;
+}
+
 @keyframes splashSkipOut {
-    to { opacity: 0; transform: scale(1.04); }
+    0%   { opacity: 1; }
+    60%  { opacity: 1; }
+    100% { opacity: 0; }
 }
 
 /* ---- Hide after exit completes ---- */
 .splash-screen.splash-done {
     display: none;
+}
+
+/* ---- Login screen entrance — continues the splash visual language ---- */
+.login-screen.splash-reveal {
+    animation: loginReveal 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.login-screen.splash-reveal .login-container {
+    animation: loginContainerReveal 0.6s 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes loginReveal {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes loginContainerReveal {
+    0%   { opacity: 0; transform: scale(0.92) translateY(16px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 * {

@@ -5,10 +5,13 @@
 // ---- Splash Screen Controller ----
 // 10-second cinematic animation with 5 stages:
 // Cosmic Awakening → Two Lights → Heart Morph → Orbit → Universe Reveal
+// Stage 5 dissolves into a bridge glow that expands into the login screen
 // Supports triple-tap skip (3 taps within 700ms)
 const SPLASH_DISPLAY_MS = 9400;  // Time before starting normal exit
-const SPLASH_EXIT_MS    = 600;   // Normal exit animation duration
-const SPLASH_SKIP_MS    = 300;   // Skip exit animation duration
+const SPLASH_EXIT_MS    = 1000;  // Normal exit animation duration (cinematic bridge)
+const SPLASH_SKIP_MS    = 400;   // Skip exit animation duration (fast bridge)
+const SPLASH_REVEAL_MS  = 300;   // Delay before login screen fades in (normal)
+const SPLASH_REVEAL_SKIP_MS = 100; // Delay before login screen fades in (skip)
 const TAP_WINDOW_MS     = 700;   // Triple-tap detection window
 
 let _splashResolved = false;
@@ -23,7 +26,20 @@ function dismissSplash(quick) {
             return;
         }
         splash.removeEventListener('click', _handleSplashTap);
+
+        // Start bridge glow + exit animation
         splash.classList.add(quick ? 'splash-skip' : 'splash-exit');
+
+        // Reveal login screen mid-transition so backgrounds overlap seamlessly
+        const revealDelay = quick ? SPLASH_REVEAL_SKIP_MS : SPLASH_REVEAL_MS;
+        setTimeout(() => {
+            const loginScreen = document.getElementById('login-screen');
+            if (loginScreen && loginScreen.classList.contains('hidden')) {
+                // initializeAuth will remove hidden; add reveal class preemptively
+                loginScreen.classList.add('splash-reveal');
+            }
+        }, revealDelay);
+
         setTimeout(() => {
             splash.classList.add('splash-done');
             resolve();
@@ -50,6 +66,11 @@ async function _startApp(skipped) {
     _startApp._ran = true;
     await dismissSplash(!!skipped);
     initializeAuth();
+    // Ensure the login screen reveal animation plays
+    const loginScreen = document.getElementById('login-screen');
+    if (loginScreen && !loginScreen.classList.contains('splash-reveal')) {
+        loginScreen.classList.add('splash-reveal');
+    }
     setupEventListeners();
     if ('requestIdleCallback' in window) {
         requestIdleCallback(() => initializeMusicPlayer());
