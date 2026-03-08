@@ -202,10 +202,17 @@ function closeMomentsModal() {
     if (modal) modal.classList.add('hidden');
 }
 
+let _lastMomentsHash = '';
+
 function renderMomentsFullView() {
     const upcomingList = document.getElementById('moments-upcoming-list');
     const pastList = document.getElementById('moments-past-list');
     if (!upcomingList || !pastList) return;
+
+    // Skip re-render if data hasn't changed (include length for mutation detection)
+    const hash = moments.length + ':' + moments.map(m => m.id + (m.title || '') + (m.mood || '') + (m.linkedExpenses || []).length + (m.linkedMemories || []).length).join(',');
+    if (hash === _lastMomentsHash && upcomingList.children.length > 0) return;
+    _lastMomentsHash = hash;
 
     const now = new Date();
     now.setHours(0, 0, 0, 0);

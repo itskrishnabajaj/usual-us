@@ -3,10 +3,10 @@
 // ============================================
 
 // ---- Splash Screen Controller ----
-// The splash animation runs ~1.8s, then a 0.4s exit = ~2.2s total.
-// App initialization is delayed until the splash completes.
-const SPLASH_DISPLAY_MS = 1800;  // Time before starting exit
-const SPLASH_EXIT_MS    = 400;   // Exit animation duration
+// The splash runs a 5-stage cinematic animation (~5s total):
+// Particles → Heart → Names → Title → Dissolve into app
+const SPLASH_DISPLAY_MS = 4500;  // Time before starting exit
+const SPLASH_EXIT_MS    = 600;   // Exit animation duration
 
 function dismissSplash() {
     return new Promise(resolve => {
@@ -31,18 +31,36 @@ async function loadData() {
             loadExpenses(),
             loadBudget()
         ]);
-        // Load remaining modules in background after initial render
-        Promise.all([
+        // Defer non-critical modules until idle or tab switch
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(() => {
+                loadDeferredModules();
+            });
+        } else {
+            setTimeout(loadDeferredModules, 200);
+        }
+    } catch (error) {
+        console.error('❌ Error loading data:', error);
+    }
+    showLoading(false);
+}
+
+let _deferredLoaded = false;
+async function loadDeferredModules() {
+    if (_deferredLoaded) return;
+    _deferredLoaded = true;
+    try {
+        await Promise.all([
             loadMemories(),
             loadNotes(),
             loadSecretNotes(),
             loadTodaysMood(),
             loadMoments()
-        ]).catch(err => console.warn('⚠️ Background data load error:', err));
-    } catch (error) {
-        console.error('❌ Error loading data:', error);
+        ]);
+    } catch (err) {
+        _deferredLoaded = false;
+        console.warn('⚠️ Background data load error:', err);
     }
-    showLoading(false);
 }
 
 // ============================================
@@ -125,8 +143,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(async () => {
         await dismissSplash();
         initializeAuth();
-        initializeMusicPlayer();
         setupEventListeners();
+        // Defer music player init — only needed on Us tab
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(() => initializeMusicPlayer());
+        } else {
+            setTimeout(initializeMusicPlayer, 300);
+        }
     }, SPLASH_DISPLAY_MS);
 });
 

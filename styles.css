@@ -27,7 +27,12 @@
 
 /* ============================================
    Cinematic Splash Screen
-   Multi-stage animation ~2.2s total
+   5-stage emotional story ~5s total
+   Stage 1 (0–1s):    Quiet beginning — gradient + first particle
+   Stage 2 (1–2.2s):  Two lights converge toward center
+   Stage 3 (2.2–3s):  Heart creation — merge + pulse
+   Stage 4 (3–4s):    Personal reveal — names + subtitle
+   Stage 5 (4–5s):    App transformation — title, dissolve, exit
    ============================================ */
 
 .splash-screen {
@@ -42,86 +47,152 @@
     background: #0a0a0a;
 }
 
-/* Stage 1 — Gradient background reveal (0 → 0.6s) */
+/* Stage 1 — Dark romantic gradient fades in */
 .splash-bg {
     position: absolute;
     inset: 0;
     background: radial-gradient(ellipse at 50% 40%, #2d1520 0%, #1a0a12 40%, #0a0a0a 100%);
     opacity: 0;
-    animation: splashBgIn 0.6s ease-out forwards;
+    animation: splashBgIn 1.2s ease-out forwards;
 }
 
 @keyframes splashBgIn {
     to { opacity: 1; }
 }
 
-/* Soft glow behind heart */
+/* Stage 1-2 — Converging light particles */
+.splash-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    z-index: 2;
+    opacity: 0;
+}
+
+/* Particle 1 — drifts in from the left */
+.splash-p1 {
+    background: radial-gradient(circle, rgba(255,182,193,0.9) 0%, rgba(255,105,135,0.3) 70%, transparent 100%);
+    box-shadow: 0 0 20px rgba(255,182,193,0.6), 0 0 40px rgba(255,105,135,0.25);
+    animation: splashP1 1.8s 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes splashP1 {
+    0%   { opacity: 0; transform: translate(-120px, 20px) scale(0.3); }
+    20%  { opacity: 1; transform: translate(-90px, 12px) scale(1); }
+    85%  { opacity: 0.5; transform: translate(-8px, 2px) scale(0.5); }
+    100% { opacity: 0; transform: translate(0, 0) scale(0); }
+}
+
+/* Particle 2 — drifts in from the right */
+.splash-p2 {
+    background: radial-gradient(circle, rgba(255,198,217,0.9) 0%, rgba(255,150,180,0.3) 70%, transparent 100%);
+    box-shadow: 0 0 20px rgba(255,198,217,0.6), 0 0 40px rgba(255,150,180,0.25);
+    animation: splashP2 1.3s 1.0s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes splashP2 {
+    0%   { opacity: 0; transform: translate(120px, -20px) scale(0.3); }
+    20%  { opacity: 1; transform: translate(90px, -12px) scale(1); }
+    85%  { opacity: 0.5; transform: translate(8px, -2px) scale(0.5); }
+    100% { opacity: 0; transform: translate(0, 0) scale(0); }
+}
+
+/* Glow behind heart — intensifies as particles merge */
 .splash-glow {
     position: absolute;
-    width: 180px;
-    height: 180px;
+    width: 200px;
+    height: 200px;
     border-radius: 50%;
     background: radial-gradient(circle, rgba(255,182,193,0.35) 0%, rgba(255,105,135,0.12) 50%, transparent 70%);
-    filter: blur(30px);
+    filter: blur(35px);
     opacity: 0;
-    animation: splashGlowIn 0.5s 0.3s ease-out forwards;
+    animation: splashGlowIn 0.8s 2.0s ease-out forwards,
+               splashGlowPulse 2s 2.8s ease-in-out 2;
+    z-index: 0;
 }
 
 @keyframes splashGlowIn {
     to { opacity: 1; }
 }
 
-/* Stage 2 — Heart reveal with pulse (0.3s → 1.4s) */
+@keyframes splashGlowPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.15); opacity: 0.7; }
+}
+
+/* Stage 3 — Heart creation from merged particles */
 .splash-heart {
     position: relative;
-    font-size: 56px;
+    font-size: 58px;
     opacity: 0;
-    transform: scale(0.5);
-    animation: splashHeartIn 0.6s 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
-               splashHeartPulse 0.8s 0.9s ease-in-out 1;
-    z-index: 1;
+    transform: scale(0);
+    z-index: 3;
+    filter: drop-shadow(0 0 12px rgba(255,105,135,0.4));
+    animation:
+        splashHeartIn 0.7s 2.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+        splashHeartPulse 1.2s 3.0s ease-in-out 1;
 }
 
 @keyframes splashHeartIn {
-    to { opacity: 1; transform: scale(1); }
+    0%   { opacity: 0; transform: scale(0); }
+    60%  { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
 }
 
 @keyframes splashHeartPulse {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
+    50% { transform: scale(1.12); }
 }
 
-/* Stage 3 — Names reveal (0.7s → 1.4s) */
+/* Stage 4 — Names reveal */
 .splash-names {
     position: relative;
     font-family: 'Playfair Display', serif;
-    font-size: 15px;
+    font-size: 16px;
     font-style: italic;
-    color: rgba(255, 198, 217, 0.8);
-    letter-spacing: 2px;
-    margin-top: 14px;
+    color: rgba(255, 198, 217, 0.9);
+    letter-spacing: 2.5px;
+    margin-top: 18px;
     opacity: 0;
-    transform: translateY(8px);
-    animation: splashTextIn 0.5s 0.7s ease-out forwards;
-    z-index: 1;
+    transform: translateY(10px);
+    animation: splashFadeUp 0.6s 3.2s ease-out forwards;
+    z-index: 3;
 }
 
-/* Stage 4 — Title reveal (1.0s → 1.7s) */
+/* Subtitle tagline */
+.splash-subtitle {
+    position: relative;
+    font-family: 'Playfair Display', serif;
+    font-size: 11px;
+    color: rgba(255, 198, 217, 0.4);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-top: 8px;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: splashFadeUp 0.5s 3.6s ease-out forwards;
+    z-index: 3;
+}
+
+/* Stage 5 — App title reveals */
 .splash-title {
     position: relative;
     font-family: 'Playfair Display', serif;
-    font-size: 28px;
+    font-size: 30px;
     font-weight: 600;
     color: #ffffff;
-    letter-spacing: 4px;
-    margin-top: 10px;
+    letter-spacing: 5px;
+    margin-top: 14px;
     opacity: 0;
-    transform: translateY(10px) scale(0.95);
-    animation: splashTitleIn 0.6s 1.0s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-    z-index: 1;
+    transform: translateY(12px) scale(0.95);
+    animation: splashTitleIn 0.5s 3.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    z-index: 3;
 }
 
-@keyframes splashTextIn {
+@keyframes splashFadeUp {
     to { opacity: 1; transform: translateY(0); }
 }
 
@@ -129,16 +200,91 @@
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Stage 5 — Exit: dissolve upward (1.8s → 2.2s) */
-.splash-screen.splash-exit {
-    animation: splashExit 0.4s 0s ease-in forwards;
+/* Dissolve particles — hidden until exit, offset to align with heart center */
+.splash-dissolve {
+    position: absolute;
+    top: calc(50% - 40px); /* Vertically aligns scatter origin with heart position */
+    left: 50%;
+    z-index: 4;
     pointer-events: none;
 }
 
-@keyframes splashExit {
+.splash-dissolve span {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255, 198, 217, 0.8);
+    box-shadow: 0 0 6px rgba(255, 182, 193, 0.6);
+    opacity: 0;
+}
+
+/* Scatter directions for dissolve particles */
+.splash-dissolve span:nth-child(1) { --dx: -60px; --dy: -80px; }
+.splash-dissolve span:nth-child(2) { --dx: 55px;  --dy: -70px; }
+.splash-dissolve span:nth-child(3) { --dx: -75px; --dy: 25px; }
+.splash-dissolve span:nth-child(4) { --dx: 65px;  --dy: 35px; }
+.splash-dissolve span:nth-child(5) { --dx: -30px; --dy: -95px; }
+.splash-dissolve span:nth-child(6) { --dx: 20px;  --dy: 80px; }
+.splash-dissolve span:nth-child(7) { --dx: -85px; --dy: -15px; }
+.splash-dissolve span:nth-child(8) { --dx: 80px;  --dy: -25px; }
+
+/* ---- Exit: Continuity dissolve into app ---- */
+
+/* Heart expands and fades */
+.splash-screen.splash-exit .splash-heart {
+    animation: splashHeartDissolve 0.45s ease-in forwards;
+}
+
+@keyframes splashHeartDissolve {
+    0%   { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
+/* Particles scatter outward from heart center */
+.splash-screen.splash-exit .splash-dissolve span {
+    animation: splashScatter 0.5s ease-out forwards;
+}
+
+.splash-screen.splash-exit .splash-dissolve span:nth-child(2) { animation-delay: 0.03s; }
+.splash-screen.splash-exit .splash-dissolve span:nth-child(3) { animation-delay: 0.05s; }
+.splash-screen.splash-exit .splash-dissolve span:nth-child(4) { animation-delay: 0.07s; }
+.splash-screen.splash-exit .splash-dissolve span:nth-child(5) { animation-delay: 0.04s; }
+.splash-screen.splash-exit .splash-dissolve span:nth-child(6) { animation-delay: 0.06s; }
+.splash-screen.splash-exit .splash-dissolve span:nth-child(7) { animation-delay: 0.02s; }
+.splash-screen.splash-exit .splash-dissolve span:nth-child(8) { animation-delay: 0.08s; }
+
+@keyframes splashScatter {
+    0%   { opacity: 0.9; transform: translate(0, 0) scale(1.2); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+}
+
+/* Text + glow fade out */
+.splash-screen.splash-exit .splash-names,
+.splash-screen.splash-exit .splash-subtitle,
+.splash-screen.splash-exit .splash-title {
+    animation: splashTextOut 0.35s ease-in forwards;
+}
+
+.splash-screen.splash-exit .splash-glow {
+    animation: splashTextOut 0.4s ease-in forwards;
+}
+
+@keyframes splashTextOut {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-8px); }
+}
+
+/* Entire splash container fades — continuity into app */
+.splash-screen.splash-exit {
+    animation: splashContainerExit 0.6s 0.1s ease-in forwards;
+    pointer-events: none;
+}
+
+@keyframes splashContainerExit {
     to {
         opacity: 0;
-        transform: translateY(-20px) scale(1.02);
+        transform: scale(1.03);
     }
 }
 
@@ -504,15 +650,13 @@ body.us-active.late-night {
     display: none;
     opacity: 0;
     transform: translateY(6px);
-    transition: opacity var(--transition-normal), transform var(--transition-normal);
-    will-change: opacity, transform;
 }
 
 .tab-content.active {
     display: block;
     opacity: 1;
     transform: translateY(0);
-    animation: tabSlideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation: tabSlideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 @keyframes tabSlideIn {
@@ -2406,6 +2550,7 @@ textarea {
     --us-text: #ffffff;
     --us-text-secondary: #a0a0a0;
     --us-text-muted: #707070;
+    --us-tab-bg: #0f0f1e;
     --us-card-bg: rgba(26, 26, 26, 0.8);
     --us-card-border: rgba(255, 255, 255, 0.1);
     --us-accent: #ffc6d9;
