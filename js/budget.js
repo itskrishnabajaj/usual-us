@@ -47,7 +47,7 @@ function showBudgetCard() {
                 <span id="budget-total">₹0</span>
             </div>
             <div class="budget-progress-bar">
-                <div id="budget-progress-fill" class="budget-progress-fill" style="width: 0%"></div>
+                <div id="budget-progress-fill" class="budget-progress-fill"></div>
             </div>
             <div id="budget-warning" class="budget-warning hidden">⚠️ Over 80% of budget used!</div>
         `;
@@ -127,7 +127,7 @@ function updateBudgetProgress() {
     
     document.getElementById('budget-spent').textContent = `₹${spent.toFixed(0)}`;
     document.getElementById('budget-total').textContent = `₹${budget.amount.toFixed(0)}`;
-    document.getElementById('budget-progress-fill').style.width = `${Math.min(percentage, 100)}%`;
+    document.getElementById('budget-progress-fill').style.transform = `scaleX(${Math.min(percentage, 100) / 100})`;
     
     const warning = document.getElementById('budget-warning');
     const fill = document.getElementById('budget-progress-fill');
