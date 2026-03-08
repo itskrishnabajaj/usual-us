@@ -1,4 +1,4 @@
-const CACHE_NAME = 'usual-us-v31';
+const CACHE_NAME = 'usual-us-v32';
 
 const urlsToCache = [
     '/',
@@ -26,10 +26,8 @@ const urlsToCache = [
     '/js/auth.js',
     '/js/app.js',
     '/manifest.json',
-    '/icon-192.png',
-    '/icon-512.png',
-    '/icon-192.svg',
-    '/icon-512.svg',
+    '/icon-192.svg?v=2',
+    '/icon-512.svg?v=2',
     '/screenshots/home.png',
     '/screenshots/expenses.png',
     '/screenshots/memories.png',
