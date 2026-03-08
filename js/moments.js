@@ -164,11 +164,11 @@ function renderMomentsPreview() {
 
     const itemsHTML = upcoming.map(m => {
         const info = getMomentTypeInfo(m.type);
-        const notePreview = m.notes ? `<div class="moments-preview-note">${escapeHTML(m.notes)}</div>` : '';
+        const notePreview = m.notes ? `<div class="moments-preview-note">${escapeHTML(m.notes).replace(/\n/g, ' ')}</div>` : '';
         return `<div class="moments-preview-item" onclick="openMomentsFullView()">
             <span class="moments-preview-emoji">${info.emoji}</span>
             <div class="moments-preview-info">
-                <div class="moments-preview-text">${escapeHTML(m.title)}</div>
+                <div class="moments-preview-text">${escapeHTML(m.title).replace(/\n/g, ' ')}</div>
                 ${notePreview}
             </div>
             <span class="moments-preview-date">${getMomentRelativeLabel(m)}</span>
@@ -244,12 +244,12 @@ function buildMomentCard(m) {
         <div class="moment-card-header">
             <span class="moment-card-emoji">${info.emoji}</span>
             <div class="moment-card-info">
-                <div class="moment-card-title">${escapeHTML(m.title)}</div>
+                <div class="moment-card-title">${escapeHTML(m.title).replace(/\n/g, '<br>')}</div>
                 <div class="moment-card-date">${formatMomentDate(m)}</div>
             </div>
             ${moodHTML}
         </div>
-        ${m.notes ? `<div class="moment-card-notes">${escapeHTML(m.notes)}</div>` : ''}
+        ${m.notes ? `<div class="moment-card-notes">${escapeHTML(m.notes).replace(/\n/g, '<br>')}</div>` : ''}
         ${metaHTML ? `<div class="moment-card-meta">${metaHTML}</div>` : ''}
         <div class="moment-card-actions">
             <button class="moment-btn-edit" onclick="openEditMoment('${m.id}')">Edit</button>

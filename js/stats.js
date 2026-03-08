@@ -137,7 +137,7 @@ function renderMonthlyTrends() {
         return `
             <div class="trend-bar-group">
                 <div class="trend-bar-wrapper">
-                    <div class="trend-bar" style="height: ${Math.max(heightPct, 4)}%">
+                    <div class="trend-bar" style="transform: scaleY(${Math.max(heightPct, 4) / 100})">
                         <span class="trend-bar-value">₹${amount >= 1000 ? (amount / 1000).toFixed(1) + 'k' : amount.toFixed(0)}</span>
                     </div>
                 </div>

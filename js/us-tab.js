@@ -313,10 +313,11 @@ function createFloatingHearts() {
     const usTab = document.getElementById('us-tab');
     if (!usTab) return;
     
-    // Only create once — skip if hearts already exist
-    if (usTab.querySelector('.floating-heart-particle')) return;
+    // Only create once — skip if particles already exist
+    if (usTab.querySelector('.floating-heart-particle') || usTab.querySelector('.memory-particle')) return;
     
-    const hearts = ['💕', '💗', '✨', '💖', '🤍', '💞', '♥️'];
+    // Phase 1: Diverse memory-icon particles (hearts, sparkles, music, photos)
+    const particles = ['💕', '✨', '🎵', '📸', '💗', '🤍', '💖', '♪', '🌸', '💞'];
     
     // Stable positions and timing based on index (seeded pseudo-random)
     const heartConfigs = [
@@ -332,7 +333,7 @@ function createFloatingHearts() {
         const cfg = heartConfigs[i];
         const heart = document.createElement('span');
         heart.className = 'floating-heart-particle';
-        heart.textContent = hearts[i % hearts.length];
+        heart.textContent = particles[i % particles.length];
         heart.style.cssText = `
             position: absolute;
             font-size: ${cfg.size}px;
@@ -344,6 +345,32 @@ function createFloatingHearts() {
             animation: floatingHeartParticle ${cfg.dur}s ease-in-out ${cfg.delay}s infinite;
         `;
         usTab.appendChild(heart);
+    }
+    
+    // Phase 1: Additional slow-drifting memory particles with very low opacity
+    const driftIcons = ['♥', '✦', '♫', '📷', '✧', '♡', '🎶', '❋'];
+    const driftConfigs = [
+        { size: 10, left: 5,  top: 35, dur: 22, delay: 2 },
+        { size: 8,  left: 92, top: 60, dur: 26, delay: 5 },
+        { size: 11, left: 60, top: 10, dur: 20, delay: 0 },
+        { size: 9,  left: 30, top: 50, dur: 28, delay: 8 },
+        { size: 7,  left: 70, top: 80, dur: 24, delay: 3 },
+        { size: 10, left: 10, top: 90, dur: 30, delay: 6 },
+        { size: 8,  left: 80, top: 25, dur: 25, delay: 1 },
+        { size: 9,  left: 45, top: 40, dur: 27, delay: 4 },
+    ];
+    for (let i = 0; i < driftConfigs.length; i++) {
+        const cfg = driftConfigs[i];
+        const el = document.createElement('span');
+        el.className = 'memory-particle';
+        el.textContent = driftIcons[i];
+        el.style.cssText = `
+            font-size: ${cfg.size}px;
+            left: ${cfg.left}%;
+            top: ${cfg.top}%;
+            animation: memoryParticleDrift ${cfg.dur}s ease-in-out ${cfg.delay}s infinite;
+        `;
+        usTab.appendChild(el);
     }
 }
 
@@ -550,5 +577,26 @@ function checkDailyMemoryReminder() {
         }
     }
 }
+
+// Phase 5: Moment creation sparkle feedback
+function showMomentCreatedSparkles() {
+    const container = document.createElement('div');
+    container.className = 'moment-sparkle-burst';
+    const sparks = ['✨', '💖', '✦', '💕', '⭐', '✧', '🌟', '💗'];
+    for (let i = 0; i < sparks.length; i++) {
+        const s = document.createElement('span');
+        s.textContent = sparks[i];
+        const angle = (i / sparks.length) * 2 * Math.PI;
+        const dist = 40 + Math.random() * 40;
+        s.style.setProperty('--sx', Math.cos(angle) * dist + 'px');
+        s.style.setProperty('--sy', Math.sin(angle) * dist + 'px');
+        s.style.animationDelay = (i * 0.03) + 's';
+        container.appendChild(s);
+    }
+    document.body.appendChild(container);
+    setTimeout(() => container.remove(), 500);
+}
+
+EventBus.on('moment:created', showMomentCreatedSparkles);
 
 // NEW: Mood Tracker
