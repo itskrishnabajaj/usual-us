@@ -547,25 +547,16 @@ body.us-active {
     background: #fdf2f0;
 }
 
-/* GPU Acceleration for smooth animations */
-.polaroid, .photo-stack, .sticky-note, .ritual-card,
-.expense-item, .btn-primary, .nav-item, .balance-card,
+/* GPU Acceleration — small interactive elements only (cards, icons, buttons) */
+.btn-primary, .nav-item,
 .floating-heart-particle, .dynamic-star {
     will-change: transform;
-    transform: translateZ(0);
     backface-visibility: hidden;
 }
 
-/* GPU layer promotion for animated containers */
-.tab-content,
-.modal-content,
-.music-player-panel,
+/* GPU layer promotion for overlay/toast elements that animate in/out */
 .success-toast,
-.error-toast,
-.modal-overlay,
-.mood-tracker,
-.milestone-card,
-.moments-preview-item {
+.error-toast {
     will-change: transform, opacity;
     backface-visibility: hidden;
 }
@@ -1741,6 +1732,55 @@ textarea {
     --us-tab-bg: #fdf2f0;
     color: var(--us-text);
     contain: layout style;
+    overscroll-behavior-y: contain;
+}
+
+/* ── Pull-to-Refresh Indicator ── */
+.ptr-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 0;
+    overflow: hidden;
+    z-index: 10;
+    pointer-events: none;
+    transition: height 0.3s var(--ease-bounce);
+}
+
+.ptr-spinner {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2.5px solid rgba(194, 24, 91, 0.15);
+    border-top-color: var(--us-accent, #c2185b);
+    opacity: 0;
+    transform: scale(0.5) rotate(0deg);
+    transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.ptr-indicator.pulling .ptr-spinner {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+}
+
+.ptr-indicator.refreshing .ptr-spinner {
+    opacity: 1;
+    transform: scale(1);
+    animation: ptrSpin 0.7s linear infinite;
+}
+
+.ptr-indicator.completing .ptr-spinner {
+    opacity: 0;
+    transform: scale(0.3);
+    transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+@keyframes ptrSpin {
+    to { transform: scale(1) rotate(360deg); }
 }
 
 /* Ambient floating particles — extends 10px beyond container to hide edge seams during translateY animation */
@@ -1761,7 +1801,6 @@ textarea {
     animation: floatParticles 20s ease-in-out infinite;
     pointer-events: none;
     opacity: 0.6;
-    will-change: transform;
 }
 
 /* Music Player Toggle */
@@ -1791,7 +1830,6 @@ textarea {
     visibility: visible;
     pointer-events: auto;
     transform: scale(1);
-    animation: pulse 2s ease-in-out infinite;
 }
 
 .music-player-toggle:active {
@@ -2210,7 +2248,6 @@ textarea {
     backdrop-filter: blur(8px);
     box-shadow: 0 8px 32px rgba(194, 24, 91, 0.08), 0 2px 8px rgba(194, 24, 91, 0.04);
     position: relative;
-    animation: breathe 6s ease-in-out infinite;
     /* Phase 4: Touch depth transition */
     transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
 }
@@ -2309,7 +2346,8 @@ textarea {
 .mood-option.selected {
     background: rgba(194, 24, 91, 0.1);
     border-color: var(--us-accent, var(--accent));
-    animation: glow 2s ease-in-out infinite;
+    box-shadow: 0 0 20px rgba(194, 24, 91, 0.3);
+    transform: scale(1.1);
 }
 
 .current-mood-display {
@@ -2412,7 +2450,7 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: bounceDown 2s ease-in-out infinite;
+    animation: bounceDown 1.5s ease-in-out 3;
 }
 
 .btn-scroll-oldest:active {
@@ -2518,8 +2556,6 @@ textarea {
     transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
     width: 300px;
     position: relative;
-    /* Phase 3: Subtle glow pulse */
-    animation: memoryTimelineGlow 6s ease-in-out infinite;
 }
 
 /* Phase 4: Touch depth — scale down with deeper shadow on press */
@@ -3958,6 +3994,13 @@ textarea {
     }
 }
 
+/* Finite entrance breathe for ritual card — opacity+scale only, GPU-friendly */
+@keyframes ritualBreatheIn {
+    0%   { opacity: 0; transform: scale(0.96); }
+    60%  { opacity: 1; transform: scale(1.01); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
 @keyframes float {
     0%, 100% {
         transform: translateY(0px);
@@ -3969,21 +4012,21 @@ textarea {
 
 @keyframes floatParticles {
     0%, 100% {
-        transform: translateY(0) translateZ(0);
+        opacity: 0.6;
     }
     50% {
-        transform: translateY(-10px) translateZ(0);
+        opacity: 0.35;
     }
 }
 
 @keyframes glow {
     0%, 100% {
-        box-shadow: 0 0 20px rgba(194, 24, 91, 0.3);
-        transform: scale(1.1);
+        opacity: 0.85;
+        transform: scale(1);
     }
     50% {
-        box-shadow: 0 0 35px rgba(194, 24, 91, 0.5);
-        transform: scale(1.15);
+        opacity: 1;
+        transform: scale(1.02);
     }
 }
 
@@ -4175,7 +4218,8 @@ textarea {
 .milestone-card.quarterly-anniversary.today {
     border-color: rgba(194, 24, 91, 0.5);
     background: linear-gradient(135deg, rgba(255,240,245,0.8), rgba(194, 24, 91, 0.12));
-    animation: fadeInUp 0.5s ease-out both, glow 2.5s ease-in-out infinite;
+    box-shadow: 0 0 24px rgba(194, 24, 91, 0.25);
+    animation: fadeInUp 0.5s ease-out both, glow 2.5s ease-in-out 3;
 }
 
 .milestone-prompt {
@@ -4227,7 +4271,6 @@ textarea {
     position: absolute;
     pointer-events: none;
     z-index: 0;
-    will-change: transform, opacity;
 }
 
 /* Phase 5: Sparkle burst container for moment creation feedback */
@@ -4243,7 +4286,6 @@ textarea {
     position: absolute;
     font-size: 14px;
     opacity: 0;
-    will-change: transform, opacity;
     animation: momentSparkle 0.45s var(--ease) forwards;
 }
 
@@ -4298,7 +4340,7 @@ textarea {
 }
 
 .us-tab .ritual-card {
-    animation: fadeInUp 0.5s ease-out 0.1s both;
+    animation: ritualBreatheIn 1.2s var(--ease) 0.1s both;
 }
 
 .us-tab .add-memory-section {
@@ -4314,12 +4356,12 @@ textarea {
 }
 
 .us-tab .us-day-counter {
-    animation: gentleFloat 4s ease-in-out infinite;
+    animation: fadeInUp 0.5s ease-out 0.15s both;
 }
 
-/* Heartbeat on Us nav icon */
+/* Heartbeat on Us nav icon — single pulse on activation */
 .nav-item[data-tab="us"].active .nav-icon {
-    animation: heartbeat 2s ease-in-out infinite;
+    animation: heartbeat 0.6s var(--ease-bounce);
 }
 
 /* Balance card shimmer */
@@ -4332,17 +4374,18 @@ textarea {
     content: '';
     position: absolute;
     top: 0;
-    left: -100%;
+    left: 0;
     width: 50%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
     animation: shimmerCard 4s ease-in-out infinite;
     pointer-events: none;
+    transform: translateX(-200%);
 }
 
 @keyframes shimmerCard {
-    0% { left: -100%; }
-    50%, 100% { left: 200%; }
+    0% { transform: translateX(-200%); }
+    50%, 100% { transform: translateX(400%); }
 }
 
 /* Category stat stagger animation */
@@ -4464,7 +4507,7 @@ textarea {
 
 /* Mood option bounce on select */
 .mood-option.selected {
-    animation: moodBounce 0.4s var(--ease-bounce), glow 2s ease-in-out infinite 0.4s;
+    animation: moodBounce 0.4s var(--ease-bounce);
 }
 
 @keyframes moodBounce {

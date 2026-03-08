@@ -35,47 +35,114 @@ function getCachedElements() {
 let _lastMilestonesDay = -1;
 
 let _pullToRefreshSetup = false;
+let _ptrRefreshing = false;
 
 function setupPullToRefresh() {
     if (_pullToRefreshSetup) return;
     const usTab = document.getElementById('us-tab');
-    if (!usTab) return;
+    const indicator = document.getElementById('ptr-indicator');
+    if (!usTab || !indicator) return;
     _pullToRefreshSetup = true;
-    
+
+    const spinner = indicator.firstElementChild;
+    const THRESHOLD = 80;      // px to trigger refresh
+    const MAX_PULL = 130;      // visual cap for elastic feel
     let startY = 0;
-    let currentY = 0;
+    let pullDistance = 0;
     let pulling = false;
-    
+
+    function isAtTop() {
+        return (window.scrollY || document.documentElement.scrollTop) <= 0;
+    }
+
     usTab.addEventListener('touchstart', (e) => {
-        if (usTab.scrollTop === 0) {
+        if (_ptrRefreshing) return;
+        if (isAtTop()) {
             startY = e.touches[0].pageY;
+            pullDistance = 0;
             pulling = true;
+            // Remove transition during drag for immediate response
+            indicator.style.transition = 'none';
         }
     }, { passive: true });
-    
+
     usTab.addEventListener('touchmove', (e) => {
-        if (!pulling) return;
-        currentY = e.touches[0].pageY;
-    }, { passive: true });
-    
-    usTab.addEventListener('touchend', async () => {
-        if (!pulling) return;
-        
-        const pullDistance = currentY - startY;
-        
-        if (pullDistance > 80) {
-            await refreshUsTab();
+        if (!pulling || _ptrRefreshing) return;
+        // Cancel if user scrolled away from top
+        if (!isAtTop()) {
+            pulling = false;
+            pullDistance = 0;
+            indicator.style.transition = '';
+            indicator.style.height = '';
+            indicator.classList.remove('pulling');
+            return;
         }
-        
+        const diff = e.touches[0].pageY - startY;
+        if (diff <= 0) {
+            // Scrolling up — reset
+            pullDistance = 0;
+            indicator.style.height = '';
+            indicator.classList.remove('pulling');
+            return;
+        }
+        // Elastic damping — decelerates as you pull further
+        pullDistance = Math.min(diff, MAX_PULL);
+        // Quadratic resistance: factor of 3 keeps damping gentle (higher = less resistance)
+        const damped = pullDistance * (1 - pullDistance / (MAX_PULL * 3));
+        const height = damped * 0.6;
+        indicator.style.height = height + 'px';
+        indicator.classList.add('pulling');
+        // Rotate spinner proportionally to pull distance
+        if (spinner) {
+            const rotation = (pullDistance / MAX_PULL) * 360;
+            const scale = Math.min(pullDistance / THRESHOLD, 1);
+            spinner.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+        }
+    }, { passive: true });
+
+    usTab.addEventListener('touchend', async () => {
+        if (!pulling || _ptrRefreshing) { pulling = false; return; }
+        // Re-enable transition for smooth snap-back
+        indicator.style.transition = '';
+        const reachedThreshold = pullDistance >= THRESHOLD;
+
+        if (reachedThreshold) {
+            await triggerPtrRefresh(indicator, spinner);
+        } else {
+            resetPtrIndicator(indicator, spinner);
+        }
         pulling = false;
-        startY = 0;
-        currentY = 0;
+        pullDistance = 0;
     });
+}
+
+function resetPtrIndicator(indicator, spinner) {
+    indicator.classList.remove('pulling', 'refreshing');
+    indicator.classList.add('completing');
+    if (spinner) spinner.style.transform = '';
+    setTimeout(() => {
+        indicator.style.height = '';
+        indicator.classList.remove('completing');
+    }, 300);
+}
+
+async function triggerPtrRefresh(indicator, spinner) {
+    _ptrRefreshing = true;
+    indicator.classList.remove('pulling');
+    indicator.classList.add('refreshing');
+    indicator.style.height = '48px';
+    if (spinner) spinner.style.transform = '';
+
+    try {
+        await refreshUsTab();
+    } finally {
+        resetPtrIndicator(indicator, spinner);
+        _ptrRefreshing = false;
+    }
 }
 
 async function refreshUsTab() {
     console.log('🔄 Refreshing Us tab...');
-    showLoading(true);
     // Notify listeners (extensibility hook for future modules)
     EventBus.emit('us:refresh');
     await Promise.allSettled([
@@ -84,7 +151,6 @@ async function refreshUsTab() {
         loadSecretNotes(),
         updateLastSeen()
     ]);
-    showLoading(false);
 }
 
 function switchTab(tabName) {
@@ -214,52 +280,30 @@ function initializeUsTab() {
     document.getElementById('us-day-counter').textContent = `Day ${days} of us`;
     document.getElementById('ritual-quote').textContent = getDailyQuote();
     
+    const { appHeader, bottomNav, appEl } = getCachedElements();
     const usTab = document.getElementById('us-tab');
-    const appHeader = document.getElementById('app-header');
-    const bottomNav = document.getElementById('bottom-nav');
-    const appEl = document.getElementById('app');
-    if (isLateNight()) {
-        usTab.classList.add('late-night');
-        if (appHeader) {
-            appHeader.classList.add('us-active');
-            appHeader.classList.add('late-night');
-        }
-        if (bottomNav) {
-            bottomNav.classList.add('us-active');
-            bottomNav.classList.add('late-night');
-        }
-        document.body.classList.add('us-active');
-        document.body.classList.add('late-night');
-        if (appEl) {
-            appEl.classList.add('us-active');
-            appEl.classList.add('late-night');
-        }
-        const lateNightMsg = document.getElementById('late-night-message');
-        if (lateNightMsg) lateNightMsg.classList.remove('hidden');
-    } else {
-        usTab.classList.remove('late-night');
-        if (appHeader) {
-            appHeader.classList.add('us-active');
-            appHeader.classList.remove('late-night');
-        }
-        if (bottomNav) {
-            bottomNav.classList.add('us-active');
-            bottomNav.classList.remove('late-night');
-        }
-        document.body.classList.add('us-active');
-        document.body.classList.remove('late-night');
-        if (appEl) {
-            appEl.classList.add('us-active');
-            appEl.classList.remove('late-night');
-        }
-        const lateNightMsg = document.getElementById('late-night-message');
-        if (lateNightMsg) lateNightMsg.classList.add('hidden');
+    const lateNight = isLateNight();
+    
+    if (usTab) usTab.classList.toggle('late-night', lateNight);
+    if (appHeader) {
+        appHeader.classList.add('us-active');
+        appHeader.classList.toggle('late-night', lateNight);
     }
+    if (bottomNav) {
+        bottomNav.classList.add('us-active');
+        bottomNav.classList.toggle('late-night', lateNight);
+    }
+    document.body.classList.add('us-active');
+    document.body.classList.toggle('late-night', lateNight);
+    if (appEl) {
+        appEl.classList.add('us-active');
+        appEl.classList.toggle('late-night', lateNight);
+    }
+    const lateNightMsg = document.getElementById('late-night-message');
+    if (lateNightMsg) lateNightMsg.classList.toggle('hidden', !lateNight);
     
-    // NEW: Check for memory highlights
+    // Check for memory highlights & daily reminder
     checkMemoryHighlights();
-    
-    // NEW: Check for daily memory reminder
     checkDailyMemoryReminder();
     
     // Stars, floating hearts, milestones
@@ -317,16 +361,14 @@ function createFloatingHearts() {
     if (usTab.querySelector('.floating-heart-particle') || usTab.querySelector('.memory-particle')) return;
     
     // Phase 1: Diverse memory-icon particles (hearts, sparkles, music, photos)
+    // Limited to 4 for mobile performance (was 6)
     const particles = ['💕', '✨', '🎵', '📸', '💗', '🤍', '💖', '♪', '🌸', '💞'];
     
-    // Stable positions and timing based on index (seeded pseudo-random)
     const heartConfigs = [
         { size: 12, left: 15, top: 20, dur: 10, delay: 0 },
         { size: 9,  left: 75, top: 45, dur: 14, delay: 1.5 },
         { size: 16, left: 40, top: 70, dur: 11, delay: 3 },
         { size: 10, left: 85, top: 15, dur: 18, delay: 0.8 },
-        { size: 14, left: 25, top: 85, dur: 12, delay: 2.5 },
-        { size: 11, left: 50, top: 55, dur: 9,  delay: 1 },
     ];
     
     for (let i = 0; i < heartConfigs.length; i++) {
@@ -347,17 +389,14 @@ function createFloatingHearts() {
         usTab.appendChild(heart);
     }
     
-    // Phase 1: Additional slow-drifting memory particles with very low opacity
-    const driftIcons = ['♥', '✦', '♫', '📷', '✧', '♡', '🎶', '❋'];
+    // Phase 1: Slow-drifting memory particles — limited to 5 for mobile (was 8)
+    const driftIcons = ['♥', '✦', '♫', '📷', '✧'];
     const driftConfigs = [
         { size: 10, left: 5,  top: 35, dur: 22, delay: 2 },
         { size: 8,  left: 92, top: 60, dur: 26, delay: 5 },
         { size: 11, left: 60, top: 10, dur: 20, delay: 0 },
         { size: 9,  left: 30, top: 50, dur: 28, delay: 8 },
         { size: 7,  left: 70, top: 80, dur: 24, delay: 3 },
-        { size: 10, left: 10, top: 90, dur: 30, delay: 6 },
-        { size: 8,  left: 80, top: 25, dur: 25, delay: 1 },
-        { size: 9,  left: 45, top: 40, dur: 27, delay: 4 },
     ];
     for (let i = 0; i < driftConfigs.length; i++) {
         const cfg = driftConfigs[i];
