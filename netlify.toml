@@ -17,6 +17,11 @@
     Cache-Control = "no-cache"
 
 [[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
