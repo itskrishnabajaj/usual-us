@@ -17,8 +17,29 @@
     Cache-Control = "no-cache"
 
 [[headers]]
+  for = "/icons/*.svg"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/icons/tabs/*.svg"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
   for = "/*.png"
   [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/screenshots/*.png"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/.well-known/assetlinks.json"
+  [headers.values]
+    Content-Type = "application/json"
     Cache-Control = "no-cache"
 
 [[headers]]
