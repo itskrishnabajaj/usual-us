@@ -3,10 +3,10 @@
 // ============================================
 
 // ---- Splash Screen Controller ----
-// The splash animation runs ~1.8s, then a 0.4s exit = ~2.2s total.
-// App initialization is delayed until the splash completes.
-const SPLASH_DISPLAY_MS = 1800;  // Time before starting exit
-const SPLASH_EXIT_MS    = 400;   // Exit animation duration
+// The splash runs a 5-stage cinematic animation (~5s total):
+// Particles → Heart → Names → Title → Dissolve into app
+const SPLASH_DISPLAY_MS = 4500;  // Time before starting exit
+const SPLASH_EXIT_MS    = 600;   // Exit animation duration
 
 function dismissSplash() {
     return new Promise(resolve => {

@@ -20,14 +20,26 @@
 <body>
     <!-- ============================================
          Cinematic Splash Screen
-         Runs before any app UI loads (~2.2s)
+         5-stage emotional animation ~5s total
+         Stage 1: Quiet beginning — gradient + first particle
+         Stage 2: Two lights — second particle, both converge
+         Stage 3: Heart creation — merge + pulse
+         Stage 4: Personal reveal — names + subtitle
+         Stage 5: App transformation — title, dissolve, exit
          ============================================ -->
     <div id="splash-screen" class="splash-screen">
         <div class="splash-bg"></div>
+        <div class="splash-particle splash-p1"></div>
+        <div class="splash-particle splash-p2"></div>
         <div class="splash-glow"></div>
         <div class="splash-heart">💖</div>
-        <div class="splash-names">Krishna &amp; Rashi</div>
+        <div class="splash-names">Krishna ❤️ Rashi</div>
+        <div class="splash-subtitle">Our little universe</div>
         <div class="splash-title">usual us</div>
+        <div class="splash-dissolve">
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+        </div>
     </div>
 
     <!-- Login Screen -->
