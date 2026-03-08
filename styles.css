@@ -603,7 +603,7 @@ body.us-active {
     object-fit: contain;
     position: relative;
     z-index: 1;
-    animation: flowerBreathe 3.5s 1.2s ease-in-out infinite, flowerSway 5s 1.2s ease-in-out infinite;
+    animation: flowerLive 5s 1.2s ease-in-out infinite;
     will-change: transform;
 }
 
@@ -615,17 +615,12 @@ body.us-active {
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* Gentle breathing motion — organic slow pulse */
-@keyframes flowerBreathe {
+/* Combined breathing + sway — avoids transform conflicts from separate animations */
+@keyframes flowerLive {
     0%, 100% { transform: scale(1) rotate(0deg); }
+    25%      { transform: scale(1.04) rotate(2.5deg); }
     50%      { transform: scale(1.06) rotate(0deg); }
-}
-
-/* Gentle sway — slight tilt left and right like a breeze */
-@keyframes flowerSway {
-    0%, 100% { transform: rotate(0deg); }
-    25%      { transform: rotate(3deg); }
-    75%      { transform: rotate(-3deg); }
+    75%      { transform: scale(1.04) rotate(-2.5deg); }
 }
 
 /* Subtle glow pulse behind the flower */
@@ -4911,7 +4906,6 @@ select:focus {
     font-weight: 600;
     color: var(--text-primary);
     overflow: hidden;
-    text-overflow: ellipsis;
     letter-spacing: -0.1px;
     line-height: 1.4;
 }
