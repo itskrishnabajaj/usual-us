@@ -1700,7 +1700,10 @@ textarea {
     padding-right: 20px;
     position: relative;
     overflow: hidden;
-    background: linear-gradient(170deg, #fdf2f0 0%, #fce4ec 30%, #f9dde5 55%, #fef5e7 80%, #fdf2f0 100%);
+    /* Phase 2: Breathing gradient — oversized to allow slow drift */
+    background: linear-gradient(170deg, #fdf2f0 0%, #fce4ec 15%, #f9dde5 30%, #fef5e7 45%, #fce4ec 60%, #fdf2f0 75%, #f9dde5 90%, #fdf2f0 100%);
+    background-size: 200% 200%;
+    animation: usBreathingGradient 25s ease-in-out infinite;
     min-height: 100vh;
     /* Break out of #main-content padding */
     margin-left: -20px;
@@ -2186,6 +2189,14 @@ textarea {
     box-shadow: 0 8px 32px rgba(194, 24, 91, 0.08), 0 2px 8px rgba(194, 24, 91, 0.04);
     position: relative;
     animation: breathe 6s ease-in-out infinite;
+    /* Phase 4: Touch depth transition */
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Phase 4: Touch depth for ritual card */
+.ritual-card:active {
+    transform: scale(0.975) translateZ(0);
+    box-shadow: 0 4px 16px rgba(194, 24, 91, 0.12), 0 1px 4px rgba(194, 24, 91, 0.06);
 }
 
 .ritual-card::before {
@@ -2230,6 +2241,14 @@ textarea {
     text-align: center;
     backdrop-filter: blur(8px);
     box-shadow: 0 4px 16px rgba(194, 24, 91, 0.05);
+    /* Phase 4: Touch depth transition */
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Phase 4: Touch depth for mood tracker */
+.mood-tracker:active {
+    transform: scale(0.975) translateZ(0);
+    box-shadow: 0 2px 8px rgba(194, 24, 91, 0.08);
 }
 
 .mood-tracker-title {
@@ -2473,16 +2492,21 @@ textarea {
         0 12px 48px rgba(0, 0, 0, 0.15),
         0 6px 20px rgba(0, 0, 0, 0.1);
     cursor: pointer;
-    transition: all var(--transition-normal);
+    /* Phase 4: Smooth transition for touch depth */
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     width: 300px;
     position: relative;
+    /* Phase 3: Subtle glow pulse */
+    animation: memoryTimelineGlow 6s ease-in-out infinite;
 }
 
+/* Phase 4: Touch depth — scale down with deeper shadow on press */
 .polaroid:active {
-    transform: scale(0.97) translateZ(0) !important;
+    transform: scale(0.965) translateZ(0) !important;
     box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.12),
-        0 4px 16px rgba(0, 0, 0, 0.08);
+        0 4px 16px rgba(0, 0, 0, 0.18),
+        0 2px 8px rgba(0, 0, 0, 0.12),
+        0 0 12px rgba(194, 24, 91, 0.1);
 }
 
 .polaroid-photo {
@@ -2820,7 +2844,9 @@ textarea {
 
 /* Late Night Mode */
 .us-tab.late-night {
-    background: linear-gradient(180deg, #0a0a0a 0%, #0f0f1e 50%, #1a1a2e 100%);
+    background: linear-gradient(180deg, #0a0a0a 0%, #0f0f1e 25%, #1a1a2e 50%, #0f0f1e 75%, #0a0a0a 100%);
+    background-size: 200% 200%;
+    animation: usBreathingGradient 30s ease-in-out infinite;
     --us-text: #ffffff;
     --us-text-secondary: #a0a0a0;
     --us-text-muted: #707070;
@@ -3939,6 +3965,36 @@ textarea {
     }
 }
 
+/* Phase 2: Ultra-slow breathing gradient for Us tab background */
+@keyframes usBreathingGradient {
+    0%   { background-position: 0% 0%; }
+    25%  { background-position: 100% 50%; }
+    50%  { background-position: 50% 100%; }
+    75%  { background-position: 0% 50%; }
+    100% { background-position: 0% 0%; }
+}
+
+/* Phase 3: Soft glow pulse for memory timeline cards */
+@keyframes memoryTimelineGlow {
+    0%, 100% { box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15), 0 6px 20px rgba(0, 0, 0, 0.1); }
+    50%      { box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15), 0 6px 20px rgba(0, 0, 0, 0.1), 0 0 18px rgba(194, 24, 91, 0.08); }
+}
+
+/* Phase 1: Slow drifting motion for memory particles */
+@keyframes memoryParticleDrift {
+    0%   { opacity: 0;    transform: translateY(0)     scale(0.7) rotate(0deg); }
+    10%  { opacity: 0.18; }
+    50%  { opacity: 0.12; transform: translateY(-50px)  scale(1)   rotate(8deg); }
+    90%  { opacity: 0.16; }
+    100% { opacity: 0;    transform: translateY(-100px) scale(0.7) rotate(-5deg); }
+}
+
+/* Phase 5: Sparkle burst on moment creation */
+@keyframes momentSparkle {
+    0%   { opacity: 0.9; transform: translate(0, 0) scale(1); }
+    100% { opacity: 0;   transform: translate(var(--sx), var(--sy)) scale(0); }
+}
+
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -4042,6 +4098,14 @@ textarea {
     gap: 14px;
     backdrop-filter: blur(10px);
     animation: fadeInUp 0.5s ease-out both;
+    /* Phase 4: Touch depth transition */
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Phase 4: Touch depth for milestone cards */
+.milestone-card:active {
+    transform: scale(0.975) translateZ(0);
+    box-shadow: 0 2px 12px rgba(194, 24, 91, 0.12);
 }
 
 .milestone-card.upcoming {
@@ -4134,6 +4198,31 @@ textarea {
     50% { opacity: 0.3; transform: translateY(-40px) scale(1) rotate(10deg); }
     85% { opacity: 0.4; }
     100% { opacity: 0; transform: translateY(-80px) scale(0.5) rotate(-10deg); }
+}
+
+/* Phase 1: Memory particle layer (hearts, sparkles, notes, cameras) */
+.memory-particle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+    will-change: transform, opacity;
+}
+
+/* Phase 5: Sparkle burst container for moment creation feedback */
+.moment-sparkle-burst {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 10001;
+    pointer-events: none;
+}
+
+.moment-sparkle-burst span {
+    position: absolute;
+    font-size: 14px;
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: momentSparkle 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* Enhanced animations */
@@ -4704,6 +4793,14 @@ select:focus {
     border-radius: 20px;
     backdrop-filter: blur(10px);
     box-shadow: 0 2px 16px rgba(194, 24, 91, 0.08);
+    /* Phase 4: Touch depth transition */
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Phase 4: Touch depth for moments preview */
+.moments-preview:active {
+    transform: scale(0.975) translateZ(0);
+    box-shadow: 0 1px 8px rgba(194, 24, 91, 0.12);
 }
 
 .moments-preview-header {
