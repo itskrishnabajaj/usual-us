@@ -1,4 +1,4 @@
-const CACHE_NAME = 'usual-us-v34';
+const CACHE_NAME = 'usual-us-v35';
 
 const urlsToCache = [
     '/',
@@ -60,7 +60,8 @@ const urlsToCache = [
     '/icons/him.svg',
     '/icons/her.svg',
     '/icons/allsettled.svg',
-    '/icons/welcomeback.svg'
+    '/icons/welcomeback.svg',
+    '/icons/splashheart.svg'
 ];
 
 self.addEventListener('install', (event) => {
