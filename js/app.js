@@ -222,18 +222,27 @@ window.handleNoteTouchMove = handleNoteTouchMove;
 
 // Service Worker Registration
 if ('serviceWorker' in navigator) {
+    // Auto-reload when a new service worker takes control (critical for TWA
+    // where users cannot manually refresh the page)
+    let _swRefreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (_swRefreshing) return;
+        _swRefreshing = true;
+        window.location.reload();
+    });
+
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js')
             .then(registration => {
                 console.log('✅ Service Worker registered');
-                // Check for updates periodically
+                // Detect waiting/installing workers and prompt activation
                 registration.addEventListener('updatefound', () => {
                     const newWorker = registration.installing;
                     if (newWorker) {
                         newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
-                                // New version available — reload for the user
-                                console.log('🔄 New version available');
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('🔄 New version available — activating');
+                                newWorker.postMessage({ type: 'SKIP_WAITING' });
                             }
                         });
                     }
