@@ -3,24 +3,59 @@
 // ============================================
 
 // ---- Splash Screen Controller ----
-// The splash runs a 5-stage cinematic animation (~5s total):
-// Particles → Heart → Names → Title → Dissolve into app
-const SPLASH_DISPLAY_MS = 4500;  // Time before starting exit
-const SPLASH_EXIT_MS    = 600;   // Exit animation duration
+// 10-second cinematic animation with 5 stages:
+// Cosmic Awakening → Two Lights → Heart Morph → Orbit → Universe Reveal
+// Supports triple-tap skip (3 taps within 700ms)
+const SPLASH_DISPLAY_MS = 9400;  // Time before starting normal exit
+const SPLASH_EXIT_MS    = 600;   // Normal exit animation duration
+const SPLASH_SKIP_MS    = 300;   // Skip exit animation duration
+const TAP_WINDOW_MS     = 700;   // Triple-tap detection window
 
-function dismissSplash() {
+let _splashResolved = false;
+let _tapCount = 0;
+let _tapTimer = null;
+
+function dismissSplash(quick) {
     return new Promise(resolve => {
         const splash = document.getElementById('splash-screen');
         if (!splash || splash.classList.contains('splash-done')) {
             resolve();
             return;
         }
-        splash.classList.add('splash-exit');
+        splash.removeEventListener('click', _handleSplashTap);
+        splash.classList.add(quick ? 'splash-skip' : 'splash-exit');
         setTimeout(() => {
             splash.classList.add('splash-done');
             resolve();
-        }, SPLASH_EXIT_MS);
+        }, quick ? SPLASH_SKIP_MS : SPLASH_EXIT_MS);
     });
+}
+
+function _handleSplashTap() {
+    if (_splashResolved) return;
+    _tapCount++;
+    if (_tapCount >= 3) {
+        _splashResolved = true;
+        _tapCount = 0;
+        clearTimeout(_tapTimer);
+        _startApp(true);
+        return;
+    }
+    clearTimeout(_tapTimer);
+    _tapTimer = setTimeout(() => { _tapCount = 0; }, TAP_WINDOW_MS);
+}
+
+async function _startApp(skipped) {
+    if (_startApp._ran) return;
+    _startApp._ran = true;
+    await dismissSplash(!!skipped);
+    initializeAuth();
+    setupEventListeners();
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => initializeMusicPlayer());
+    } else {
+        setTimeout(initializeMusicPlayer, 300);
+    }
 }
 
 async function loadData() {
@@ -139,16 +174,17 @@ document.addEventListener('DOMContentLoaded', () => {
     history.replaceState({ app: true }, '');
     pushBackState();
 
+    // Set up triple-tap skip on splash
+    const splash = document.getElementById('splash-screen');
+    if (splash) {
+        splash.addEventListener('click', _handleSplashTap);
+    }
+
     // Wait for splash animation before showing any UI
-    setTimeout(async () => {
-        await dismissSplash();
-        initializeAuth();
-        setupEventListeners();
-        // Defer music player init — only needed on Us tab
-        if ('requestIdleCallback' in window) {
-            requestIdleCallback(() => initializeMusicPlayer());
-        } else {
-            setTimeout(initializeMusicPlayer, 300);
+    setTimeout(() => {
+        if (!_splashResolved) {
+            _splashResolved = true;
+            _startApp(false);
         }
     }, SPLASH_DISPLAY_MS);
 });
