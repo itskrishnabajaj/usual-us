@@ -193,11 +193,11 @@
 /* Glow burst as particles merge */
 .splash-glow {
     position: absolute;
-    width: 200px;
-    height: 200px;
+    width: 260px;
+    height: 260px;
     border-radius: 50%;
     background: radial-gradient(circle, rgba(255,182,193,0.4) 0%, rgba(255,105,135,0.15) 50%, transparent 70%);
-    filter: blur(35px);
+    filter: blur(40px);
     opacity: 0;
     z-index: 0;
     animation:
@@ -222,12 +222,12 @@
 /* Heart morphs from merged energy — organic scale-up with bounce */
 .splash-heart {
     position: relative;
-    width: 58px;
-    height: 58px;
+    width: 96px;
+    height: 96px;
     opacity: 0;
     transform: scale(0);
     z-index: 3;
-    filter: drop-shadow(0 0 15px rgba(255,105,135,0.5));
+    filter: drop-shadow(0 0 20px rgba(255,105,135,0.6));
     will-change: transform, opacity;
     animation:
         splashHeartMorph 1s 4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
@@ -267,7 +267,7 @@
 
 .splash-orbit {
     position: absolute;
-    top: calc(50% - 40px);
+    top: calc(50% - 48px);
     left: 50%;
     z-index: 2;
     pointer-events: none;
@@ -275,9 +275,9 @@
 
 .splash-orbit-icon {
     position: absolute;
-    width: 22px;
-    height: 22px;
-    margin: -11px;
+    width: 26px;
+    height: 26px;
+    margin: -13px;
     opacity: 0;
     filter: drop-shadow(0 0 6px rgba(255,182,193,0.5));
     will-change: transform, opacity;
@@ -289,31 +289,31 @@
 .splash-oi4 { animation: splashOrbit270 2.5s 6.45s ease-in-out forwards; }
 
 @keyframes splashOrbit0 {
-    0%   { opacity: 0; transform: rotate(0deg) translateY(-80px) rotate(0deg) scale(0.3); }
-    12%  { opacity: 0.7; transform: rotate(7deg) translateY(-80px) rotate(-7deg) scale(1); }
-    88%  { opacity: 0.7; transform: rotate(53deg) translateY(-80px) rotate(-53deg) scale(1); }
-    100% { opacity: 0; transform: rotate(60deg) translateY(-80px) rotate(-60deg) scale(0.3); }
+    0%   { opacity: 0; transform: rotate(0deg) translateY(-100px) rotate(0deg) scale(0.3); }
+    12%  { opacity: 0.7; transform: rotate(7deg) translateY(-100px) rotate(-7deg) scale(1); }
+    88%  { opacity: 0.7; transform: rotate(53deg) translateY(-100px) rotate(-53deg) scale(1); }
+    100% { opacity: 0; transform: rotate(60deg) translateY(-100px) rotate(-60deg) scale(0.3); }
 }
 
 @keyframes splashOrbit90 {
-    0%   { opacity: 0; transform: rotate(90deg) translateY(-80px) rotate(-90deg) scale(0.3); }
-    12%  { opacity: 0.7; transform: rotate(97deg) translateY(-80px) rotate(-97deg) scale(1); }
-    88%  { opacity: 0.7; transform: rotate(143deg) translateY(-80px) rotate(-143deg) scale(1); }
-    100% { opacity: 0; transform: rotate(150deg) translateY(-80px) rotate(-150deg) scale(0.3); }
+    0%   { opacity: 0; transform: rotate(90deg) translateY(-100px) rotate(-90deg) scale(0.3); }
+    12%  { opacity: 0.7; transform: rotate(97deg) translateY(-100px) rotate(-97deg) scale(1); }
+    88%  { opacity: 0.7; transform: rotate(143deg) translateY(-100px) rotate(-143deg) scale(1); }
+    100% { opacity: 0; transform: rotate(150deg) translateY(-100px) rotate(-150deg) scale(0.3); }
 }
 
 @keyframes splashOrbit180 {
-    0%   { opacity: 0; transform: rotate(180deg) translateY(-80px) rotate(-180deg) scale(0.3); }
-    12%  { opacity: 0.7; transform: rotate(187deg) translateY(-80px) rotate(-187deg) scale(1); }
-    88%  { opacity: 0.7; transform: rotate(233deg) translateY(-80px) rotate(-233deg) scale(1); }
-    100% { opacity: 0; transform: rotate(240deg) translateY(-80px) rotate(-240deg) scale(0.3); }
+    0%   { opacity: 0; transform: rotate(180deg) translateY(-100px) rotate(-180deg) scale(0.3); }
+    12%  { opacity: 0.7; transform: rotate(187deg) translateY(-100px) rotate(-187deg) scale(1); }
+    88%  { opacity: 0.7; transform: rotate(233deg) translateY(-100px) rotate(-233deg) scale(1); }
+    100% { opacity: 0; transform: rotate(240deg) translateY(-100px) rotate(-240deg) scale(0.3); }
 }
 
 @keyframes splashOrbit270 {
-    0%   { opacity: 0; transform: rotate(270deg) translateY(-80px) rotate(-270deg) scale(0.3); }
-    12%  { opacity: 0.7; transform: rotate(277deg) translateY(-80px) rotate(-277deg) scale(1); }
-    88%  { opacity: 0.7; transform: rotate(323deg) translateY(-80px) rotate(-323deg) scale(1); }
-    100% { opacity: 0; transform: rotate(330deg) translateY(-80px) rotate(-330deg) scale(0.3); }
+    0%   { opacity: 0; transform: rotate(270deg) translateY(-100px) rotate(-270deg) scale(0.3); }
+    12%  { opacity: 0.7; transform: rotate(277deg) translateY(-100px) rotate(-277deg) scale(1); }
+    88%  { opacity: 0.7; transform: rotate(323deg) translateY(-100px) rotate(-323deg) scale(1); }
+    100% { opacity: 0; transform: rotate(330deg) translateY(-100px) rotate(-330deg) scale(0.3); }
 }
 
 /* ---- Stage 5: Universe Expansion & App Reveal (8–10s) ---- */
@@ -357,7 +357,7 @@
 /* Dissolve particles — scatter from heart at Stage 5 */
 .splash-dissolve {
     position: absolute;
-    top: calc(50% - 40px);
+    top: calc(50% - 48px);
     left: 50%;
     z-index: 4;
     pointer-events: none;
@@ -573,17 +573,65 @@ body.us-active {
 }
 
 .returning-avatar {
-    margin-bottom: 10px;
+    margin-bottom: 14px;
     line-height: 1;
-    animation: heartbeat 2s ease-in-out infinite;
+    position: relative;
+    animation: flowerBloom 1.2s ease-out forwards;
+}
+
+/* Subtle warm glow behind the flower */
+.returning-avatar::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255, 198, 217, 0.25) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(12px);
+    z-index: 0;
+    animation: flowerGlow 3s 1.2s ease-in-out infinite;
 }
 
 .returning-avatar-icon {
-    width: 48px;
-    height: 48px;
+    width: 72px;
+    height: 72px;
     display: block;
     margin: 0 auto;
     object-fit: contain;
+    position: relative;
+    z-index: 1;
+    animation: flowerBreathe 3.5s 1.2s ease-in-out infinite, flowerSway 5s 1.2s ease-in-out infinite;
+    will-change: transform;
+}
+
+/* Bloom: flower scales up as if opening */
+@keyframes flowerBloom {
+    0%   { transform: scale(0.3); opacity: 0; }
+    50%  { transform: scale(1.08); opacity: 1; }
+    75%  { transform: scale(0.96); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Gentle breathing motion — organic slow pulse */
+@keyframes flowerBreathe {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    50%      { transform: scale(1.06) rotate(0deg); }
+}
+
+/* Gentle sway — slight tilt left and right like a breeze */
+@keyframes flowerSway {
+    0%, 100% { transform: rotate(0deg); }
+    25%      { transform: rotate(3deg); }
+    75%      { transform: rotate(-3deg); }
+}
+
+/* Subtle glow pulse behind the flower */
+@keyframes flowerGlow {
+    0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+    50%      { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
 }
 
 .returning-welcome {
@@ -4579,13 +4627,13 @@ select:focus {
    ============================================ */
 
 .moments-preview {
-    margin: 16px;
-    padding: 18px 20px;
+    margin: 20px 16px;
+    padding: 22px 22px;
     background: var(--us-card-bg, rgba(255, 255, 255, 0.55));
     border: 1px solid var(--us-card-border, rgba(194, 24, 91, 0.15));
-    border-radius: 18px;
+    border-radius: 20px;
     backdrop-filter: blur(10px);
-    box-shadow: 0 2px 12px rgba(194, 24, 91, 0.06);
+    box-shadow: 0 2px 16px rgba(194, 24, 91, 0.08);
 }
 
 .moments-preview-header {
@@ -4593,12 +4641,12 @@ select:focus {
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .moments-preview-title {
     font-family: 'Playfair Display', serif;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     color: var(--us-accent, #c2185b);
 }
@@ -4612,12 +4660,12 @@ select:focus {
 .moments-preview-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
+    gap: 14px;
+    padding: 14px 16px;
     cursor: pointer;
     background: rgba(194, 24, 91, 0.04);
     border-radius: 14px;
-    margin-top: 8px;
+    margin-top: 10px;
     transition: background 0.2s ease;
 }
 
@@ -4626,15 +4674,15 @@ select:focus {
 }
 
 .moments-preview-emoji {
-    font-size: 22px;
+    font-size: 24px;
     flex-shrink: 0;
-    width: 36px;
-    height: 36px;
+    width: 42px;
+    height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(194, 24, 91, 0.08);
-    border-radius: 10px;
+    border-radius: 12px;
 }
 
 .moments-preview-info {
@@ -4644,7 +4692,7 @@ select:focus {
 
 .moments-preview-text {
     flex: 1;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
     color: var(--us-text, #333);
     white-space: nowrap;
@@ -4653,28 +4701,28 @@ select:focus {
 }
 
 .moments-preview-note {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--us-text-muted, #8b7b7b);
-    margin-top: 2px;
+    margin-top: 3px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .moments-preview-date {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--us-accent, #c2185b);
     flex-shrink: 0;
     font-weight: 500;
     background: rgba(194, 24, 91, 0.08);
-    padding: 3px 8px;
+    padding: 4px 10px;
     border-radius: 8px;
 }
 
 .moments-preview-empty {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--us-text-muted, #aaa);
-    margin: 8px 0;
+    margin: 10px 0;
     text-align: center;
 }
 
@@ -4684,11 +4732,11 @@ select:focus {
     background: rgba(194, 24, 91, 0.08);
     border: 1px dashed rgba(194, 24, 91, 0.25);
     color: var(--us-accent, #c2185b);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    padding: 10px;
-    margin-top: 10px;
+    padding: 12px;
+    margin-top: 12px;
     border-radius: 12px;
     font-family: 'Inter', sans-serif;
     transition: background 0.2s ease;
@@ -4743,7 +4791,7 @@ select:focus {
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 20px 16px 80px;
-    animation: slideUp 0.3s ease-out;
+    animation: slideUp 0.35s ease-out;
 }
 
 .moments-modal-content::before {
@@ -4825,10 +4873,10 @@ select:focus {
 .moment-card {
     background: var(--bg-secondary);
     border-radius: 18px;
-    padding: 20px 20px;
+    padding: 22px 22px;
     border: 1px solid var(--border-color);
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-    transition: box-shadow 0.2s ease, transform 0.15s ease;
+    transition: box-shadow 0.25s ease, transform 0.2s ease;
 }
 
 .moment-card + .moment-card {
@@ -4862,10 +4910,10 @@ select:focus {
     font-size: 15px;
     font-weight: 600;
     color: var(--text-primary);
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     letter-spacing: -0.1px;
+    line-height: 1.4;
 }
 
 .moment-card-date {
@@ -4960,7 +5008,7 @@ select:focus {
     display: flex;
     flex-direction: column;
     align-items: center;
-    animation: momentFormSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: momentFormSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .moment-form-content::before {

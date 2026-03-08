@@ -44,13 +44,13 @@ function animateModalIn(el) {
 
     gsap.fromTo(el, {
         opacity: 0,
-        scale: 0.92,
-        y: 30,
+        scale: 0.94,
+        y: 20,
     }, {
         opacity: 1,
         scale: 1,
         y: 0,
-        duration: 0.35,
+        duration: 0.4,
         ease: 'power3.out',
     });
 }
@@ -69,9 +69,9 @@ function animateModalOut(el, onComplete) {
 
     gsap.to(el, {
         opacity: 0,
-        scale: 0.92,
-        y: 20,
-        duration: 0.25,
+        scale: 0.94,
+        y: 16,
+        duration: 0.3,
         ease: 'power2.in',
         onComplete: onComplete,
     });
@@ -90,12 +90,12 @@ function animateCardsIn(selector, parent) {
 
     gsap.fromTo(items, {
         opacity: 0,
-        y: 24,
+        y: 20,
     }, {
         opacity: 1,
         y: 0,
-        duration: 0.4,
-        stagger: 0.06,
+        duration: 0.45,
+        stagger: 0.07,
         ease: 'power2.out',
     });
 }
@@ -117,8 +117,8 @@ function animateTabSwitch(outEl, inEl, onSwap) {
     if (outEl) {
         tl.to(outEl, {
             opacity: 0,
-            y: -8,
-            duration: 0.15,
+            y: -10,
+            duration: 0.18,
             ease: 'power2.in',
         });
     }
@@ -130,11 +130,11 @@ function animateTabSwitch(outEl, inEl, onSwap) {
     if (inEl) {
         tl.fromTo(inEl, {
             opacity: 0,
-            y: 8,
+            y: 12,
         }, {
             opacity: 1,
             y: 0,
-            duration: 0.25,
+            duration: 0.3,
             ease: 'power2.out',
         });
     }
