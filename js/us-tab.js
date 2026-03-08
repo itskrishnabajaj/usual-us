@@ -313,8 +313,8 @@ function createFloatingHearts() {
     const usTab = document.getElementById('us-tab');
     if (!usTab) return;
     
-    // Only create once — skip if hearts already exist
-    if (usTab.querySelector('.floating-heart-particle')) return;
+    // Only create once — skip if particles already exist
+    if (usTab.querySelector('.floating-heart-particle') || usTab.querySelector('.memory-particle')) return;
     
     // Phase 1: Diverse memory-icon particles (hearts, sparkles, music, photos)
     const particles = ['💕', '✨', '🎵', '📸', '💗', '🤍', '💖', '♪', '🌸', '💞'];
@@ -348,7 +348,6 @@ function createFloatingHearts() {
     }
     
     // Phase 1: Additional slow-drifting memory particles with very low opacity
-    if (usTab.querySelector('.memory-particle')) return;
     const driftIcons = ['♥', '✦', '♫', '📷', '✧', '♡', '🎶', '❋'];
     const driftConfigs = [
         { size: 10, left: 5,  top: 35, dur: 22, delay: 2 },
