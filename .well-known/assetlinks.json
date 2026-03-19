@@ -1,0 +1,9 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.usualus.app",
+        "sha256_cert_fingerprints": ["C9:2E:67:34:80:95:03:DF:03:FC:FC:1A:1F:87:BA:B2:6A:B0:44:92:25:EF:E9:89:D1:BA:4C:0A:6B:2A:2E:84"]
+      }
+    }]
+

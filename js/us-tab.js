@@ -36,7 +36,6 @@ let _lastMilestonesDay = -1;
 
 let _pullToRefreshSetup = false;
 let _ptrRefreshing = false;
-let _usIntroAnimated = false;
 
 function setupPullToRefresh() {
     if (_pullToRefreshSetup) return;
@@ -311,14 +310,6 @@ function initializeUsTab() {
     createUsTabStars();
     createFloatingHearts();
     renderMilestones();
-
-    if (!_usIntroAnimated && usTab && typeof animateCardsIn === 'function') {
-        _usIntroAnimated = true;
-        animateCardsIn(
-            '.moments-preview, .ritual-card, .mood-tracker, .milestones-section .milestone-card, .notes-section, .secret-notes-section',
-            usTab
-        );
-    }
 }
 
 function createUsTabStars() {
@@ -547,10 +538,6 @@ function renderMilestones() {
     }).join('');
     
     container.innerHTML = quarterlyHTML + milestonesHTML;
-
-    if (typeof animateCardsIn === 'function') {
-        animateCardsIn('.milestone-card', container);
-    }
 }
 
 // NEW: Memory Highlights - "On This Day"
