@@ -29,6 +29,7 @@
     --transition-medium: 0.36s var(--ease);
     --transition-slow: 0.5s var(--ease);
     --transition-emotional: 0.6s var(--ease-emotional);
+    --loading-fade-ms: 220ms;
 }
 
 /* ============================================
@@ -3697,7 +3698,7 @@ body:not(.us-active) .us-tab::before {
     justify-content: center;
     z-index: 9999;
     opacity: 0;
-    transition: opacity 0.22s var(--ease);
+    transition: opacity var(--loading-fade-ms) var(--ease);
 }
 
 .spinner {
@@ -4514,7 +4515,6 @@ body:not(.us-active) .us-tab::before {
 
 /* Smooth loading overlay transition */
 .loading.hidden {
-    opacity: 0;
     pointer-events: none;
 }
 
