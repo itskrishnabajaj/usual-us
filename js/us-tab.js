@@ -36,6 +36,7 @@ let _lastMilestonesDay = -1;
 
 let _pullToRefreshSetup = false;
 let _ptrRefreshing = false;
+let _usIntroAnimated = false;
 
 function setupPullToRefresh() {
     if (_pullToRefreshSetup) return;
@@ -311,17 +312,12 @@ function initializeUsTab() {
     createFloatingHearts();
     renderMilestones();
 
-    if (usTab && typeof animateCardsIn === 'function') {
-        usTab.querySelectorAll('.mood-tracker, .ritual-card, .notes-section, .secret-notes-section, .milestones-section .milestone-card, .moments-preview')
-            .forEach(el => { el.style.animation = 'none'; });
+    if (!_usIntroAnimated && usTab && typeof animateCardsIn === 'function') {
+        _usIntroAnimated = true;
         animateCardsIn(
             '.moments-preview, .ritual-card, .mood-tracker, .milestones-section .milestone-card, .notes-section, .secret-notes-section',
             usTab
         );
-        requestAnimationFrame(() => {
-            usTab.querySelectorAll('.mood-tracker, .ritual-card, .notes-section, .secret-notes-section, .milestones-section .milestone-card, .moments-preview')
-                .forEach(el => { el.style.animation = ''; });
-        });
     }
 }
 
