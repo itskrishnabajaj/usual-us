@@ -222,7 +222,8 @@ window.handleNoteTouchMove = handleNoteTouchMove;
 
 // Service Worker Registration
 if ('serviceWorker' in navigator) {
-    // Auto-reload when a new service worker takes control so users get fresh assets
+    // Auto-reload when a new service worker takes control (critical for TWA
+    // where users cannot manually refresh the page)
     let _swRefreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (_swRefreshing) return;
@@ -252,9 +253,10 @@ if ('serviceWorker' in navigator) {
 }
 
 // ============================================
-// Mobile PWA Interaction Hardening
+// TWA Native-App Behavior Hardening
 // ============================================
-// Keeps interactions native-like in standalone browser/PWA mode.
+// Ensures the PWA feels indistinguishable from a native Android app
+// when running inside a Trusted Web Activity.
 
 // 1. Prevent Chrome scroll restoration artifacts during navigation
 if ('scrollRestoration' in history) {
