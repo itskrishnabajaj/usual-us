@@ -516,8 +516,20 @@
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;      /* Remove 300ms tap delay, disable double-tap zoom */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
     scrollbar-width: none;           /* Firefox */
     -ms-overflow-style: none;        /* IE/Edge */
+}
+
+input,
+textarea,
+select,
+[contenteditable="true"] {
+    -webkit-touch-callout: default;
+    -webkit-user-select: text;
+    user-select: text;
 }
 
 *::-webkit-scrollbar {
