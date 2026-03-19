@@ -6,6 +6,7 @@
 
 let moments = [];
 let momentsLoaded = false;
+const MOMENTS_HIGHLIGHT_MS = 600;
 
 // ---- Firestore CRUD ----
 
@@ -40,7 +41,7 @@ async function addMoment(momentData) {
         const preview = document.getElementById('moments-preview');
         if (preview) {
             preview.classList.add('is-highlighted');
-            setTimeout(() => preview.classList.remove('is-highlighted'), 700);
+            setTimeout(() => preview.classList.remove('is-highlighted'), MOMENTS_HIGHLIGHT_MS);
         }
         if (typeof animateEntrance === 'function' && preview) {
             animateEntrance(preview, { y: 10, duration: 0.24, ease: 'power2.out' });
@@ -70,7 +71,7 @@ async function updateMoment(id, updates) {
         const preview = document.getElementById('moments-preview');
         if (preview) {
             preview.classList.add('is-highlighted');
-            setTimeout(() => preview.classList.remove('is-highlighted'), 500);
+            setTimeout(() => preview.classList.remove('is-highlighted'), MOMENTS_HIGHLIGHT_MS);
         }
     } catch (error) {
         console.error('❌ Error updating moment:', error);
@@ -88,7 +89,7 @@ async function deleteMoment(id) {
         const preview = document.getElementById('moments-preview');
         if (preview) {
             preview.classList.add('is-highlighted');
-            setTimeout(() => preview.classList.remove('is-highlighted'), 500);
+            setTimeout(() => preview.classList.remove('is-highlighted'), MOMENTS_HIGHLIGHT_MS);
         }
         showSuccess('Moment deleted');
     } catch (error) {

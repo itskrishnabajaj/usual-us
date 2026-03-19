@@ -2,6 +2,8 @@
 // UI Utilities
 // ============================================
 
+const LOADING_FADE_MS = 220;
+
 function showLoading(show) {
     const loading = document.getElementById('loading');
     if (loading) {
@@ -14,7 +16,7 @@ function showLoading(show) {
             requestAnimationFrame(() => loading.classList.add('loading-active'));
         } else {
             loading.classList.remove('loading-active');
-            setTimeout(() => loading.classList.add('hidden'), 220);
+            setTimeout(() => loading.classList.add('hidden'), LOADING_FADE_MS);
         }
     }
 }
