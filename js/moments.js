@@ -6,6 +6,7 @@
 
 let moments = [];
 let momentsLoaded = false;
+const MOMENTS_HIGHLIGHT_MS = 600;
 
 // ---- Firestore CRUD ----
 
@@ -37,6 +38,14 @@ async function addMoment(momentData) {
         moments.push({ id: ref.id, ...doc, date: doc.date });
         moments.sort((a, b) => getMomentDate(a) - getMomentDate(b));
         renderMomentsPreview();
+        const preview = document.getElementById('moments-preview');
+        if (preview) {
+            preview.classList.add('is-highlighted');
+            setTimeout(() => preview.classList.remove('is-highlighted'), MOMENTS_HIGHLIGHT_MS);
+        }
+        if (typeof animateEntrance === 'function' && preview) {
+            animateEntrance(preview, { y: 10, duration: 0.24, ease: 'power2.out' });
+        }
         return ref.id;
     } catch (error) {
         console.error('❌ Error adding moment:', error);
@@ -59,6 +68,11 @@ async function updateMoment(id, updates) {
         if (idx !== -1) Object.assign(moments[idx], doc);
         moments.sort((a, b) => getMomentDate(a) - getMomentDate(b));
         renderMomentsPreview();
+        const preview = document.getElementById('moments-preview');
+        if (preview) {
+            preview.classList.add('is-highlighted');
+            setTimeout(() => preview.classList.remove('is-highlighted'), MOMENTS_HIGHLIGHT_MS);
+        }
     } catch (error) {
         console.error('❌ Error updating moment:', error);
         throw error;
@@ -72,6 +86,11 @@ async function deleteMoment(id) {
         moments = moments.filter(m => m.id !== id);
         renderMomentsPreview();
         renderMomentsFullView();
+        const preview = document.getElementById('moments-preview');
+        if (preview) {
+            preview.classList.add('is-highlighted');
+            setTimeout(() => preview.classList.remove('is-highlighted'), MOMENTS_HIGHLIGHT_MS);
+        }
         showSuccess('Moment deleted');
     } catch (error) {
         console.error('❌ Error deleting moment:', error);
@@ -145,6 +164,17 @@ function renderMomentsPreview() {
     const container = document.getElementById('moments-preview');
     if (!container) return;
 
+    if (!momentsLoaded) {
+        container.innerHTML = `
+            <div class="moments-preview-header">
+                <span class="moments-preview-title">Upcoming Moments ❤️</span>
+            </div>
+            <div class="moments-preview-skeleton-item"></div>
+            <div class="moments-preview-skeleton-item"></div>
+        `;
+        return;
+    }
+
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     const upcoming = moments
@@ -182,6 +212,10 @@ function renderMomentsPreview() {
         </div>
         ${itemsHTML}
     `;
+
+    if (typeof animateCardsIn === 'function') {
+        animateCardsIn('.moments-preview-item', container);
+    }
 }
 
 // ---- Full Moments View ----
@@ -335,4 +369,8 @@ window.deleteMoment = deleteMoment;
 // Render moments preview when switching to the Us tab
 EventBus.on('tab:switched', (detail) => {
     if (detail && detail.tab === 'us') renderMomentsPreview();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderMomentsPreview();
 });

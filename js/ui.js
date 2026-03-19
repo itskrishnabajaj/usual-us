@@ -2,6 +2,8 @@
 // UI Utilities
 // ============================================
 
+const LOADING_FADE_MS = 220;
+
 function showLoading(show) {
     const loading = document.getElementById('loading');
     if (loading) {
@@ -11,8 +13,10 @@ function showLoading(show) {
         }
         if (show) {
             loading.classList.remove('hidden');
+            requestAnimationFrame(() => loading.classList.add('loading-active'));
         } else {
-            loading.classList.add('hidden');
+            loading.classList.remove('loading-active');
+            setTimeout(() => loading.classList.add('hidden'), LOADING_FADE_MS);
         }
     }
 }
@@ -429,4 +433,3 @@ function setupEventListeners() {
             String(today.getDate()).padStart(2, '0');
     }
 }
-

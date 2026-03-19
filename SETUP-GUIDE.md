@@ -4,7 +4,7 @@
 
 This guide explains **every single step** to set up, run, and update the "Usual Us" app on your Windows PC. Nothing is assumed. Every click, every command, every concept is explained.
 
-Your app is already live at **usualus.netlify.app**. This guide is for when you want to make changes to it from your computer.
+Your app is already live at **usualus.vercel.app**. This guide is for when you want to make changes to it from your computer.
 
 ---
 
@@ -26,8 +26,8 @@ Your app is already live at **usualus.netlify.app**. This guide is for when you 
 | 12 | [How the splash screen works](#12-how-the-splash-screen-works) | The animation that plays when the app opens |
 | 13 | [How to change common things](#13-how-to-change-common-things) | Names, colors, timing, icons |
 | 14 | [How to check your code for errors](#14-how-to-check-your-code-for-errors) | Finding and fixing mistakes |
-| 15 | [How to deploy to Netlify](#15-how-to-deploy-to-netlify) | How the live site gets updated |
-| 16 | [How to make an Android app (TWA)](#16-how-to-make-an-android-app-twa) | Turning the website into a phone app |
+| 15 | [How to deploy to Vercel](#15-how-to-deploy-to-vercel) | How the live site gets updated |
+| 16 | [Android installation (PWA only)](#16-android-installation-pwa-only) | Installing the website like an app |
 | 17 | [Quick reference commands](#17-quick-reference-commands) | Copy-paste commands for everyday use |
 | 18 | [Troubleshooting](#18-troubleshooting) | Fixing common problems |
 | 19 | [Glossary](#19-glossary) | What all the technical words mean |
@@ -45,9 +45,9 @@ It is a **website** that works like a phone app. This kind of app is called a **
 - It works offline (once loaded, it saves itself on your phone)
 - It remembers your data using **Firebase** (a free database from Google that stores everything in the cloud)
 
-The app is currently live and working at: **usualus.netlify.app**
+The app is currently live and working at: **usualus.vercel.app**
 
-All the code lives on **GitHub** (a website that stores code). When you push changes to GitHub, Netlify automatically picks them up and updates the live site.
+All the code lives on **GitHub** (a website that stores code). When you push changes to GitHub, Vercel automatically picks them up and updates the live site.
 
 ---
 
@@ -284,7 +284,7 @@ When the dev server is running (`npm run dev`), any file you edit and save will 
 
 ## 10. How to push changes to the live site
 
-When you've made changes you're happy with, you need to **upload them to GitHub**. Netlify watches your GitHub repository, so it will automatically update the live site within about a minute.
+When you've made changes you're happy with, you need to **upload them to GitHub**. Vercel watches your GitHub repository, so it will automatically update the live site within about a minute.
 
 ### First-time only — tell Git who you are:
 
@@ -326,7 +326,7 @@ Replace the text in quotes with a short description of what you changed. Example
 git push
 ```
 
-That's it! Within 1-2 minutes, your live site at **usualus.netlify.app** will update with your changes.
+That's it! Within 1-2 minutes, your live site at **usualus.vercel.app** will update with your changes.
 
 ### Example — the full workflow in one go:
 
@@ -556,18 +556,18 @@ This makes your code consistently formatted — same indentation, same quote sty
 
 ---
 
-## 15. How to deploy to Netlify
+## 15. How to deploy to Vercel
 
-Your app is hosted on **Netlify** at **usualus.netlify.app**. Netlify is connected to your GitHub repository. This means:
+Your app is hosted on **Vercel** at **usualus.vercel.app**. Vercel is connected to your GitHub repository. This means:
 
-> **When you push changes to GitHub, Netlify automatically picks them up and updates the live site.**
+> **When you push changes to GitHub, Vercel automatically picks them up and updates the live site.**
 
 You don't need to do anything special for deployment. Just:
 
 1. Make your changes
 2. Push to GitHub (see [step 10](#10-how-to-push-changes-to-the-live-site))
 3. Wait 1–2 minutes
-4. Open **usualus.netlify.app** — your changes are live!
+4. Open **usualus.vercel.app** — your changes are live!
 
 ### Important: Update the service worker version
 
@@ -592,40 +592,17 @@ Every time you change any file (JS, CSS, HTML), you should **bump the service wo
 
 ---
 
-## 16. How to make an Android app (TWA)
+## 16. Android installation (PWA only)
 
-You can turn your website into a real Android app that appears in the app drawer, using something called a **Trusted Web Activity (TWA)**. The easiest method doesn't require any Android development tools.
+This project is deployed as a **PWA only** at **https://usualus.vercel.app/**.
 
-### Easiest method — use PWABuilder (recommended):
+If you want it to behave like an app on Android:
 
-1. Go to **https://www.pwabuilder.com** in your browser
-2. In the text box, type your live site URL: `usualus.netlify.app`
-3. Click **"Start"**
-4. It will analyze your app and show a score (you should score well since manifest + service worker are set up)
-5. Click **"Package for stores"**
-6. Choose **"Android"**
-7. Fill in:
-   - **Package ID:** `us.usual.twa`
-   - **App name:** `usual us`
-   - Leave everything else as default
-8. Click **"Generate"**
-9. Download the ZIP file
-10. Inside the ZIP you'll find an APK file
-11. Transfer the APK to your Android phone (via email, Google Drive, USB cable, etc.)
-12. On your phone, open the APK file and tap **Install**
-    - If your phone says "Install from unknown sources is blocked", go to Settings → search for "Install unknown apps" → allow your file manager or browser
+1. Open **https://usualus.vercel.app/** in Chrome
+2. Tap **Install app** (or Chrome menu → **Add to Home screen**)
+3. Launch from the home screen/app drawer
 
-> 💡 That's it! No Android Studio, no Java, no complicated setup.
-
-### Setting up Digital Asset Links (so the browser bar doesn't show):
-
-When you open a TWA, Android may show a browser address bar at the top. To remove it, you need to "prove" that you own the website.
-
-1. When PWABuilder generates your APK, it will show you a **SHA-256 fingerprint** (a long string of letters and numbers). Copy it.
-2. In your project, open `.well-known/assetlinks.json`
-3. Replace `TODO:REPLACE_WITH_YOUR_SIGNING_KEY_SHA256_FINGERPRINT` with the fingerprint you copied
-4. Save, push to GitHub, wait for Netlify to deploy
-5. Now Android knows the website and the app are from the same person, and the browser bar will disappear
+No Android package signing or Digital Asset Links file is required for this repository.
 
 ---
 
@@ -651,7 +628,7 @@ When you open a TWA, Android may show a browser address bar at the top. To remov
 | See the actual changes line by line | `git diff` |
 | Stage all changes | `git add .` |
 | Save changes with a description | `git commit -m "your message"` |
-| Upload to GitHub (triggers Netlify deploy) | `git push` |
+| Upload to GitHub (triggers Vercel deploy) | `git push` |
 | Download latest changes from GitHub | `git pull` |
 
 ### VS Code shortcuts:
@@ -705,10 +682,10 @@ git push
 ### Changes don't appear on the live site
 **What it means:** The old version is cached.
 **How to fix:**
-1. Make sure you bumped the service worker version in `service-worker.js` (see [step 15](#15-how-to-deploy-to-netlify))
+1. Make sure you bumped the service worker version in `service-worker.js` (see [step 15](#15-how-to-deploy-to-vercel))
 2. Wait 2 minutes after pushing
 3. Hard-refresh: **Ctrl + Shift + R** on desktop, or clear app cache on Android
-4. Check your Netlify dashboard to see if the deploy succeeded
+4. Check your Vercel dashboard to see if the deploy succeeded
 
 ### The installed PWA on Android shows old content
 **What it means:** The service worker is serving cached files.
@@ -743,14 +720,13 @@ Every technical word used in this guide, explained in plain English:
 | **Firebase** | Google's online database that stores your app's data (expenses, memories, notes, etc.) |
 | **Firestore** | The specific type of database inside Firebase that your app uses |
 | **PWA** | "Progressive Web App" — a website that can be installed on a phone like a real app |
-| **TWA** | "Trusted Web Activity" — wrapping a PWA as an Android app |
 | **Service Worker** | A script that runs in the background, making the app work offline by caching files |
 | **Manifest** | `manifest.json` — tells the phone how to install the app (name, icon, colors) |
 | **Cache** | Saved copies of files so the app loads faster next time |
-| **HTTPS** | Secure web connection (required for PWA features). Netlify provides this automatically. |
+| **HTTPS** | Secure web connection (required for PWA features). Vercel provides this automatically. |
 | **Localhost** | Your own PC acting as a temporary web server. Only you can see it. |
 | **Deploy** | Putting your app live on the internet |
-| **Netlify** | The hosting service where your app lives (usualus.netlify.app) |
+| **Vercel** | The hosting service where your app lives (usualus.vercel.app) |
 | **GSAP** | A library that makes animations smooth and fast |
 | **Lenis** | A library that makes scrolling feel smooth |
 | **Hammer.js** | A library that handles touch gestures (swipe, pinch, drag) |
