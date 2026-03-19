@@ -310,6 +310,19 @@ function initializeUsTab() {
     createUsTabStars();
     createFloatingHearts();
     renderMilestones();
+
+    if (usTab && typeof animateCardsIn === 'function') {
+        usTab.querySelectorAll('.mood-tracker, .ritual-card, .notes-section, .secret-notes-section, .milestones-section .milestone-card, .moments-preview')
+            .forEach(el => { el.style.animation = 'none'; });
+        animateCardsIn(
+            '.moments-preview, .ritual-card, .mood-tracker, .milestones-section .milestone-card, .notes-section, .secret-notes-section',
+            usTab
+        );
+        requestAnimationFrame(() => {
+            usTab.querySelectorAll('.mood-tracker, .ritual-card, .notes-section, .secret-notes-section, .milestones-section .milestone-card, .moments-preview')
+                .forEach(el => { el.style.animation = ''; });
+        });
+    }
 }
 
 function createUsTabStars() {
@@ -538,6 +551,10 @@ function renderMilestones() {
     }).join('');
     
     container.innerHTML = quarterlyHTML + milestonesHTML;
+
+    if (typeof animateCardsIn === 'function') {
+        animateCardsIn('.milestone-card', container);
+    }
 }
 
 // NEW: Memory Highlights - "On This Day"

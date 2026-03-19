@@ -11,8 +11,10 @@ function showLoading(show) {
         }
         if (show) {
             loading.classList.remove('hidden');
+            requestAnimationFrame(() => loading.classList.add('loading-active'));
         } else {
-            loading.classList.add('hidden');
+            loading.classList.remove('loading-active');
+            setTimeout(() => loading.classList.add('hidden'), 220);
         }
     }
 }
@@ -429,4 +431,3 @@ function setupEventListeners() {
             String(today.getDate()).padStart(2, '0');
     }
 }
-
