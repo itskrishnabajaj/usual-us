@@ -268,6 +268,7 @@ if ('scrollRestoration' in history) {
 // defense-in-depth by intercepting horizontal touch moves from screen edges.
 (function blockEdgeSwipe() {
     const EDGE_ZONE = 30; // px from screen edge that triggers Chrome gesture
+    const HORIZONTAL_GESTURE_DOMINANCE = 1.25;
     let _edgeTouch = false;
     let _startX = 0;
     let _startY = 0;
@@ -293,7 +294,8 @@ if ('scrollRestoration' in history) {
             const touch = e.touches[0];
             const dxAbs = Math.abs(touch.clientX - _startX);
             const dyAbs = Math.abs(touch.clientY - _startY);
-            const isHorizontal = dxAbs > dyAbs;
+            if (dxAbs + dyAbs < 10) return; // wait for meaningful movement
+            const isHorizontal = dxAbs > dyAbs * HORIZONTAL_GESTURE_DOMINANCE;
             // Only block when gesture starts at edge and nearest scrollable container
             // cannot continue in that horizontal direction.
             if (isHorizontal) {
@@ -303,7 +305,6 @@ if ('scrollRestoration' in history) {
                 _blocking = !canScrollHorizontally;
                 return;
             }
-            if (dxAbs + dyAbs < 10) return; // wait for meaningful movement
             _decided = true;
             _blocking = false;
         }
@@ -318,15 +319,29 @@ if ('scrollRestoration' in history) {
         _blocking = false;
     }, { passive: true });
 
+    // Returns true when the target or an ancestor can continue horizontal scrolling
+    // in the swipe direction represented by deltaX.
     function canScrollFromTarget(target, deltaX) {
         if (!target || !target.closest) return false;
-        const scroller = target.closest('.image-adjust-preview, .adjust-controls input[type="range"]');
-        if (!scroller) return false;
-        if (scroller.matches('input[type="range"]')) return true;
-        const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
-        if (maxScrollLeft <= 0) return false;
-        if (deltaX < 0) return scroller.scrollLeft < maxScrollLeft;
-        if (deltaX > 0) return scroller.scrollLeft > 0;
+        const rangeInput = target.closest('input[type="range"]');
+        if (rangeInput) return true;
+
+        let node = target;
+        while (node && node !== document.body) {
+            if (node instanceof HTMLElement) {
+                const maxHorizontalScroll = node.scrollWidth - node.clientWidth;
+                if (maxHorizontalScroll > 0) {
+                    const styles = getComputedStyle(node);
+                    const overflowX = styles.overflowX;
+                    const hasHorizontalScrollOverflow = overflowX === 'auto' || overflowX === 'scroll';
+                    if (hasHorizontalScrollOverflow) {
+                        if (deltaX < 0 && node.scrollLeft < maxHorizontalScroll) return true;
+                        if (deltaX > 0 && node.scrollLeft > 0) return true;
+                    }
+                }
+            }
+            node = node.parentElement;
+        }
         return false;
     }
 })();
