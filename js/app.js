@@ -285,13 +285,27 @@ if ('scrollRestoration' in history) {
 
     document.addEventListener('touchmove', (e) => {
         if (!_edgeTouch || !e.cancelable) return;
+        // Never interfere with vertical scrolling inside the Us tab (PTR/native scroll)
+        const inUsTab = e.target.closest && e.target.closest('#us-tab');
+        if (inUsTab) return;
         // Determine swipe direction once after enough movement
         if (!_decided) {
-            const dx = Math.abs(e.touches[0].clientX - _startX);
-            const dy = Math.abs(e.touches[0].clientY - _startY);
-            if (dx + dy < 10) return; // wait for meaningful movement
+            const touch = e.touches[0];
+            const dxAbs = Math.abs(touch.clientX - _startX);
+            const dyAbs = Math.abs(touch.clientY - _startY);
+            const isHorizontal = dxAbs > dyAbs;
+            // Only block when gesture starts at edge and nearest scrollable container
+            // cannot continue in that horizontal direction.
+            if (isHorizontal) {
+                const dx = touch.clientX - _startX;
+                const canScrollHorizontally = canScrollFromTarget(e.target, dx);
+                _decided = true;
+                _blocking = !canScrollHorizontally;
+                return;
+            }
+            if (dxAbs + dyAbs < 10) return; // wait for meaningful movement
             _decided = true;
-            _blocking = dx > dy; // horizontal swipe from edge → block
+            _blocking = false;
         }
         if (_blocking) {
             e.preventDefault();
@@ -303,6 +317,18 @@ if ('scrollRestoration' in history) {
         _decided = false;
         _blocking = false;
     }, { passive: true });
+
+    function canScrollFromTarget(target, deltaX) {
+        if (!target || !target.closest) return false;
+        const scroller = target.closest('.image-adjust-preview, .adjust-controls input[type="range"]');
+        if (!scroller) return false;
+        if (scroller.matches('input[type="range"]')) return true;
+        const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
+        if (maxScrollLeft <= 0) return false;
+        if (deltaX < 0) return scroller.scrollLeft < maxScrollLeft;
+        if (deltaX > 0) return scroller.scrollLeft > 0;
+        return false;
+    }
 })();
 
 console.log('✨ usual us - Complete rebuild ready for your love story');
