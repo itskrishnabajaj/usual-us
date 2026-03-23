@@ -515,7 +515,6 @@
     padding: 0;
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;      /* Remove 300ms tap delay, disable double-tap zoom */
     scrollbar-width: none;           /* Firefox */
     -ms-overflow-style: none;        /* IE/Edge */
 }
@@ -1733,6 +1732,7 @@ textarea {
     color: var(--us-text);
     contain: layout style;
     overscroll-behavior-y: contain;
+    touch-action: pan-y;
 }
 
 /* ── Pull-to-Refresh Indicator ── */

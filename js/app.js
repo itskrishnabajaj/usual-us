@@ -268,6 +268,7 @@ if ('scrollRestoration' in history) {
 // defense-in-depth by intercepting horizontal touch moves from screen edges.
 (function blockEdgeSwipe() {
     const EDGE_ZONE = 30; // px from screen edge that triggers Chrome gesture
+    const HORIZONTAL_GESTURE_DOMINANCE = 1.25;
     let _edgeTouch = false;
     let _startX = 0;
     let _startY = 0;
@@ -285,13 +286,27 @@ if ('scrollRestoration' in history) {
 
     document.addEventListener('touchmove', (e) => {
         if (!_edgeTouch || !e.cancelable) return;
+        // Never interfere with vertical scrolling inside the Us tab (PTR/native scroll)
+        const inUsTab = e.target.closest && e.target.closest('#us-tab');
+        if (inUsTab) return;
         // Determine swipe direction once after enough movement
         if (!_decided) {
-            const dx = Math.abs(e.touches[0].clientX - _startX);
-            const dy = Math.abs(e.touches[0].clientY - _startY);
-            if (dx + dy < 10) return; // wait for meaningful movement
+            const touch = e.touches[0];
+            const dxAbs = Math.abs(touch.clientX - _startX);
+            const dyAbs = Math.abs(touch.clientY - _startY);
+            if (dxAbs + dyAbs < 10) return; // wait for meaningful movement
+            const isHorizontal = dxAbs > dyAbs * HORIZONTAL_GESTURE_DOMINANCE;
+            // Only block when gesture starts at edge and nearest scrollable container
+            // cannot continue in that horizontal direction.
+            if (isHorizontal) {
+                const dx = touch.clientX - _startX;
+                const canScrollHorizontally = canScrollFromTarget(e.target, dx);
+                _decided = true;
+                _blocking = !canScrollHorizontally;
+                return;
+            }
             _decided = true;
-            _blocking = dx > dy; // horizontal swipe from edge → block
+            _blocking = false;
         }
         if (_blocking) {
             e.preventDefault();
@@ -303,6 +318,32 @@ if ('scrollRestoration' in history) {
         _decided = false;
         _blocking = false;
     }, { passive: true });
+
+    // Returns true when the target or an ancestor can continue horizontal scrolling
+    // in the swipe direction represented by deltaX.
+    function canScrollFromTarget(target, deltaX) {
+        if (!target || !target.closest) return false;
+        const rangeInput = target.closest('input[type="range"]');
+        if (rangeInput) return true;
+
+        let node = target;
+        while (node && node !== document.body) {
+            if (node instanceof HTMLElement) {
+                const maxHorizontalScroll = node.scrollWidth - node.clientWidth;
+                if (maxHorizontalScroll > 0) {
+                    const styles = getComputedStyle(node);
+                    const overflowX = styles.overflowX;
+                    const hasHorizontalScrollOverflow = overflowX === 'auto' || overflowX === 'scroll';
+                    if (hasHorizontalScrollOverflow) {
+                        if (deltaX < 0 && node.scrollLeft < maxHorizontalScroll) return true;
+                        if (deltaX > 0 && node.scrollLeft > 0) return true;
+                    }
+                }
+            }
+            node = node.parentElement;
+        }
+        return false;
+    }
 })();
 
 console.log('✨ usual us - Complete rebuild ready for your love story');
