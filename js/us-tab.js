@@ -52,7 +52,8 @@ function setupPullToRefresh() {
     let pulling = false;
 
     function isAtTop() {
-        return (window.scrollY || document.documentElement.scrollTop) <= 0;
+        const scrollEl = document.scrollingElement || document.documentElement;
+        return scrollEl.scrollTop <= 0;
     }
 
     usTab.addEventListener('touchstart', (e) => {

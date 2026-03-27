@@ -1711,7 +1711,8 @@ textarea {
     padding-left: 20px;
     padding-right: 20px;
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
     /* Phase 2: Breathing gradient — oversized to allow slow drift */
     background: linear-gradient(170deg, #fdf2f0 0%, #fce4ec 15%, #f9dde5 30%, #fef5e7 45%, #fce4ec 60%, #fdf2f0 75%, #f9dde5 90%, #fdf2f0 100%);
     background-size: 200% 200%;
@@ -1730,8 +1731,8 @@ textarea {
     --us-accent: #c2185b;
     --us-tab-bg: #fdf2f0;
     color: var(--us-text);
-    contain: layout style;
-    overscroll-behavior-y: contain;
+    contain: style;
+    overscroll-behavior-y: auto;
     touch-action: pan-y;
 }
 
