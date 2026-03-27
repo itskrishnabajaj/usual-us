@@ -47,46 +47,72 @@ function setupPullToRefresh() {
     const spinner = indicator.firstElementChild;
     const THRESHOLD = 80;      // px to trigger refresh
     const MAX_PULL = 130;      // visual cap for elastic feel
+    const ACTIVATION_DISTANCE = 8; // px before PTR engages
+    const TOP_TOLERANCE = 1; // px tolerance for device rounding
     let startY = 0;
+    let startX = 0;
     let pullDistance = 0;
+    let maybePulling = false;
     let pulling = false;
 
     function isAtTop() {
-        return (window.scrollY || document.documentElement.scrollTop) <= 0;
+        return (window.scrollY || document.documentElement.scrollTop) <= TOP_TOLERANCE;
+    }
+
+    function isUsTabActive() {
+        return usTab.classList.contains('active');
+    }
+
+    function resetPullState() {
+        maybePulling = false;
+        pulling = false;
+        pullDistance = 0;
+        indicator.style.transition = '';
+        indicator.style.height = '';
+        indicator.classList.remove('pulling');
     }
 
     usTab.addEventListener('touchstart', (e) => {
-        if (_ptrRefreshing) return;
-        if (isAtTop()) {
-            startY = e.touches[0].pageY;
-            pullDistance = 0;
-            pulling = true;
-            // Remove transition during drag for immediate response
-            indicator.style.transition = 'none';
-        }
+        if (_ptrRefreshing || e.touches.length !== 1 || !isUsTabActive()) return;
+        if (!isAtTop()) return;
+        startY = e.touches[0].pageY;
+        startX = e.touches[0].pageX;
+        pullDistance = 0;
+        maybePulling = true;
+        pulling = false;
+        // Remove transition during drag for immediate response
+        indicator.style.transition = 'none';
     }, { passive: true });
 
     usTab.addEventListener('touchmove', (e) => {
-        if (!pulling || _ptrRefreshing) return;
-        // Cancel if user scrolled away from top
-        if (!isAtTop()) {
-            pulling = false;
-            pullDistance = 0;
-            indicator.style.transition = '';
-            indicator.style.height = '';
-            indicator.classList.remove('pulling');
+        if (!maybePulling || _ptrRefreshing || e.touches.length !== 1 || !isUsTabActive()) return;
+        const touch = e.touches[0];
+        const diffY = touch.pageY - startY;
+        const diffX = Math.abs(touch.pageX - startX);
+
+        // Ignore horizontal gestures and upward movement; allow native scroll to continue
+        if (diffY <= 0 || diffX > Math.abs(diffY)) {
+            resetPullState();
             return;
         }
-        const diff = e.touches[0].pageY - startY;
-        if (diff <= 0) {
-            // Scrolling up — reset
-            pullDistance = 0;
-            indicator.style.height = '';
-            indicator.classList.remove('pulling');
+
+        // Engage PTR only after a small downward distance at top
+        if (!pulling) {
+            if (diffY < ACTIVATION_DISTANCE) return;
+            if (!isAtTop()) {
+                resetPullState();
+                return;
+            }
+            pulling = true;
+        }
+
+        // Cancel if user scrolled away from top
+        if (!isAtTop()) {
+            resetPullState();
             return;
         }
         // Elastic damping — decelerates as you pull further
-        pullDistance = Math.min(diff, MAX_PULL);
+        pullDistance = Math.min(diffY, MAX_PULL);
         // Quadratic resistance: factor of 3 keeps damping gentle (higher = less resistance)
         const damped = pullDistance * (1 - pullDistance / (MAX_PULL * 3));
         const height = damped * 0.6;
@@ -101,6 +127,7 @@ function setupPullToRefresh() {
     }, { passive: true });
 
     usTab.addEventListener('touchend', async () => {
+        maybePulling = false;
         if (!pulling || _ptrRefreshing) { pulling = false; return; }
         // Re-enable transition for smooth snap-back
         indicator.style.transition = '';
@@ -114,6 +141,10 @@ function setupPullToRefresh() {
         pulling = false;
         pullDistance = 0;
     });
+
+    usTab.addEventListener('touchcancel', () => {
+        resetPullState();
+    }, { passive: true });
 }
 
 function resetPtrIndicator(indicator, spinner) {

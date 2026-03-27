@@ -925,8 +925,6 @@ body.us-active.late-night {
     padding: 20px;
     max-width: 600px;
     margin: 0 auto;
-    /* TWA: Contain overscroll so nested scrollers don't trigger browser navigation */
-    overscroll-behavior: contain;
 }
 
 /* Tab transitions with fade effect */
@@ -1711,7 +1709,7 @@ textarea {
     padding-left: 20px;
     padding-right: 20px;
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
     /* Phase 2: Breathing gradient — oversized to allow slow drift */
     background: linear-gradient(170deg, #fdf2f0 0%, #fce4ec 15%, #f9dde5 30%, #fef5e7 45%, #fce4ec 60%, #fdf2f0 75%, #f9dde5 90%, #fdf2f0 100%);
     background-size: 200% 200%;
@@ -1730,8 +1728,6 @@ textarea {
     --us-accent: #c2185b;
     --us-tab-bg: #fdf2f0;
     color: var(--us-text);
-    contain: layout style;
-    overscroll-behavior-y: contain;
     touch-action: pan-y;
 }
 
