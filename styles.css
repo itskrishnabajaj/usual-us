@@ -496,6 +496,15 @@
     animation: loginReveal 0.7s var(--ease) both;
 }
 
+/* Release GPU layers for splash children once the reveal phase starts —
+   splash animations are complete at this point (all use `forwards` fill).
+   The login-screen gets display:none after auth, but this frees layers
+   during the login-screen waiting period. */
+.login-screen.splash-reveal .splash-ambient span,
+.login-screen.splash-reveal .splash-particle {
+    will-change: auto;
+}
+
 .login-screen.splash-reveal .login-container {
     animation: loginContainerReveal 0.6s 0.15s var(--ease-bounce) both;
 }
