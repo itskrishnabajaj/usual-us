@@ -12,6 +12,11 @@ let lenisInstance = null;
 
 function initSmoothScroll() {
     if (typeof Lenis === 'undefined') return;
+    // Skip Lenis on touch-only devices (Android phones, etc.) — native scroll
+    // is more reliable and performant on mobile; Lenis can cause scroll lock
+    // and kinetic-scroll conflicts on Motorola, Realme, and iQOO devices.
+    const isTouchOnly = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (isTouchOnly) return;
     try {
         lenisInstance = new Lenis({
             duration: 1.2,
@@ -202,3 +207,16 @@ function attachImageAdjustGestures(previewEl, xSlider, ySlider, updateFn) {
 document.addEventListener('DOMContentLoaded', () => {
     initSmoothScroll();
 });
+
+// ---- Device-resilience failsafe ----
+// If any code path accidentally locks scroll by setting overflow:hidden on
+// the root elements, this touchend listener clears it immediately so scroll
+// can never be permanently disabled.
+document.addEventListener('touchend', () => {
+    if (document.body.style.overflow === 'hidden') {
+        document.body.style.overflow = '';
+    }
+    if (document.documentElement.style.overflow === 'hidden') {
+        document.documentElement.style.overflow = '';
+    }
+}, { passive: true });

@@ -526,7 +526,9 @@
 /* Global scroll + TWA native-app hardening */
 html {
     scroll-behavior: smooth;
-    overscroll-behavior: none;
+    /* body handles PWA overscroll hardening; html:auto prevents double-locking
+       which can cause scroll to feel dead on some Android WebViews */
+    overscroll-behavior: auto;
 }
 
 body {
@@ -925,8 +927,8 @@ body.us-active.late-night {
     padding: 20px;
     max-width: 600px;
     margin: 0 auto;
-    /* TWA: Contain overscroll so nested scrollers don't trigger browser navigation */
-    overscroll-behavior: contain;
+    /* overscroll-behavior handled at tab level — removing duplicate contain rule
+       that could compound with body:none and block scroll on some Android devices */
 }
 
 /* Tab transitions with fade effect */
@@ -1734,6 +1736,12 @@ textarea {
     contain: style;
     overscroll-behavior-y: auto;
     touch-action: pan-y;
+    /* Override html smooth-scroll so the breathing gradient animation doesn't
+       compete with Lenis/native scroll smoothing simultaneously */
+    scroll-behavior: auto;
+    /* Promote gradient animation to its own composited layer — eliminates
+       repaints on every frame of usBreathingGradient */
+    will-change: background-position;
 }
 
 /* ── Pull-to-Refresh Indicator ── */
@@ -3626,6 +3634,12 @@ textarea {
     height: 100%;
     pointer-events: none;
     z-index: 10000;
+}
+
+/* Hide floating hearts when not on the Us tab — frees GPU resources on
+   other tabs and prevents unnecessary animation overhead */
+body:not(.us-active) .floating-hearts-container {
+    display: none;
 }
 
 .floating-heart {

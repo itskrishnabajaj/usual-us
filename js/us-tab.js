@@ -50,10 +50,13 @@ function setupPullToRefresh() {
     let startY = 0;
     let pullDistance = 0;
     let pulling = false;
+    let _pullStartTime = 0;
 
     function isAtTop() {
         const scrollEl = document.scrollingElement || document.documentElement;
-        return scrollEl.scrollTop <= 0;
+        // Use both scrollTop and pageYOffset as fallback — Lenis (when active)
+        // and some Android WebViews can disagree on which value reflects reality.
+        return scrollEl.scrollTop <= 0 && window.pageYOffset <= 0;
     }
 
     usTab.addEventListener('touchstart', (e) => {
@@ -62,6 +65,7 @@ function setupPullToRefresh() {
             startY = e.touches[0].pageY;
             pullDistance = 0;
             pulling = true;
+            _pullStartTime = Date.now();
             // Remove transition during drag for immediate response
             indicator.style.transition = 'none';
         }
@@ -69,6 +73,15 @@ function setupPullToRefresh() {
 
     usTab.addEventListener('touchmove', (e) => {
         if (!pulling || _ptrRefreshing) return;
+        // Stale-pull guard: if we've been "pulling" for 200ms with no distance
+        // (e.g., Lenis intercepted the gesture), abort to prevent locked state.
+        if (pullDistance === 0 && Date.now() - _pullStartTime > 200) {
+            pulling = false;
+            indicator.style.transition = '';
+            indicator.style.height = '';
+            indicator.classList.remove('pulling');
+            return;
+        }
         // Cancel if user scrolled away from top
         if (!isAtTop()) {
             pulling = false;

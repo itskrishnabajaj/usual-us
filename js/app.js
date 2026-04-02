@@ -268,7 +268,7 @@ if ('scrollRestoration' in history) {
 // defense-in-depth by intercepting horizontal touch moves from screen edges.
 (function blockEdgeSwipe() {
     const EDGE_ZONE = 30; // px from screen edge that triggers Chrome gesture
-    const HORIZONTAL_GESTURE_DOMINANCE = 1.25;
+    const HORIZONTAL_GESTURE_DOMINANCE = 1.5; // raised from 1.25 — ambiguous swipes default to scroll
     let _edgeTouch = false;
     let _startX = 0;
     let _startY = 0;
@@ -295,6 +295,13 @@ if ('scrollRestoration' in history) {
             const dxAbs = Math.abs(touch.clientX - _startX);
             const dyAbs = Math.abs(touch.clientY - _startY);
             if (dxAbs + dyAbs < 10) return; // wait for meaningful movement
+            // Early exit: if vertical movement clearly dominates, never block — let
+            // native scroll resolve immediately without waiting for full decision.
+            if (dyAbs > dxAbs * 1.5) {
+                _decided = true;
+                _blocking = false;
+                return;
+            }
             const isHorizontal = dxAbs > dyAbs * HORIZONTAL_GESTURE_DOMINANCE;
             // Only block when gesture starts at edge and nearest scrollable container
             // cannot continue in that horizontal direction.
