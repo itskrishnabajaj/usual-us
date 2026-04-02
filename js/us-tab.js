@@ -329,6 +329,10 @@ function initializeUsTab() {
     createUsTabStars();
     createFloatingHearts();
     renderMilestones();
+
+    // Re-validate PTR listeners each activation — handles the case where
+    // #us-tab is ever re-created; the guard inside checks the DOM ref identity.
+    setupPullToRefresh();
 }
 
 function createUsTabStars() {

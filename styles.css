@@ -3637,10 +3637,14 @@ textarea {
 }
 
 /* Pause floating heart animations when not on the Us tab — frees GPU
-   compositing resources on other tabs without altering layout or visibility */
+   compositing resources on other tabs. Target both the container and each
+   .floating-heart because animation-play-state is not inherited by children. */
 body:not(.us-active) .floating-hearts-container {
-    animation-play-state: paused;
     visibility: hidden;
+}
+
+body:not(.us-active) .floating-heart {
+    animation-play-state: paused;
 }
 
 .floating-heart {
