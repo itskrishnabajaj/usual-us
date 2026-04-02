@@ -1742,7 +1742,10 @@ textarea {
     --us-tab-bg: #fdf2f0;
     color: var(--us-text);
     contain: style;
-    overscroll-behavior-y: auto;
+    /* none: with lazy PTR activation in place the browser's own overscroll
+       bounce no longer competes — disabling it removes the double-bounce on
+       the first swipe while native scroll still operates normally */
+    overscroll-behavior-y: none;
     touch-action: pan-y;
     /* Override html smooth-scroll so the breathing gradient animation doesn't
        compete with Lenis/native scroll smoothing simultaneously */
