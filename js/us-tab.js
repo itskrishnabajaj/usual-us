@@ -99,9 +99,12 @@ function setupPullToRefresh() {
         const currentY = e.touches[0].pageY;
         const diff = currentY - startY;
 
-        // Guard 1: upward swipe — abandon immediately, never interfere
+        // Guard 1: upward swipe — abandon immediately, never interfere.
+        // Clear potentialPull too so this gesture can't re-qualify if direction
+        // reverses, keeping state consistent with the "abandon" intent.
         if (diff <= 0) {
             if (pulling) resetPtr();
+            else potentialPull = false;
             return;
         }
 
@@ -141,7 +144,13 @@ function setupPullToRefresh() {
     usTab.addEventListener('touchend', async () => {
         if (_rafId) { cancelAnimationFrame(_rafId); _rafId = null; }
         potentialPull = false;
-        if (!pulling || _ptrRefreshing) { pulling = false; return; }
+        if (!pulling || _ptrRefreshing) {
+            pulling = false;
+            // Reset any transition suppression set during touchstart even if
+            // PTR was never committed, to avoid lingering inline style state.
+            indicator.style.transition = '';
+            return;
+        }
 
         indicator.style.transition = '';
         const reachedThreshold = pullDistance >= THRESHOLD;
