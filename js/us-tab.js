@@ -35,14 +35,18 @@ function getCachedElements() {
 let _lastMilestonesDay = -1;
 
 let _pullToRefreshSetup = false;
+let _pullToRefreshUsTabRef = null; // tracks the exact DOM node listeners are bound to
 let _ptrRefreshing = false;
 
 function setupPullToRefresh() {
-    if (_pullToRefreshSetup) return;
     const usTab = document.getElementById('us-tab');
     const indicator = document.getElementById('ptr-indicator');
     if (!usTab || !indicator) return;
+    // If the #us-tab DOM node was replaced (e.g., by a re-render), the old
+    // listeners are orphaned — reset the flag so we re-bind to the new node.
+    if (_pullToRefreshSetup && _pullToRefreshUsTabRef === usTab) return;
     _pullToRefreshSetup = true;
+    _pullToRefreshUsTabRef = usTab;
 
     const spinner = indicator.firstElementChild;
     const THRESHOLD = 80;      // px to trigger refresh
@@ -54,9 +58,10 @@ function setupPullToRefresh() {
 
     function isAtTop() {
         const scrollEl = document.scrollingElement || document.documentElement;
-        // Use both scrollTop and pageYOffset as fallback — Lenis (when active)
-        // and some Android WebViews can disagree on which value reflects reality.
-        return scrollEl.scrollTop <= 0 && window.pageYOffset <= 0;
+        // OR semantics: treat as "at top" if either scroll signal says so.
+        // Lenis (when active) and some Android WebViews can report different
+        // values for the same scroll position — use whichever says we're at top.
+        return scrollEl.scrollTop <= 0 || window.pageYOffset <= 0;
     }
 
     usTab.addEventListener('touchstart', (e) => {
@@ -73,9 +78,9 @@ function setupPullToRefresh() {
 
     usTab.addEventListener('touchmove', (e) => {
         if (!pulling || _ptrRefreshing) return;
-        // Stale-pull guard: if we've been "pulling" for 200ms with no distance
+        // Stale-pull guard: if we've been "pulling" for 100ms with no distance
         // (e.g., Lenis intercepted the gesture), abort to prevent locked state.
-        if (pullDistance === 0 && Date.now() - _pullStartTime > 200) {
+        if (pullDistance === 0 && Date.now() - _pullStartTime > 100) {
             pulling = false;
             indicator.style.transition = '';
             indicator.style.height = '';

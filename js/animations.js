@@ -25,6 +25,10 @@ function initSmoothScroll() {
             gestureOrientation: 'vertical',
             smoothWheel: true,
             touchMultiplier: 1.8,
+            // Prevent Lenis from synthesizing momentum on touch — defers to
+            // native inertia and avoids double-scroll on hybrid devices.
+            syncTouch: false,
+            touchInertiaMultiplier: 20,
         });
 
         function raf(time) {

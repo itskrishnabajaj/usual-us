@@ -3636,10 +3636,11 @@ textarea {
     z-index: 10000;
 }
 
-/* Hide floating hearts when not on the Us tab — frees GPU resources on
-   other tabs and prevents unnecessary animation overhead */
+/* Pause floating heart animations when not on the Us tab — frees GPU
+   compositing resources on other tabs without altering layout or visibility */
 body:not(.us-active) .floating-hearts-container {
-    display: none;
+    animation-play-state: paused;
+    visibility: hidden;
 }
 
 .floating-heart {
