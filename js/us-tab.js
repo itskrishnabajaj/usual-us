@@ -49,109 +49,79 @@ function setupPullToRefresh() {
     _pullToRefreshUsTabRef = usTab;
 
     const spinner = indicator.firstElementChild;
-    const THRESHOLD = 80;           // px to trigger refresh
-    const MAX_PULL = 130;           // visual cap for elastic feel
-    const ACTIVATION_THRESHOLD = 12; // min downward px before PTR "owns" the gesture
-
+    const THRESHOLD = 80;      // px to trigger refresh
+    const MAX_PULL = 130;      // visual cap for elastic feel
     let startY = 0;
     let pullDistance = 0;
-    let pulling = false;       // true = PTR has committed to this gesture
-    let potentialPull = false; // true = we're at top and watching, but haven't committed
-    let _rafId = null;         // requestAnimationFrame handle for indicator updates
+    let pulling = false;
+    let _pullStartTime = 0;
 
     function isAtTop() {
-        // Strict AND: both signals must agree we're at the top.
-        // Lenis is now bypassed on touch-only devices so they should always agree.
-        // Using AND avoids treating a partially-scrolled position as "top" when
-        // one value lags during momentum scroll (was OR — caused early PTR activation).
         const scrollEl = document.scrollingElement || document.documentElement;
-        return scrollEl.scrollTop <= 0 && window.pageYOffset <= 0;
-    }
-
-    function resetPtr() {
-        pulling = false;
-        potentialPull = false;
-        pullDistance = 0;
-        if (_rafId) { cancelAnimationFrame(_rafId); _rafId = null; }
-        indicator.style.transition = '';
-        indicator.style.height = '';
-        indicator.classList.remove('pulling');
+        // OR semantics: treat as "at top" if either scroll signal says so.
+        // Lenis (when active) and some Android WebViews can report different
+        // values for the same scroll position — use whichever says we're at top.
+        return scrollEl.scrollTop <= 0 || window.pageYOffset <= 0;
     }
 
     usTab.addEventListener('touchstart', (e) => {
         if (_ptrRefreshing) return;
-        // Phase 1: only watch — do NOT commit. Record touch origin and let native
-        // scroll handle everything until a clear downward intent is confirmed.
-        potentialPull = false;
-        pulling = false;
-        pullDistance = 0;
         if (isAtTop()) {
             startY = e.touches[0].pageY;
-            potentialPull = true;
-            // Suppress transition so indicator responds instantly once activated
+            pullDistance = 0;
+            pulling = true;
+            _pullStartTime = Date.now();
+            // Remove transition during drag for immediate response
             indicator.style.transition = 'none';
         }
     }, { passive: true });
 
     usTab.addEventListener('touchmove', (e) => {
-        if (_ptrRefreshing || !potentialPull) return;
-
-        const currentY = e.touches[0].pageY;
-        const diff = currentY - startY;
-
-        // Guard 1: upward swipe — abandon immediately, never interfere.
-        // Clear potentialPull too so this gesture can't re-qualify if direction
-        // reverses, keeping state consistent with the "abandon" intent.
-        if (diff <= 0) {
-            if (pulling) resetPtr();
-            else potentialPull = false;
+        if (!pulling || _ptrRefreshing) return;
+        // Stale-pull guard: if we've been "pulling" for 100ms with no distance
+        // (e.g., Lenis intercepted the gesture), abort to prevent locked state.
+        if (pullDistance === 0 && Date.now() - _pullStartTime > 100) {
+            pulling = false;
+            indicator.style.transition = '';
+            indicator.style.height = '';
+            indicator.classList.remove('pulling');
             return;
         }
-
-        // Guard 2: page has scrolled away from top — abandon
+        // Cancel if user scrolled away from top
         if (!isAtTop()) {
-            if (pulling) resetPtr();
-            else { potentialPull = false; }
+            pulling = false;
+            pullDistance = 0;
+            indicator.style.transition = '';
+            indicator.style.height = '';
+            indicator.classList.remove('pulling');
             return;
         }
-
-        // Phase 2: commit to PTR only after crossing the activation threshold.
-        // Until then, do nothing — native scroll runs completely unimpeded.
-        if (!pulling) {
-            if (diff < ACTIVATION_THRESHOLD) return; // wait silently
-            pulling = true; // gesture confirmed as a pull-to-refresh
+        const diff = e.touches[0].pageY - startY;
+        if (diff <= 0) {
+            // Scrolling up — reset
+            pullDistance = 0;
+            indicator.style.height = '';
+            indicator.classList.remove('pulling');
+            return;
         }
-
         // Elastic damping — decelerates as you pull further
         pullDistance = Math.min(diff, MAX_PULL);
+        // Quadratic resistance: factor of 3 keeps damping gentle (higher = less resistance)
         const damped = pullDistance * (1 - pullDistance / (MAX_PULL * 3));
         const height = damped * 0.6;
-
-        // Batch all DOM writes into a single rAF to avoid forced reflows
-        if (_rafId) cancelAnimationFrame(_rafId);
-        _rafId = requestAnimationFrame(() => {
-            _rafId = null;
-            indicator.style.height = height + 'px';
-            indicator.classList.add('pulling');
-            if (spinner) {
-                const rotation = (pullDistance / MAX_PULL) * 360;
-                const scale = Math.min(pullDistance / THRESHOLD, 1);
-                spinner.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
-            }
-        });
+        indicator.style.height = height + 'px';
+        indicator.classList.add('pulling');
+        // Rotate spinner proportionally to pull distance
+        if (spinner) {
+            const rotation = (pullDistance / MAX_PULL) * 360;
+            const scale = Math.min(pullDistance / THRESHOLD, 1);
+            spinner.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+        }
     }, { passive: true });
 
     usTab.addEventListener('touchend', async () => {
-        if (_rafId) { cancelAnimationFrame(_rafId); _rafId = null; }
-        potentialPull = false;
-        if (!pulling || _ptrRefreshing) {
-            pulling = false;
-            // Reset any transition suppression set during touchstart even if
-            // PTR was never committed, to avoid lingering inline style state.
-            indicator.style.transition = '';
-            return;
-        }
-
+        if (!pulling || _ptrRefreshing) { pulling = false; return; }
+        // Re-enable transition for smooth snap-back
         indicator.style.transition = '';
         const reachedThreshold = pullDistance >= THRESHOLD;
 
