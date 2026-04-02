@@ -1743,9 +1743,9 @@ textarea {
     color: var(--us-text);
     contain: style;
     overscroll-behavior-y: auto;
-    touch-action: pan-y;
-    /* Override html smooth-scroll so the breathing gradient animation doesn't
-       compete with Lenis/native scroll smoothing simultaneously */
+    /* touch-action intentionally omitted: browser default allows all gestures.
+       Explicitly setting pan-y was conflicting with scroll region detection on
+       some Android WebViews. Native scroll is fully browser-controlled. */
     scroll-behavior: auto;
     /* Promote gradient animation to its own composited layer — eliminates
        repaints on every frame of usBreathingGradient */

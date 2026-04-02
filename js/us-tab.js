@@ -34,130 +34,14 @@ function getCachedElements() {
 // Track last rendered milestones day to avoid unnecessary rebuilds
 let _lastMilestonesDay = -1;
 
-let _pullToRefreshSetup = false;
-let _pullToRefreshUsTabRef = null; // tracks the exact DOM node listeners are bound to
-let _ptrRefreshing = false;
+// Pull-to-refresh intentionally disabled — all gesture handlers removed so the
+// browser owns 100% of scroll on the Us tab. setupPullToRefresh() is kept as a
+// no-op to preserve all call-sites without changes elsewhere in the codebase.
+// _ptrRefreshing is kept false permanently so no code paths gate on it.
+const _ptrRefreshing = false;
 
 function setupPullToRefresh() {
-    const usTab = document.getElementById('us-tab');
-    const indicator = document.getElementById('ptr-indicator');
-    if (!usTab || !indicator) return;
-    // If the #us-tab DOM node was replaced (e.g., by a re-render), the old
-    // listeners are orphaned — reset the flag so we re-bind to the new node.
-    if (_pullToRefreshSetup && _pullToRefreshUsTabRef === usTab) return;
-    _pullToRefreshSetup = true;
-    _pullToRefreshUsTabRef = usTab;
-
-    const spinner = indicator.firstElementChild;
-    const THRESHOLD = 80;      // px to trigger refresh
-    const MAX_PULL = 130;      // visual cap for elastic feel
-    let startY = 0;
-    let pullDistance = 0;
-    let pulling = false;
-    let _pullStartTime = 0;
-
-    function isAtTop() {
-        const scrollEl = document.scrollingElement || document.documentElement;
-        // OR semantics: treat as "at top" if either scroll signal says so.
-        // Lenis (when active) and some Android WebViews can report different
-        // values for the same scroll position — use whichever says we're at top.
-        return scrollEl.scrollTop <= 0 || window.pageYOffset <= 0;
-    }
-
-    usTab.addEventListener('touchstart', (e) => {
-        if (_ptrRefreshing) return;
-        if (isAtTop()) {
-            startY = e.touches[0].pageY;
-            pullDistance = 0;
-            pulling = true;
-            _pullStartTime = Date.now();
-            // Remove transition during drag for immediate response
-            indicator.style.transition = 'none';
-        }
-    }, { passive: true });
-
-    usTab.addEventListener('touchmove', (e) => {
-        if (!pulling || _ptrRefreshing) return;
-        // Stale-pull guard: if we've been "pulling" for 100ms with no distance
-        // (e.g., Lenis intercepted the gesture), abort to prevent locked state.
-        if (pullDistance === 0 && Date.now() - _pullStartTime > 100) {
-            pulling = false;
-            indicator.style.transition = '';
-            indicator.style.height = '';
-            indicator.classList.remove('pulling');
-            return;
-        }
-        // Cancel if user scrolled away from top
-        if (!isAtTop()) {
-            pulling = false;
-            pullDistance = 0;
-            indicator.style.transition = '';
-            indicator.style.height = '';
-            indicator.classList.remove('pulling');
-            return;
-        }
-        const diff = e.touches[0].pageY - startY;
-        if (diff <= 0) {
-            // Scrolling up — reset
-            pullDistance = 0;
-            indicator.style.height = '';
-            indicator.classList.remove('pulling');
-            return;
-        }
-        // Elastic damping — decelerates as you pull further
-        pullDistance = Math.min(diff, MAX_PULL);
-        // Quadratic resistance: factor of 3 keeps damping gentle (higher = less resistance)
-        const damped = pullDistance * (1 - pullDistance / (MAX_PULL * 3));
-        const height = damped * 0.6;
-        indicator.style.height = height + 'px';
-        indicator.classList.add('pulling');
-        // Rotate spinner proportionally to pull distance
-        if (spinner) {
-            const rotation = (pullDistance / MAX_PULL) * 360;
-            const scale = Math.min(pullDistance / THRESHOLD, 1);
-            spinner.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
-        }
-    }, { passive: true });
-
-    usTab.addEventListener('touchend', async () => {
-        if (!pulling || _ptrRefreshing) { pulling = false; return; }
-        // Re-enable transition for smooth snap-back
-        indicator.style.transition = '';
-        const reachedThreshold = pullDistance >= THRESHOLD;
-
-        if (reachedThreshold) {
-            await triggerPtrRefresh(indicator, spinner);
-        } else {
-            resetPtrIndicator(indicator, spinner);
-        }
-        pulling = false;
-        pullDistance = 0;
-    });
-}
-
-function resetPtrIndicator(indicator, spinner) {
-    indicator.classList.remove('pulling', 'refreshing');
-    indicator.classList.add('completing');
-    if (spinner) spinner.style.transform = '';
-    setTimeout(() => {
-        indicator.style.height = '';
-        indicator.classList.remove('completing');
-    }, 300);
-}
-
-async function triggerPtrRefresh(indicator, spinner) {
-    _ptrRefreshing = true;
-    indicator.classList.remove('pulling');
-    indicator.classList.add('refreshing');
-    indicator.style.height = '48px';
-    if (spinner) spinner.style.transform = '';
-
-    try {
-        await refreshUsTab();
-    } finally {
-        resetPtrIndicator(indicator, spinner);
-        _ptrRefreshing = false;
-    }
+    // No-op: PTR disabled. Native scroll runs unimpeded.
 }
 
 async function refreshUsTab() {
