@@ -3649,6 +3649,7 @@ textarea {
    .floating-heart because animation-play-state is not inherited by children. */
 body:not(.us-active) .floating-hearts-container {
     visibility: hidden;
+    animation-play-state: paused;
 }
 
 body:not(.us-active) .floating-heart {
