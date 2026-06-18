@@ -11,6 +11,15 @@ Related: [ROADMAP](./ROADMAP.md) · [README](./README.md)
 ## [Unreleased]
 
 ### Fixed
+- **Us-tab first-swipe scroll bounce/stick.** `.us-tab` had `overflow-x:hidden` +
+  `overflow-y:visible`, which computes `overflow-y:auto` → it was a nested scroll container that
+  rubber-banded on the first touch (`overscroll-behavior-y:auto`) before chaining to the document.
+  Set `.us-tab { overflow: visible }` so the document is the sole scroller; scrolling now starts
+  instantly. Horizontal overflow still clipped by `body{overflow-x:hidden}`. Cache → v50.
+- **Live muted looping video previews in the timeline.** The timeline (`lazy`) branch of
+  `renderMediaElement` rendered videos without `autoplay`, relying only on the IntersectionObserver
+  (unreliable under `content-visibility:auto` + Android autoplay policy). Added
+  `autoplay muted loop playsinline`; the observer still pauses off-screen videos. Cache → v49.
 - **Release blocker: stuck splash + "shortcut instead of Install" on Vercel.** Root cause was the
   hosting migration, not app code: Vercel auto-detected Vite and served the `vite build` `dist/`
   output, which omits the loose `service-worker.js`, `manifest.json` and `js/*.js` (no `public/`
@@ -52,7 +61,7 @@ Related: [ROADMAP](./ROADMAP.md) · [README](./README.md)
 - **`icons/` folder optimised ~95%** — 18 raster-wrapped SVGs (tab/category/mood/who-pays/splash)
   downscaled to display-appropriate caps (256–512 px), ~36 MB → ~1.9 MB. Combined precache media
   dropped from ~45 MB to ~2.8 MB.
-- Service-worker cache bumped to **`usual-us-v48`**.
+- Service-worker cache bumped to **`usual-us-v50`**.
 - Setup guide updated to the real Vercel URL (usualus.vercel.app).
 
 ### Added

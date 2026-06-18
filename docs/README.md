@@ -86,7 +86,7 @@ global touch interception, no fabrication) and the expected working style.
 | Media | Cloudinary | `js/config.js:6-10` |
 | Animation libs | GSAP, Lenis, Hammer.js (local copies in `lib/`) | `index.html` |
 | Users | Exactly two: `imsusu` (Susu/krishna), `imgugu` (Gugu/rashi) | `js/config.js:13-16` |
-| Service worker cache | `usual-us-v48` | `service-worker.js:1` |
+| Service worker cache | `usual-us-v50` | `service-worker.js:1` |
 | Relationship start | 2025-01-28 | `js/config.js:19` |
 
 _Last reviewed against the codebase: see the latest commit on

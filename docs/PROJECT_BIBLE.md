@@ -203,7 +203,7 @@ A flat, readable layout. Full detail in [REPOSITORY_ARCHITECTURE](./REPOSITORY_A
 index.html          Single HTML entry: all screens, modals, and ordered <script> tags
 styles.css          One global stylesheet (themes, components, animations)
 firebase.js         Firebase config + Firestore init + collection references
-service-worker.js   PWA cache + offline strategy (cache: usual-us-v48)
+service-worker.js   PWA cache + offline strategy (cache: usual-us-v50)
 manifest.json       PWA manifest
 vercel.json         Hosting headers (no-cache for SW/manifest + security headers)
 js/                 App logic, one domain per file + core (config/state/event-bus/app)

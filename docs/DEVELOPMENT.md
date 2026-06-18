@@ -32,7 +32,7 @@ npm install
 | `npm run optimize:svg` | SVGO-optimise SVGs in `icons/` |
 
 **Before committing:** run `npm run lint` and `npm run build` (both should pass). If you changed
-any cached asset, **bump `CACHE_NAME`** in `service-worker.js` ([PWA_BIBLE](./PWA_BIBLE.md#2-service-worker-service-workerjs-cache-usual-us-v48)).
+any cached asset, **bump `CACHE_NAME`** in `service-worker.js` ([PWA_BIBLE](./PWA_BIBLE.md#2-service-worker-service-workerjs-cache-usual-us-v50)).
 
 ## Configuration (`js/config.js`)
 All personal/config constants live here:
