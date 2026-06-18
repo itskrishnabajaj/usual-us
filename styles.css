@@ -1722,8 +1722,13 @@ textarea {
     padding-left: 20px;
     padding-right: 20px;
     position: relative;
-    overflow-x: hidden;
-    overflow-y: visible;
+    /* overflow:visible on BOTH axes so .us-tab is NOT its own scroll container.
+       The old overflow-x:hidden + overflow-y:visible combo computed overflow-y:auto,
+       making .us-tab a nested scroller; with overscroll-behavior-y:auto it rubber-banded
+       on the FIRST swipe before chaining to the document (the "bouncy then smooth, sticky
+       after idle" feel). Document is the sole scroller now → scroll starts instantly.
+       Horizontal overflow is still clipped by body{overflow-x:hidden}. */
+    overflow: visible;
     /* Phase 2: Breathing gradient — oversized to allow slow drift */
     background: linear-gradient(170deg, #fdf2f0 0%, #fce4ec 15%, #f9dde5 30%, #fef5e7 45%, #fce4ec 60%, #fdf2f0 75%, #f9dde5 90%, #fdf2f0 100%);
     background-size: 200% 200%;
@@ -1744,7 +1749,8 @@ textarea {
     --us-tab-bg: #fdf2f0;
     color: var(--us-text);
     contain: style;
-    overscroll-behavior-y: auto;
+    /* overscroll-behavior-y removed: it only applied while .us-tab was a (nested) scroll
+       container. Document-level overscroll is governed by body{overscroll-behavior:none}. */
     /* touch-action intentionally omitted: browser default allows all gestures.
        Explicitly setting pan-y was conflicting with scroll region detection on
        some Android WebViews. Native scroll is fully browser-controlled. */
