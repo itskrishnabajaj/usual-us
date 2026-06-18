@@ -95,9 +95,16 @@ To feel like a native app rather than a browser tab:
   sanctioned `preventDefault`-on-touch in the codebase.
 
 ## 6. Deployment {#deployment}
-- **Host:** Vercel, zero-config static hosting, connected to the GitHub repo. **Push → auto
-  deploy** (preview deploys for branches, production for the main branch). Live at usualus.vercel.app.
-- **`vercel.json`:** `Cache-Control: no-cache` for `/service-worker.js` and `/manifest.json` (so
+- **Host:** Vercel, connected to the GitHub repo. **Push → auto deploy** (preview deploys for
+  branches, production for the main branch). Live at usualus.vercel.app.
+- **CRITICAL — no build step.** The app runs from the **loose repo files** (classic `<script>`
+  tags, `service-worker.js`, `manifest.json` at root), not a bundle. `vercel.json` therefore sets
+  `"framework": null`, `"buildCommand": ""`, `"outputDirectory": "."` so Vercel serves the **repo
+  root verbatim** (exactly as Netlify's old `publish = "."` did). **Do not** let Vercel auto-detect
+  Vite and serve `dist/` — `vite build` does not copy the loose JS/SW/manifest into `dist/`, so a
+  `dist`-served deploy 404s the scripts and service worker (stuck splash + "shortcut, not Install").
+  `npm run build` still works locally; it just isn't used for deployment.
+- **`vercel.json` headers:** `Cache-Control: no-cache` for `/service-worker.js` and `/manifest.json` (so
   updates reach phones immediately) + global security headers (`X-Frame-Options: DENY`,
   `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`).
 - There is **no `netlify.toml`** (removed) — Vercel ignores it anyway. Don't reintroduce

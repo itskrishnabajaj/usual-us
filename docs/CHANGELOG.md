@@ -11,6 +11,14 @@ Related: [ROADMAP](./ROADMAP.md) · [README](./README.md)
 ## [Unreleased]
 
 ### Fixed
+- **Release blocker: stuck splash + "shortcut instead of Install" on Vercel.** Root cause was the
+  hosting migration, not app code: Vercel auto-detected Vite and served the `vite build` `dist/`
+  output, which omits the loose `service-worker.js`, `manifest.json` and `js/*.js` (no `public/`
+  dir) — so those 404'd (`_startApp` never ran → splash forever; no SW → no install prompt).
+  Netlify had served the repo root verbatim (`publish = "."`). Fix: `vercel.json` now sets
+  `"framework": null`, `"buildCommand": ""`, `"outputDirectory": "."` to serve the root with **no
+  build**, restoring Netlify-equivalent behaviour. Configuration-only; no application code changed.
+
 - **Us-tab scroll smoothness on weaker GPUs (e.g. Moto Edge 50 Fusion).** Removed the
   counter-productive `will-change: background-position` on `.us-tab` (a paint property was being
   forced onto a constantly re-rasterised full-screen layer, starving scroll compositing); added
