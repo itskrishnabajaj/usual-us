@@ -29,7 +29,7 @@ from ~4.7 MB each to ~0.47 MB — see [CHANGELOG](./CHANGELOG.md). The `?v=` que
 
 ---
 
-## 2. Service worker (`service-worker.js`, cache `usual-us-v47`)
+## 2. Service worker (`service-worker.js`, cache `usual-us-v48`)
 
 ### Precache (install)
 On `install`, `urlsToCache` (the app shell: `/`, `index.html`, `styles.css`, `firebase.js`, the
@@ -60,14 +60,14 @@ sequenceDiagram
     Note over SW: new SW skipWaiting() on install
     SW-->>Page: statechange 'installed' (controller exists)
     Page->>Page: location.reload() once (_swRefreshing guard)
-    Note over SW: activate → delete all caches ≠ usual-us-v47 → clients.claim()
+    Note over SW: activate → delete all caches ≠ usual-us-v48 → clients.claim()
 ```
 Because an installed PWA can't be manually refreshed, `app.js` auto-reloads **once** when a new
 worker takes control. On `activate`, every non-current cache is deleted (so bumping `CACHE_NAME`
 fully clears the old version).
 
 > **Golden rule:** whenever you change any cached asset, **bump `CACHE_NAME`**
-> (`service-worker.js:1`, currently `usual-us-v47`). This is the #1 cause of "I don't see my
+> (`service-worker.js:1`, currently `usual-us-v48`). This is the #1 cause of "I don't see my
 > change" — see [DEBUGGING_GUIDE](./DEBUGGING_GUIDE.md).
 
 ---

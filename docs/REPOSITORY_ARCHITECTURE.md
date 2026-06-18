@@ -13,7 +13,7 @@ usual-us/
 ├── index.html            Single entry point: every screen, every modal, ordered <script> tags
 ├── styles.css            One global stylesheet (~5,400 lines): themes, components, animations
 ├── firebase.js           Firebase config, initializeFirebase(), Firestore collection refs
-├── service-worker.js     PWA precache list + fetch strategy (cache name: usual-us-v47)
+├── service-worker.js     PWA precache list + fetch strategy (cache name: usual-us-v48)
 ├── manifest.json         PWA manifest (name, icons, theme, screenshots, standalone)
 ├── vercel.json           Hosting headers: no-cache for SW/manifest + security headers
 ├── vite.config.js        Dev server (port 5000) + build (outDir: dist)
@@ -244,7 +244,7 @@ all documented in [MEDIA_SYSTEM](./MEDIA_SYSTEM.md).
 
 ## 13. Caching & service worker
 
-`service-worker.js` (cache `usual-us-v47`) precaches the app shell, JS, icons and sounds.
+`service-worker.js` (cache `usual-us-v48`) precaches the app shell, JS, icons and sounds.
 Strategy: **network-first** for navigation/scripts/styles/manifest (avoids stale app),
 **cache-first** for images/fonts, and **bypass** for video/audio and Cloudinary (so range
 requests work on mobile). On activate, all non-current caches are deleted. Full detail in

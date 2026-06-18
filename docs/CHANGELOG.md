@@ -10,6 +10,15 @@ Related: [ROADMAP](./ROADMAP.md) · [README](./README.md)
 
 ## [Unreleased]
 
+### Fixed
+- **Us-tab scroll smoothness on weaker GPUs (e.g. Moto Edge 50 Fusion).** Removed the
+  counter-productive `will-change: background-position` on `.us-tab` (a paint property was being
+  forced onto a constantly re-rasterised full-screen layer, starving scroll compositing); added
+  `100dvh` (with `100vh` fallback) to `.us-tab`/`#app` to stop address-bar layout jumps; reduced
+  the always-visible bottom-nav `backdrop-filter` blur 30px→12px (with a slightly more opaque
+  background to keep legibility). The breathing gradient still animates. Cache bumped to `v48`.
+  *(Pending on-device confirmation on the Moto; see audit report.)*
+
 ### Added
 - **`/docs` engineering Bible** — this full documentation system: project philosophy,
   architecture, UI/UX, design system, animations, state, Firebase, media, PWA, performance,
@@ -35,7 +44,7 @@ Related: [ROADMAP](./ROADMAP.md) · [README](./README.md)
 - **`icons/` folder optimised ~95%** — 18 raster-wrapped SVGs (tab/category/mood/who-pays/splash)
   downscaled to display-appropriate caps (256–512 px), ~36 MB → ~1.9 MB. Combined precache media
   dropped from ~45 MB to ~2.8 MB.
-- Service-worker cache bumped to **`usual-us-v47`**.
+- Service-worker cache bumped to **`usual-us-v48`**.
 - Setup guide updated to the real Vercel URL (usualus.vercel.app).
 
 ### Added

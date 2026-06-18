@@ -886,6 +886,7 @@ body.us-active {
 
 #app {
     min-height: 100vh;
+    min-height: 100dvh; /* dynamic viewport height — stable across Android address-bar show/hide */
     padding-bottom: 80px;
     transition: background var(--transition-normal);
 }
@@ -1728,6 +1729,7 @@ textarea {
     background-size: 200% 200%;
     animation: usBreathingGradient 25s ease-in-out infinite;
     min-height: 100vh;
+    min-height: 100dvh; /* dynamic viewport: avoids address-bar scroll jump on Android */
     /* Break out of #main-content padding */
     margin-left: -20px;
     margin-bottom: -20px;
@@ -1747,9 +1749,11 @@ textarea {
        Explicitly setting pan-y was conflicting with scroll region detection on
        some Android WebViews. Native scroll is fully browser-controlled. */
     scroll-behavior: auto;
-    /* Promote gradient animation to its own composited layer — eliminates
-       repaints on every frame of usBreathingGradient */
-    will-change: background-position;
+    /* NOTE: will-change:background-position was removed — background-position is a
+       paint property (not compositor-accelerated), so will-change forced a large
+       full-screen layer that had to be re-rasterised every frame, starving scroll
+       compositing on weaker GPUs (e.g. Moto Edge 50 Fusion). The breathing gradient
+       still animates; it just no longer fights the scroll. */
 }
 
 /* ── Pull-to-Refresh Indicator ── */
@@ -3772,9 +3776,9 @@ body:not(.us-active) .floating-heart {
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(10, 10, 10, 0.85);
-    backdrop-filter: blur(30px) saturate(180%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    background: rgba(10, 10, 10, 0.92);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
     border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: space-around;

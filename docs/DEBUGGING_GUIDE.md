@@ -11,7 +11,7 @@ Related: [PWA_BIBLE](./PWA_BIBLE.md) · [FIREBASE_BIBLE](./FIREBASE_BIBLE.md) ·
 - Open DevTools (desktop) or `chrome://inspect` (remote-debug the phone).
 - Check the **Console** for the boot logs (`app.js` logs startup; `firebase.js` logs
   `✅ Firebase initialized` / `❌ Firebase error`).
-- Check **Application → Service Workers** and **Cache Storage** (look for `usual-us-v47`).
+- Check **Application → Service Workers** and **Cache Storage** (look for `usual-us-v48`).
 - Reproduce with the network throttled / offline to separate sync issues from UI issues.
 
 ---
@@ -19,11 +19,11 @@ Related: [PWA_BIBLE](./PWA_BIBLE.md) · [FIREBASE_BIBLE](./FIREBASE_BIBLE.md) ·
 ## 1. "My change isn't showing up" (the #1 issue)
 **Root cause:** the service worker served a cached version, or `CACHE_NAME` wasn't bumped.
 **Fix:**
-1. Bump `CACHE_NAME` in `service-worker.js:1` (e.g. `usual-us-v47` → `v48`) for any cached-asset change.
+1. Bump `CACHE_NAME` in `service-worker.js:1` (e.g. `usual-us-v48` → `v48`) for any cached-asset change.
 2. Redeploy (push → Vercel). `vercel.json` keeps `service-worker.js`/`manifest.json` `no-cache`.
 3. On device: reopen the installed app, wait ~30s for the new worker, then it auto-reloads once
    (`app.js` update flow). Or DevTools → Application → Service Workers → "Update"/"Unregister".
-See [PWA_BIBLE §2](./PWA_BIBLE.md#2-service-worker-service-workerjs-cache-usual-us-v47).
+See [PWA_BIBLE §2](./PWA_BIBLE.md#2-service-worker-service-workerjs-cache-usual-us-v48).
 
 ## 2. Data not loading / not updating
 - **Symptom: nothing loads after login.** Check Console for a Firebase error; confirm
@@ -87,9 +87,9 @@ See [PWA_BIBLE §2](./PWA_BIBLE.md#2-service-worker-service-workerjs-cache-usual
 | Want to… | Do |
 |----------|----|
 | Force the newest code | Bump `CACHE_NAME`, redeploy |
-| Inspect what's cached | DevTools → Application → Cache Storage → `usual-us-v47` |
+| Inspect what's cached | DevTools → Application → Cache Storage → `usual-us-v48` |
 | Nuke local state | DevTools → Application → Clear storage (clears SW, caches, localStorage) |
-| Verify SW is active | Application → Service Workers (should show activated `usual-us-v47`) |
+| Verify SW is active | Application → Service Workers (should show activated `usual-us-v48`) |
 
 ## 10. Useful console probes
 ```js
