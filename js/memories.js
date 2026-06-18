@@ -776,12 +776,15 @@ function isVideoMedia(memory, index) {
 }
 
 // Render media element (image or video) as HTML string
-// When lazy is true, videos use preload="metadata" and don't autoplay (for timeline thumbnails)
+// When lazy is true (timeline previews), videos autoplay muted+looping but are paused
+// off-screen by the IntersectionObserver (observeTimelineVideos) — no off-screen decoding.
 function renderMediaElement(url, isVideo, altText, style, extraAttrs, lazy) {
     if (isVideo) {
         if (lazy) {
-            return `<video src="${url}" 
-                        muted loop playsinline preload="metadata"
+            // autoplay+muted+playsinline = reliable live muted looping preview on Android
+            // Chrome; the observer still pauses these when they scroll out of view.
+            return `<video src="${url}"
+                        autoplay muted loop playsinline preload="metadata"
                         ${extraAttrs || ''}
                         style="${style}; width: 100%; height: 100%; object-fit: cover;"></video>`;
         }
