@@ -4,7 +4,7 @@
 
 This guide explains **every single step** to set up, run, and update the "Usual Us" app on your Windows PC. Nothing is assumed. Every click, every command, every concept is explained.
 
-Your app is deployed as a PWA on **Vercel**. This guide is for when you want to make changes to it from your computer.
+Your app is already live at **usualus.vercel.app**. This guide is for when you want to make changes to it from your computer.
 
 ---
 
@@ -45,7 +45,7 @@ It is a **website** that works like a phone app. This kind of app is called a **
 - It works offline (once loaded, it saves itself on your phone)
 - It remembers your data using **Firebase** (a free database from Google that stores everything in the cloud)
 
-The app is deployed as a PWA on **Vercel**.
+The app is currently live and working at: **usualus.vercel.app**
 
 All the code lives on **GitHub** (a website that stores code). When you push changes to GitHub, Vercel automatically picks them up and updates the live site.
 
@@ -326,7 +326,7 @@ Replace the text in quotes with a short description of what you changed. Example
 git push
 ```
 
-That's it! Within 1-2 minutes, your live Vercel site will update with your changes.
+That's it! Within 1-2 minutes, your live site at **usualus.vercel.app** will update with your changes.
 
 ### Example — the full workflow in one go:
 
@@ -558,7 +558,7 @@ This makes your code consistently formatted — same indentation, same quote sty
 
 ## 15. How to deploy to Vercel
 
-Your app is hosted on **Vercel**, connected to your GitHub repository. This means:
+Your app is hosted on **Vercel** at **usualus.vercel.app**, connected to your GitHub repository. This means:
 
 > **When you push changes to GitHub, Vercel automatically picks them up and updates your live site.**
 
@@ -567,7 +567,7 @@ You don't need to do anything special for deployment. Just:
 1. Make your changes
 2. Push to GitHub (see [step 10](#10-how-to-push-changes-to-the-live-site))
 3. Wait 1–2 minutes
-4. Open your live Vercel site — your changes are live!
+4. Open **usualus.vercel.app** — your changes are live!
 
 > ℹ️ **Caching & security headers** live in `vercel.json` at the project root. It tells Vercel never to cache `service-worker.js` and `manifest.json` (so app updates reach phones quickly) and adds a few security headers. You normally never need to touch this file.
 
